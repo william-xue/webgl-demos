@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xxx</title>
+    <style type="text/css">
+        .img {
+            width: 20px;
+            height: 20px;
+            opacity: 1;
+            position: absolute;
+            z-index: 100000;
+            transition: 2s;
+        }
+
+        .left,
+        .right {
+            width: 10px;
+            height: 10px;
+            border-radius: 100%;
+            position: absolute;
+        }
+
+        .right {
+            right: 0;
+        }
+
+        .under {
+            width: 10px;
+            height: 10px;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            transform: rotate(45deg)
+        }
+
+        .text {
+            width: 50px;
+            font-size: 10px;
+            line-height: 1;
+            position: absolute;
+            top: -1em;
+            left: -15px;
+            text-align: center;
+        }
+
+        #viz {
+            width: 90%;
+            height: calc(100% - 0px);
+            /* height: 1200px; */
+            border: 1px solid lightgray;
+            font: 22pt arial;
+            margin: 0 auto;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        html,
+        body,
+        div {
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            height: calc(100% - 0px);
+        }
+
+        .container .search {
+            background: aliceblue;
+            position: absolute;
+            right: 5%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 3px 3px 5px 5px #ccc;
+            top: 40px;
+            z-index: 1111;
+            padding: 10px 20px;
+            flex-direction: column;
+        }
+
+        .container .search .item{
+            margin-bottom: 10px; 
+        }
+
+        .container .search .item input {
+            width: 500px;
+        }
+
+        .neo-container {
+            justify-content: center;
+        }
+    </style>
+    <script src="./js/jquery-3.6.0.min.js"></script>
+    <script src="./js/Blob.js"></script>
+    <script src="./lib/neovis.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="search">
+            <div class="item">
+                <input type="text" class="query_by_cql search_sql"
+                    placeholder="请输入cypher语句进行查询，例如：MATCH (n) RETURN n limit 10">&nbsp;&nbsp;
+                <button id="btn_submit_search_sql">搜索</button>
+            </div>
+            <div class="item">
+                <select id="search_entity">
+                    <option selected>Cutter</option>
+                    <option>Kind</option>
+                    <option>Name</option>
+                </select>
+                <input type="text" class="query_name" style="width: 236px;" placeholder="请输入实体 name, 支持模糊查询">&nbsp;&nbsp;
+                <button id="btn_submit_entity">搜索单个实体</button>
+                <button id="btn_submit_relation">搜索实体和关系</button>
+            </div>
+        </div>
+        <div id="viz"></div>
+    </div>
+</body>
+<script>
+    $(function () {
+        var viz;
+        var config = {
+            container_id: "viz",
+            server_url: "bolt://localhost:7687",
+            server_user: "neo4j",
+            server_password: "123",
+            arrows: false,
+            labels: {
+                "Cutter": {
+                    "caption": "label",
+                    "size": 16,
+                    "community": "label",
+                    // "image": 'https://visjs.org/images/visjs_logo.png',
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                    "title_properties": [
+                        "label",
+                    ],
+                },
+                "Kind": {
+                    "caption": "label",
+                    group: "community",
+                },
+                "Name": {
+                    "caption": "label",
+                },
+            },
+            relationships: {
+                // "IsPartOf": {
+                //     "thickness": "weight",
+                //     // "caption": 'type',
+                //     "caption": true,
+                // },
+                // "关系":{},
+
+            },
+            initial_cypher: "MATCH p = ()-[]->() RETURN p"
+        };
+
+        viz = new NeoVis.default(config);
+        viz.render();
+
+        $("#btn_submit_search_sql").click(function (e) {
+            e.preventDefault();
+            const cql = $('.search_sql').val();
+            config['initial_cypher'] = ($.trim(cql) === '') ? "MATCH p = (n)-[]->(m) RETURN p" : cql;
+            try {
+                viz.clearNetwork()
+                viz.reinit(config)
+                viz.render()
+            } catch (err) {
+                alert('cypher语句有误，请检查')
+            }
+        });
+
+        $("#btn_submit_entity").click((e)=>{
+            e.preventDefault();
+            const entity = $('#search_entity').val();
+            const name = $('.query_name').val();
+            // config['initial_cypher'] = "MATCH (n:`" + entity + "`) where n.name =~'.*"+ name +".*'  RETURN n" ;
+            config['initial_cypher'] = "MATCH (n:`" + entity + "`) where n.label =~'.*"+ name +".*'  RETURN n" ;
+            console.log(config['initial_cypher'])
+            try {
+                viz.clearNetwork()
+                viz.reinit(config)
+                viz.render()
+            } catch (err) {
+                alert('有误，请检查')
+            }
+        })
+
+        $("#btn_submit_relation").click((e)=>{
+            e.preventDefault();
+            const entity = $('#search_entity').val();
+            const name = $('.query_name').val();
+            // MATCH (n:Major{name:''}) optional match (n)-[r*0..3]->(x) return n,r,x
+            // config['initial_cypher'] = "MATCH (n:`" + entity + "`) where n.name =~'.*"+ name +".*' optional match (n)-[r*0..1]->(x) return n,r,x" ;
+            config['initial_cypher'] = "MATCH (n:`" + entity + "`) where n.label =~'.*"+ name +".*' optional match (n)-[r*0..1]->(x) return n,r,x" ;
+            try {
+                viz.clearNetwork()
+                viz.reinit(config)
+                viz.render()
+            } catch (err) {
+                alert('有误，请检查')
+            }
+        })
+        
+
+        $("#btn_download").click(function (e) {
+            e.preventDefault();
+            const cql = $('.search_sql').val();
+            if (cql.trim() === '') {
+                alert('请输入下载语句，如MATCH (n:GY3) RETURN n LIMIT 25')
+                return;
+            }
+            $.ajax({
+                url: "/api/neo/javaCode/excute",
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify([cql]),
+                async: false,
+                contentType: 'application/json; charset=UTF-8',
+                timeout: 5000,
+                success: function (result) {
+                    console.log(result)
+                    var blob = new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json,charset=utf-8;' });
+                    let fileName = new Date().getTime() + ".json";
+                    //IE浏览器使用msSaveBlob
+                    if (window.navigator.msSaveBlob) {
+                        window.navigator.msSaveBlob(blob, fileName);
+                    } else {
+                        var aLink = document.createElement('a');
+                        aLink.download = fileName;
+                        aLink.href = URL.createObjectURL(blob);
+                        aLink.click();
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+
+                }
+            })
+        });
+
+    })
+</script>
+</html>

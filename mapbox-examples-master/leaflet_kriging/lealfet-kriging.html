@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>leaflet克里金空间插值</title>
+  <style>
+    html,
+    body,
+    #map {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      cursor: default;
+    }
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" />
+  <script src="https://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/esri-leaflet@2.2.4/dist/esri-leaflet.js"></script>
+  <script src="kriging.js"></script>
+  <script src="world.js"></script>
+</head>
+
+<body>
+  <canvas id="canvasMap" style="display: none;"></canvas>
+  <div id="map"></div>
+  <script>
+    var map = L.map('map', {
+      center: [38.65953686, 120.8696333],
+      zoom: 9
+    });
+
+    L.esri.tiledMapLayer({
+      url: 'http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineCommunity/MapServer/tile/{z}/{y}/{x}'
+    }).addTo(map);
+
+    //world.js,是插值之后需要裁切的图形边界信息
+    //point.js,是要插值的离散的点
+
+    //遍历world边界数据，生成scope边界线
+    var positions = [];
+    world[0].forEach(function (point) {
+      positions.push([point[1], point[0]]);
+    });
+    var scope = L.polyline(positions, { color: 'red' }).addTo(map);
+    map.fitBounds(scope.getBounds());
+
+    //根据scope边界线的范围，计算范围变量
+    var xlim = [scope.getBounds()._southWest.lng, scope.getBounds()._northEast.lng];
+    var ylim = [scope.getBounds()._southWest.lat, scope.getBounds()._northEast.lat];
+
+
+    //进行克里金插值
+    function loadkriging() {
+      var params = {
+        krigingModel: 'exponential',//model还可选'gaussian','spherical',exponential//mapCenter: [102.27996826,24.23034668],
+        krigingSigma2: 0,
+        krigingAlpha: 100,//此参数可能控制钻孔扩散范围,越小范围越大,但点多了且分布均匀以后即效果不明显了
+        canvasAlpha: 1,//canvas图层透明度
+        gridnum: 150,//网格数量,越大越细，一般最大设为需要出图的 canvas 的宽度即可，则 kriging.grid 返回点阵尺寸为每点一像素，再大无用
+        w: 1000, h: 1000,//色斑图绘制区域尺寸，根据实际需要决定
+        colors: ["#006837", "#1a9850", "#66bd63", "#a6d96a", "#d9ef8b", "#ffffbf", "#fee08b", "#fdae61", "#f46d43", "#d73027", "#a50026"]//色卡数据
+      };
+      var canvas = document.getElementById("canvasMap");
+      canvas.width = params.w;
+      canvas.height = params.h;
+      var points = [{ "lat": 39.22759376, "lng": 121.803684, "t": 12.509620428085 }
+        , { "lat": 39.229950269999996, "lng": 121.89783190000001, "t": 7.54121255875 }
+        , { "lat": 39.27229396, "lng": 121.91191780000001, "t": 9.0562750697136 }
+        , { "lat": 39.288607449766765, "lng": 121.97563197043729, "t": 19.0678876042366 }
+        , { "lat": 39.30008602489065, "lng": 121.99633050604957, "t": 13.7385559082 }
+        , { "lat": 39.20598106, "lng": 121.8475394, "t": 12.182748734951 }
+        , { "lat": 39.19499195, "lng": 121.7646362, "t": 0.30133485794 }
+        , { "lat": 39.3132653, "lng": 121.84163860000001, "t": 2.03384304047 }
+        , { "lat": 39.280120589999996, "lng": 121.8096294, "t": 12.618051588535 }
+        , { "lat": 39.35997207090382, "lng": 121.9070195631195, "t": 20.488464772701 }
+        , { "lat": 39.35711438090382, "lng": 121.89603466311951, "t": 11.93976140022 }
+        , { "lat": 39.383170139183676, "lng": 121.95228814793732, "t": 19.309067904949 }];
+      var n = points.length;
+      var t = [];//数值
+      var x = [];//经度
+      var y = [];//纬度
+      for (var i = 0; i < n; i++) {
+        t.push(points[i].t);
+        x.push(points[i].lng);
+        y.push(points[i].lat);
+        var lc = L.circleMarker([y[i], x[i]], { radius: 3, t: t[i] }).addTo(map);
+        lc.on('click', function (e) {
+          var aa = e.latlng;
+          aa.t = e.target.options.t
+          console.log(JSON.stringify(aa));
+        })
+      }
+      //  console.log(t, x, y);
+      //对数据集进行训练
+      var variogram = kriging.train(t, x, y, params.krigingModel, params.krigingSigma2, params.krigingAlpha);
+      console.log(variogram);
+      //使用variogram对象使polygons描述的地理位置内的格网元素具备不一样的预测值,最后一个参数，是插值格点精度大小
+      console.log(world)
+      var grid = kriging.grid(world, variogram, (ylim[1] - ylim[0]) / params.gridnum);
+      console.log(grid);
+      //将得到的格网grid渲染至canvas上
+      kriging.plot(canvas, grid, [xlim[0], xlim[1]], [ylim[0], ylim[1]], params.colors);
+    }
+
+    //将canvas对象转换成image的URL
+    function returnImgae() {
+      var mycanvas = document.getElementById("canvasMap");
+      return mycanvas.toDataURL("image/png");
+    }
+
+    loadkriging();
+
+    var imageBounds = [[ylim[0], xlim[0]], [ylim[1], xlim[1]]];
+    L.imageOverlay(returnImgae(), imageBounds, { opacity: 0.8 }).addTo(map);
+
+  </script>
+</body>
+
+</html>

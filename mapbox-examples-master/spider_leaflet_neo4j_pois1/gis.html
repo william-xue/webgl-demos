@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>上海 - poi管理系统</title>
+  <link rel="icon" href="favicon.ico" type="image/ico">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="css/style.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="./js/leaflet.css" crossorigin="" />
+  <style>
+    .panel {
+      position: fixed;
+      width: 100px;
+      height: 430px;
+      box-shadow: 10px 10px 0 0 #86c2c0;
+      top: 130px;
+      right: 70px;
+      background: #528abb;
+      z-index: 10000;
+    }
+
+    .nav .selected {
+      color: #33cabb;
+    }
+  </style>
+  <script src="./js/leaflet.js" crossorigin=""></script>
+  <script src="./js/data.js" crossorigin=""></script>
+</head>
+
+<body>
+  <div class="lyear-layout-web">
+    <div class="lyear-layout-container">
+      <!--左侧导航-->
+      <aside class="lyear-layout-sidebar">
+
+        <!-- logo -->
+        <div id="logo" class="sidebar-header">
+          <a href="index.html" style="font-size: 28px;
+        text-align: center;">上海-poi 知识系统</a>
+        </div>
+        <div class="lyear-layout-sidebar-scroll">
+
+          <nav class="sidebar-main">
+            <ul class="nav nav-drawer">
+              <li class="nav-item active"> <a href="index.html"><i class="mdi mdi-home"></i> 首页</a> </li>
+              <li class="nav-item nav-item-has-subnav open">
+                <a href="#"><i class="mdi mdi-format-align-justify"></i> POIS</a>
+                <ul id="pois" class="nav nav-subnav">
+                  <li name="Chongdianzhuang" class="selected"> <a href="#">充电桩</a> </li>
+                  <li name="Jiayouzhan"> <a href="#">加油站</a> </li>
+                  <li name="xxx"> <a href="#">xxx</a> </li>
+                </ul>
+              </li>
+              
+              <li class="nav-item nav-item-has-subnav">
+                <a href="neovis.html"><i class="mdi mdi-format-align-justify"></i> neovis</a>
+                <ul class="nav nav-subnav">
+                  
+                </ul>
+              </li>
+
+            </ul>
+          </nav>
+        </div>
+
+      </aside>
+      <!--End 左侧导航-->
+
+      <!--头部信息-->
+      <header class="lyear-layout-header">
+
+        <nav class="navbar navbar-default">
+          <div class="topbar">
+
+            <div class="topbar-left">
+              <div class="lyear-aside-toggler">
+                <span class="lyear-toggler-bar"></span>
+                <span class="lyear-toggler-bar"></span>
+                <span class="lyear-toggler-bar"></span>
+              </div>
+              <span class="navbar-page-title">  </span>
+            </div>
+
+            <ul class="topbar-right">
+              <li class="dropdown dropdown-profile">
+                <a href="javascript:void(0)" data-toggle="dropdown">
+                  <img class="img-avatar img-avatar-48 m-r-10" src="images/users/avatar.jpg" alt="光年" />
+                  <span> <span class="caret"></span></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-right">
+                  <li> <a href="lyear_pages_profile.html"><i class="mdi mdi-account"></i> 个人信息</a> </li>
+                  <li> <a href="lyear_pages_edit_pwd.html"><i class="mdi mdi-lock-outline"></i> 修改密码</a> </li>
+                  <li> <a href="javascript:void(0)"><i class="mdi mdi-delete"></i> 清空缓存</a></li>
+                  <li class="divider"></li>
+                  <li> <a href="lyear_pages_login.html"><i class="mdi mdi-logout-variant"></i> 退出登录</a> </li>
+                </ul>
+              </li>
+              <!--切换主题配色-->
+              <li class="dropdown dropdown-skin">
+                <span data-toggle="dropdown" class="icon-palette"><i class="mdi mdi-palette"></i></span>
+                <ul class="dropdown-menu dropdown-menu-right" data-stopPropagation="true">
+                  <li class="drop-title">
+                    <p>主题</p>
+                  </li>
+                  <li class="drop-skin-li clearfix">
+                    <span class="inverse">
+                      <input type="radio" name="site_theme" value="default" id="site_theme_1" checked>
+                      <label for="site_theme_1"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="site_theme" value="dark" id="site_theme_2">
+                      <label for="site_theme_2"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="site_theme" value="translucent" id="site_theme_3">
+                      <label for="site_theme_3"></label>
+                    </span>
+                  </li>
+                  <li class="drop-title">
+                    <p>LOGO</p>
+                  </li>
+                  <li class="drop-skin-li clearfix">
+                    <span class="inverse">
+                      <input type="radio" name="logo_bg" value="default" id="logo_bg_1" checked>
+                      <label for="logo_bg_1"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_2" id="logo_bg_2">
+                      <label for="logo_bg_2"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_3" id="logo_bg_3">
+                      <label for="logo_bg_3"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_4" id="logo_bg_4">
+                      <label for="logo_bg_4"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_5" id="logo_bg_5">
+                      <label for="logo_bg_5"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_6" id="logo_bg_6">
+                      <label for="logo_bg_6"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_7" id="logo_bg_7">
+                      <label for="logo_bg_7"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_8" id="logo_bg_8">
+                      <label for="logo_bg_8"></label>
+                    </span>
+                  </li>
+                  <li class="drop-title">
+                    <p>头部</p>
+                  </li>
+                  <li class="drop-skin-li clearfix">
+                    <span class="inverse">
+                      <input type="radio" name="header_bg" value="default" id="header_bg_1" checked>
+                      <label for="header_bg_1"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_2" id="header_bg_2">
+                      <label for="header_bg_2"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_3" id="header_bg_3">
+                      <label for="header_bg_3"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_4" id="header_bg_4">
+                      <label for="header_bg_4"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_5" id="header_bg_5">
+                      <label for="header_bg_5"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_6" id="header_bg_6">
+                      <label for="header_bg_6"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_7" id="header_bg_7">
+                      <label for="header_bg_7"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_8" id="header_bg_8">
+                      <label for="header_bg_8"></label>
+                    </span>
+                  </li>
+                  <li class="drop-title">
+                    <p>侧边栏</p>
+                  </li>
+                  <li class="drop-skin-li clearfix">
+                    <span class="inverse">
+                      <input type="radio" name="sidebar_bg" value="default" id="sidebar_bg_1" checked>
+                      <label for="sidebar_bg_1"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_2" id="sidebar_bg_2">
+                      <label for="sidebar_bg_2"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_3" id="sidebar_bg_3">
+                      <label for="sidebar_bg_3"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_4" id="sidebar_bg_4">
+                      <label for="sidebar_bg_4"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_5" id="sidebar_bg_5">
+                      <label for="sidebar_bg_5"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_6" id="sidebar_bg_6">
+                      <label for="sidebar_bg_6"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_7" id="sidebar_bg_7">
+                      <label for="sidebar_bg_7"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_8" id="sidebar_bg_8">
+                      <label for="sidebar_bg_8"></label>
+                    </span>
+                  </li>
+                </ul>
+              </li>
+              <!--切换主题配色-->
+            </ul>
+
+          </div>
+        </nav>
+
+      </header>
+      <!--End 头部信息-->
+
+      <!--页面主要内容-->
+      <main class="lyear-layout-content">
+
+        <div class="container-fluid">
+
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="card">
+                <div class="card-body">
+                  <div id="map-container" style="height: 750px; z-index: 1;"></div>
+                  <div class="searchPanel" style="position: fixed; z-index: 1; top: 150px; right: 260px;
+                  box-shadow: 0px 0px 2px 2px #86c2c0;">
+                    <input id="searchPoi" type="text" value="安悦充电汽车充电站"/>
+                  </div>
+                  <div id="panel" class="panel" style="color:#fff">
+                    <h5 style="color:#fff">请选择行政区</h5>
+                    <div><input type="checkbox" value="青浦区" checked />青浦区</div>
+                    <div><input type="checkbox" value="杨浦区" checked />杨浦区</div>
+                    <div><input type="checkbox" value="闵行区" />闵行区</div>
+                    <div><input type="checkbox" value="宝山区" />宝山区</div>
+                    <div><input type="checkbox" value="嘉定区" />嘉定区</div>
+                    <div><input type="checkbox" value="浦东新区" />浦东新区</div>
+                    <div><input type="checkbox" value="金山区" />金山区</div>
+                    <div><input type="checkbox" value="奉贤区" />奉贤区</div>
+                    <div><input type="checkbox" value="普陀区" />普陀区</div>
+                    <div><input type="checkbox" value="静安区" />静安区</div>
+                    <div><input type="checkbox" value="长宁区" />长宁区</div>
+                    <div><input type="checkbox" value="徐汇区" />徐汇区</div>
+                    <div><input type="checkbox" value="黄浦区" />黄浦区</div>
+                    <div><input type="checkbox" value="松江区" />松江区</div>
+                    <div><input type="checkbox" value="崇明区" />崇明区</div>
+                    <div><input type="checkbox" value="虹口区" />虹口区</div>
+                    <button id="doSure" style="color: #333;">确定</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </main>
+      <!--End 页面主要内容-->
+    </div>
+  </div>
+
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/perfect-scrollbar.min.js"></script>
+  <script type="text/javascript" src="js/main.min.js"></script>
+
+  <!--图表插件-->
+  <script type="text/javascript" src="js/Chart.js"></script>
+
+  <script>
+    // geoserver上的地址
+    const url = '/djapi/kecheng/pois_getByType/'
+    const map = L.map('map-container').setView([31.16, 121.12], 11)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+    function getColor(arg) {
+      return arg > 150 ? '#800026' :
+        arg > 100 ? '#F80826' :
+          arg > 50 ? '#E3FA1C' :
+            arg > 20 ? '#00DF03' :
+              arg > 10 ? '#1F33EF' :
+                '#4BD3Ef';
+    }
+    let poiGeojson = null;
+    function load(url, callback, crs = 'EPSG:4326') {
+      $.ajax({
+        type: 'get',
+        url: url,
+        dataType: 'json',
+        success: loadWFSHandler,
+        error: function (rst) {
+          console.log('request error.')
+
+          layer = L.geoJson(data, {
+            onEachFeature: onEachFeature,
+            style: {
+              // fillColor: getColor(feat.properties.Z120607), //其中一个属性值
+              // weight: 2,
+              // opacity: 0.8,
+              // color: 'white',
+              // dashArray: '3',
+              // fillOpacity: 0.8,
+              color: 'red',
+              fillColor: '#f03',
+              fillOpacity: 0.50,
+              radius: 2
+            },
+            // coordsToLatLng: toLatLng
+          })
+          console.log(data)
+          poiGeojson = data
+          loadPois(['青浦区', '杨浦区'])
+          loadArea(['青浦区', '杨浦区'])
+          // callback(layer)
+        }
+      })
+      function loadWFSHandler(json) {
+        console.log(json);
+        // 构造geojson 格式如下：
+        // { 
+        //     "type": "FeatureCollection",
+        //     "features": [
+        //         { 
+        //             "type": "Feature",
+        //             "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
+        //             "properties": {"prop0": "value0"}
+        //         }
+        //     ]
+        // }
+        if (!json.success) return;
+        let data = json.data
+        let features = []
+
+        for (let j = 0; j < data.length; j++) {
+          features.push({
+            "type": "Feature",
+            "geometry": { "type": "Point", "coordinates": [parseFloat(data[j]["a"]["lng"]), parseFloat(data[j]["a"]["lat"])] },
+            "properties": { "name": data[j]['a']['name'], "address": data[j]['a']['address'], "area": data[j]['area'] }
+          })
+        }
+        // for (let i = 0; i < data.length; i++) {
+        //   let item = data[i]
+        //   for (let j = 0; j < item.length; j++) {
+        //     features.push({
+        //       "type": "Feature",
+        //       "geometry": { "type": "Point", "coordinates": [parseFloat(item[j]["a"]["lng"]), parseFloat(item[j]["a"]["lat"])] },
+        //       "properties": { "name": item[j]['a']['name'], "address": item[j]['a']['address'], "area": item[j]['area'] }
+        //     })
+        //   }
+        // }
+        let geojson = {
+          "type": "FeatureCollection",
+          "features": features
+        }
+        // layer = L.geoJson(geojson, options)
+        poiGeojson = geojson
+        // console.log(geojson)
+        loadPois(['青浦区', '杨浦区'])
+        loadArea(['青浦区', '杨浦区'])
+        // callback(layer)
+      }
+
+    }
+    function toLatLng(coords) {
+      return L.CRS.EPSG3857.unproject(L.point(coords))
+    }
+    var lyr = ''
+
+    function highlightFeature(e) {
+      const layer = e.target
+      layer.setStyle({
+        weight: 5,
+        color: '#666',
+        // dashArray:'',
+        fillOpacity: 0.7
+      });
+      // bring this layer in front of ohter popups
+      if (!L.Browser.ie && !L.Browser.opera && L.Browser.edge) {
+        layer.bringToFront()
+      }
+    }
+    function resetHighlight(e) {
+      lyr.resetStyle(e.target)
+    }
+    //窗口绽放
+    function zoomToFeature(e) {
+      console.log(e)
+      // alert(e.target.getBounds())
+      // map.fitBounds(e.target.getBounds())
+      // map.flyTo(e.target.feature.geometry.coordinates,{animate:true})
+      // map.closePopup()
+      let html = ``
+      const props = e.target.feature.properties;
+      Object.keys(props).forEach((item) => {
+        html += `<div>${item}:${props[item]}</div>`
+      })
+      map.openPopup(html, e.latlng, {})
+    }
+    //add listeners
+    function onEachFeature(feature, layer) {
+      layer.on({
+        // mouseover: highlightFeature,
+        // mouseout: resetHighlight,
+        click: zoomToFeature
+      })
+    }
+
+    load(url + "Chongdianzhuang", callback = (layer) => {
+      // layer.onEachFeature=onEachFeature
+      lyr = layer
+      layer.addTo(map)
+      // 加载行政区
+      loadArea()
+    }, 'epsg:4326')
+
+    function loadArea(params) {
+      let data;
+      if (params) {
+        data = {
+          "type": "FeatureCollection",
+          "name": "shanghai",
+          "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+          "features": shanghaiqu.features.filter(f => params.indexOf(f.properties.district) != -1)
+        }
+      } else {
+        data = shanghaiqu;
+      }
+      L.geoJSON(data, {
+        style: function (feature) {
+          return { color: randomColor() };
+        }
+      })
+        // .bindPopup(function (layer) {
+        //     return layer.feature.properties.district;
+        // })
+        .addTo(map);
+    }
+    function loadPois(params) {
+      let data;
+      if (params) {
+        data = {
+          "type": "FeatureCollection",
+          "name": "shanghai",
+          "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+          "features": poiGeojson.features.filter(f => params.indexOf(f.properties.area) != -1)
+        }
+      } else {
+        data = poiGeojson;
+      }
+      L.geoJSON(data, {
+        // style: function (feature) {
+        //     return { color: randomColor() };
+        // }
+      })
+        .bindPopup(function (layer) {
+          let html = ``
+          const props = layer.feature.properties;
+          Object.keys(props).forEach((item) => {
+            html += `<div>${item}:${props[item]}</div>`
+          })
+          return html
+        })
+        .addTo(map);
+    }
+
+    // 随机取色函数
+    function randomColor() {
+      var col = "#";
+      for (var i = 0; i < 6; i++) col += parseInt(Math.random() * 16).toString(16);
+      return col;
+    }
+
+    $("#doSure").click((e) => {
+      let checkeds = $(".panel").find('input')
+      let names = []
+      for (let i = 0; i < checkeds.length; i++) {
+        if ($(checkeds[i])[0].checked) {
+          names.push($(checkeds[i]).val())
+        }
+      }
+      console.log(names)
+      removeAll()
+      loadArea(names)
+      loadPois(names)
+    })
+
+    // 删除所有图层
+    function removeAll() {
+      map.eachLayer(function (layer) {
+        if (!layer._container || ('' + jQuery(layer._container).attr('class')).replace(/\s/g, '') != 'leaflet-layer') {
+          layer.remove();
+        }
+      });
+    }
+
+    // 点选pois
+    $('#pois').on('click', 'li', function () {
+      let name = $(this).attr('name');
+      console.log("poi name is:", name)
+      $(this).siblings().removeClass('selected')
+      $(this).addClass('selected')
+      removeAll()
+      load(url + name, callback = (layer) => {
+        lyr = layer
+        layer.addTo(map)
+        // 加载行政区
+        // loadArea()
+      }, 'epsg:4326')
+    })
+
+    // 搜索
+    $('#searchPoi').bind('keypress', function (event) {
+
+      if (event.keyCode == 13) {
+        console.log('你输入的内容为1：' + $('#searchPoi').val());
+
+        removeAll()
+        let data = {
+          "type": "FeatureCollection",
+          "name": "shanghai",
+          "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+          "features": poiGeojson.features.filter(f => f.properties.name.indexOf($('#searchPoi').val()) != -1)
+        }
+        L.geoJSON(data)
+        .bindPopup(function (layer) {
+          let html = ``
+          const props = layer.feature.properties;
+          Object.keys(props).forEach((item) => {
+            html += `<div>${item}:${props[item]}</div>`
+          })
+          return html
+        })
+        .addTo(map);
+      }
+
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,39 @@
+{
+  "homeInfo": {
+    "title": "查询",
+    "href": "http://localhost:8006/neo4j-neovis/search&vis.html"
+  },
+  "logoInfo": {
+    "title": "xx系统",
+    "image": "images/logo.png",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+      "title": "",
+      "icon": "fa fa-address-book",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "编辑",
+          "href": "page/vis/index_chedao.html",
+          "icon": "fa fa-edit",
+          "target": "_self"
+        },
+        {
+          "title": "查询",
+          "href": "http://localhost:8006/neo4j-neovis/search&vis.html",
+          "icon": "fa fa-window-maximize",
+          "target": "_self"
+        },
+        {
+          "title": "用户管理",
+          "href": "page/user/add.html",
+          "icon": "fa fa-file-text",
+          "target": "_self"
+        }
+      ]
+    }
+  ]
+}

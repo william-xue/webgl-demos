@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>leaflet-geoserver-wfs</title>
+    <!-- <link href="../libs/leaflet.css"/> -->
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #map-container {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <script src="https://cdn.bootcss.com/Turf.js/5.1.6/turf.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.1/dist/leaflet.js"></script>
+</head>
+
+<body>
+    <div id="map-container"></div>
+</body>
+<script>
+    // geoserver上的地址
+    const map = L.map('map-container').setView([30.32, 115.11], 13)
+    var grayscaleLayer = L.tileLayer('http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineCommunity/MapServer/tile/{z}/{y}/{x}', { id: 'map11', maxZoom: 16, minZoom: 4 });
+    map.addLayer(grayscaleLayer);
+
+
+    var myPOIs = [{
+        "type": "Feature",
+        "properties": {
+            "name": "长渔湖2"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [115.11, 30.322]
+        }
+    }, {
+        "type": "Feature",
+        "properties": {
+            "name": "长渔湖3"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [115.11, 30.3223]
+        }
+    }, {
+        "type": "Feature",
+        "properties": {
+            "name": "体育公园"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [115.08, 30.32]
+        }
+    }, {
+        "type": "Feature",
+        "properties": {
+            "name": "长渔湖"
+        },
+        "geometry": {
+            "type": "Point",
+            "coordinates": [115.11, 30.321]
+        }
+    }]
+
+    function geojson(data, map) {
+        var geojsonMarkerOptions = {
+            radius: 8,
+            fillColor: "#ff7800",
+            color: "#000",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        };
+        L.geoJSON(data, {
+            onEachFeature: function (feature, layer) {
+                layer.bindTooltip(feature.properties.name, {
+                    direction: 'right',
+                    permanent: true
+                });
+            },
+            pointToLayer: function (feature, latlng) {
+                return L.circle(latlng, { icon: geojsonMarkerOptions }).openTooltip();
+            }
+        }).addTo(map);
+    }
+
+
+    // 利用turf 计算 距离小于设定值，则移出重复点
+    function filter(features, distance) {
+        
+        let arr = []; // 记录下标
+        for (let i = 0; i < features.length; i++) {
+            for (let j = 0; j < features.length; j++) {
+                if (j > i && !arr.includes(j)) {
+                    let f_coordinates = features[i].geometry.coordinates
+                    let t_coordinates = features[j].geometry.coordinates
+                    var from = turf.point(f_coordinates);
+                    var to = turf.point(t_coordinates);
+                    var options = { units: 'kilometers' };
+                    var num = turf.distance(from, to, options);
+                    console.log(i, j, num)
+
+                    if (num < distance) {
+                        arr.push(j)
+                    }
+                }
+
+            }
+        }
+
+        // 移出下标元素
+        console.log(arr)
+        let features2 = []
+        features.forEach((item, index) => {
+            if (!arr.includes(index)) {
+                features2.push(item)
+            }
+        })
+
+        return features2;
+    }
+    
+    let distance = 0.12;  // 距离的单位是平方公里
+    let features = filter(myPOIs ,distance);
+    console.log(features)
+
+    geojson({
+        "type": "FeatureCollection",
+        "features": features
+    }, map);
+
+
+    
+</script>
+
+</html>

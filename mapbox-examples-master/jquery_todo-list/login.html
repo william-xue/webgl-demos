@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>jQuery实现登录注册表单代码 </title>
+
+  <link rel="stylesheet" href="css/login.css">
+
+</head>
+
+<body>
+  <div class="htmleaf-container">
+    <div id="wrapper" class="login-page">
+      <div id="login_form" class="form">
+        <form class="register-form">
+          <input type="text" placeholder="用户名" id="r_user_name" />
+          <input type="password" placeholder="密码" id="r_password" />
+          <p class="message1" id="mes"></p>
+          <input type="password" placeholder="确认密码" id="r_repassword" />
+          <p class="message2" id="mes"></p>
+          <input type="text" placeholder="电子邮件" id="r_email" />
+          <p class="message4" id="mes"></p>
+          <input type="text" placeholder="手机号码" id="r_phone" />
+          <p class="message3" id="mes"></p>
+          <input type="text" placeholder="验证码" id="r_captcha" />
+          <p class="message5" id="mes"></p>
+          <button id="get">获取验证码</button>
+          <button id="create">创建账户</button>
+          <p class="message">已经有了一个账户? <a href="#">立刻登录</a></p>
+        </form>
+        <form class="login-form">
+          <input type="text" placeholder="用户名" id="user_name" />
+          <input type="password" placeholder="密码" id="password" />
+          <button id="login">登　录</button>
+          <!-- <p class="message">还没有账户? <a href="#">立刻创建</a></p> -->
+        </form>
+      </div>
+</body>
+<script src="./js/jquery-3.4.1.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="./js/login.js"></script>
+
+</html>

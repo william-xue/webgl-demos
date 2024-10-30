@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>武器推荐</title>
+    <style type="text/css">
+        .tagBall {
+            width: 700px;
+            height: 360px;
+            /* margin: 50px auto; */
+            position: relative;
+        }
+
+        .tag {
+            display: block;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            color: #000;
+            text-decoration: none;
+            font-size: 15px;
+            font-family: "微软雅黑";
+            font-weight: bold;
+        }
+
+        .tag:hover {
+            border: 1px solid #666;
+        }
+
+        .img {
+            width: 20px;
+            height: 20px;
+            opacity: 1;
+            position: absolute;
+            z-index: 100000;
+            transition: 2s;
+        }
+
+        .text {
+            width: 50px;
+            font-size: 10px;
+            line-height: 1;
+            position: absolute;
+            top: -1em;
+            left: -15px;
+            text-align: center;
+        }
+
+        #viz {
+            width: 90%;
+            height: 510px;
+            border: 1px solid lightgray;
+            font: 22pt arial;
+            margin: 0 auto;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        html,
+        body,
+        div {
+            margin: 0;
+            padding: 0;
+        }
+
+        .title {
+            height: 120px;
+            font-size: 25px;
+
+        }
+
+        .title>:nth-child(1) {
+            height: 70px;
+            line-height: 110px;
+            padding-left: 150px;
+        }
+
+        .title>:nth-child(1)>span:nth-child(1) {
+            font-weight: bold;
+            color: #2b9beb;
+        }
+
+        .title>:nth-child(2) {
+            height: 10px;
+            padding-left: 200px;
+            font-size: 15px;
+            font-style: italic
+        }
+
+        .container {
+            height: calc(100% - 120px);
+        }
+
+        .container .panel {
+            background: aliceblue;
+            box-shadow: 3px 3px 5px 5px #ccc;
+        }
+
+        .container .search {
+            width: 565px;
+            height: 50px;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            top: 330px;
+            margin-left: 5%;
+            position: fixed;
+            right: 5%;
+            z-index: 99999;
+        }
+
+        .container .search input {
+            width: 500px;
+        }
+
+        .neo-container {
+            justify-content: center;
+        }
+
+        .qa {
+            width: 90%;
+            margin-left: 5%;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            margin-top: 10px;
+            margin-bottom: 8px;
+        }
+
+        .qa input {
+            width: 460px;
+        }
+
+        .qa textarea {
+            width: 460px;
+            height: 200px;
+            font-size: 18px;
+            color: darkorange;
+        }
+        .qa .wen{
+            margin-top: 15px;
+        }
+        .qa .da{
+            padding-top: 15px;
+        }
+    </style>
+    <script src="./js/jquery-3.6.0.min.js"></script>
+    <script src="./js/Blob.js"></script>
+    <script src="./lib/neovis.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="panel search">
+            <input type="text" class="query_by_cql"
+                placeholder="请输入cypher语句进行查询，例如：MATCH (n) RETURN n limit 10">&nbsp;&nbsp;
+            <button id="btn_submit">搜索</button>
+        </div>
+        <div class="panel qa">
+            <div class="left">
+                <div class="wen">
+                    问：&nbsp;&nbsp;
+                    <input type="text" class="tj_input" placeholder="请输入，例如：中国的武器有哪些">&nbsp;&nbsp;
+                    <button id="do_tj">确定</button>
+                </div>
+                <div class="da">
+                    答：&nbsp;&nbsp;
+                    <textarea class="tj_res"></textarea>
+                </div>
+            </div>
+            <div class="right" style="width: 600px;height: 300px;">
+                <iframe src="./wordCloud.html" width="100%" height="100%" style="" frameborder="0" scrolling="no"></iframe>
+            </div>
+        </div>
+        <div id="viz">
+
+        </div>
+    </div>
+</body>
+<script>
+    $(function () {
+        var viz;
+        var config = {
+            container_id: "viz",
+            server_url: "bolt://localhost:7687",
+            server_user: "neo4j",
+            server_password: "123",
+            arrows: false,
+            labels: {
+                "Country": {
+                    "caption": "name",
+                    "size": 17,
+
+                    "font": {
+                        "size": 20,
+                        "color": "red"
+                    },
+                },
+                "Weapon": {
+                    "caption": "name",
+                    "size": 15,
+                    // "community": "name",
+                    "font": {
+                        "size": 18,
+                        "color": "#000000"
+                    },
+                },
+                "Category1": {
+                    "caption": "name",
+                    "size": 16,
+                    // "community": "name",
+                    "font": {
+                        "size": 18,
+                        "color": "#000000"
+                    },
+                },
+                "Category2": {
+                    "caption": "name",
+                    "size": 15,
+                    // "community": "name",
+                    "font": {
+                        "size": 18,
+                        "color": "#000000"
+                    },
+                    // "title_properties": [
+                    //     "name",
+                    //     "pagerank"
+                    // ],
+                },
+            },
+            relationships: {
+                "国别": {
+                    "thickness": '4',
+                    "caption": true,
+                },
+                "细分": {
+                    "thickness": '5',
+                    "caption": true,
+                },
+                "属于": {
+                    "thickness": '3',
+                    "caption": true,
+                },
+            },
+            initial_cypher: "MATCH p = ()-[]->() RETURN p limit 130"
+        };
+
+        viz = new NeoVis.default(config);
+        viz.render();
+
+        function updateRender(cql){
+            config['initial_cypher'] = ($.trim(cql) === '') ? "MATCH p = (n)-[]->(m) RETURN p limit 50" : cql;
+            try {
+                viz.clearNetwork()
+                viz.reinit(config)
+                viz.render()
+            } catch (err) {
+                alert('cypher语句有误，请检查')
+            }
+        }
+
+        $("#btn_submit").click(function (e) {
+            e.preventDefault();
+            const cql = $('.query_by_cql').val();
+            updateRender(cql)
+        });
+        $("#do_tj").click(function (e) {
+            fetch('/flask/excuteQA', {
+                method: 'post',
+                body: JSON.stringify({
+                    question: $('.tj_input').val() 
+                }),
+                headers: {
+                    contentType: "application/json", //必须这样写
+                }
+            }).then(res => res.json()).then(res => {
+                console.log(res)
+                if (res.success) {
+                    $('.tj_res').val(res.data.answer)
+                    updateRender(res.data.cql)
+                    $('.query_by_cql').val(res.data.cql)
+                }
+            })
+        })
+
+        window.addEventListener('message', function (e) {
+            var data = e.data;
+            console.log(data.msg) //我是子页面
+            $('.tj_input').val(data.msg)
+            //执行其他操作
+        });
+    })
+</script>
+</html>

@@ -1,0 +1,218 @@
+body {
+    font-family: Montserrat, sans-serif;
+}
+.logo {
+    border-radius: 10px;
+    box-shadow: rgba(0,0,0,0.2) 0 4px 10px;
+}
+
+.mapboxgl-popup-content {
+    border-radius: 10px;
+    box-shadow: rgba(0,0,0,0.2) 0 4px 10px;
+}
+.card {
+    border-radius: 10px;
+}
+.mapboxgl-popup-anchor-top .mapboxgl-popup-tip {
+    border-bottom-color: #AEE9D2;
+}
+.mapboxgl-popup-anchor-bottom .mapboxgl-popup-tip {
+    border-top-color: #C0EEB8;
+}
+
+.mapboxgl-ctrl-group {
+    border-radius: 10px;
+    background: #befd7c;
+    background: -moz-linear-gradient(45deg,  #befd7c 0%, #9fdcef 100%);
+    background: -webkit-linear-gradient(45deg,  #befd7c 0%,#9fdcef 100%);
+    background: linear-gradient(45deg,  #befd7c 0%,#9fdcef 100%);
+}
+.mapboxgl-ctrl-group:not(:empty) {
+    box-shadow: rgba(0,0,0,0.2) 0 4px 10px;
+}
+.mapboxgl-ctrl .mapboxgl-ctrl-zoom-in {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+.mapboxgl-ctrl .mapboxgl-ctrl-compass {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.mapboxgl-ctrl-geocoder {
+    border-radius: 10px;
+    opacity: 0.8;
+}
+
+
+
+#popup .dialog {
+    width: 320px;
+    /*
+    border-radius: 10px;
+    box-shadow: rgba(0,0,0,0.2) 0 4px 10px;
+    background: #fff;*/
+}
+
+/* Popup Header */
+#popup .dialog .header {
+    margin-bottom: 7px;
+}
+
+#popup .dialog .header > .inner > .col {
+
+}
+
+#popup .dialog .header > .inner > .col.col-title {
+
+}
+#popup .dialog .header > .inner > .col.col-title > .inner {
+    color: #fff;
+    font-size: 20px;
+    height: 40px;
+    line-height: 40px;
+}
+
+#popup .dialog .header > .inner > .col.col-close {
+    width: 40px;
+    height: 40px;
+    background: url(img/icon-close.png) no-repeat calc(100% - 0px) 50%;
+    background-size: 20px;
+    cursor: pointer;
+}
+#popup .dialog .header > .inner > .col.col-close > .inner {
+    display: none;
+}
+
+
+/* Popup Body */
+
+#popup .dialog .body {
+
+}
+#popup .dialog .body > .inner {
+    border-radius: 10px;
+    box-shadow: rgba(0,0,0,0.2) 0 4px 10px;
+    margin-bottom: 20px;
+
+    background: #002e52 url(img/card-template.png) no-repeat 0 0;
+    background-size: 320px 320px;
+}
+
+#popup .dialog .body > .inner .location-country {
+
+}
+#popup .dialog .body > .inner .location-country div {
+
+}
+#popup .dialog .body > .inner .location-country .location {
+
+}
+#popup .dialog .body > .inner .location-country .country-code {
+
+}
+
+#popup .dialog .body > .inner .latlng div {
+    position: absolute;
+    width: 100px;
+    height: 25px;
+    line-height: 25px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0 10px;
+
+}
+#popup .dialog .body > .inner .latlng .lat {
+    top: 265px;
+    left: 20px;
+}
+#popup .dialog .body > .inner .latlng .lng {
+    position: absolute;
+    top: 265px;
+    left: 200px;
+}
+
+
+#popup .dialog .body > .inner .file-wrap {
+
+}
+#popup .dialog .body > .inner .file-wrap a {
+
+}
+#popup .dialog .body > .inner .file-wrap a span {
+    text-align: center;
+    border-radius: 10px;
+    background: #eb8415;
+    background: -moz-linear-gradient(45deg,  #eb8415 0%, #ffcd1e 100%);
+    background: -webkit-linear-gradient(45deg,  #eb8415 0%,#ffcd1e 100%);
+    background: linear-gradient(45deg,  #eb8415 0%,#ffcd1e 100%);
+
+    border-top: 1px solid rgba(255,255,255,0.3);
+    border-bottom: 1px solid rgba(0,0,0,0.3);
+
+    color: #002e52;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 8px 8px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 300ms;
+}
+
+
+/* Popup Footer  */
+
+#popup .dialog .footer > .inner {
+
+}
+#popup .dialog .footer > .inner .message {
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: rgba(0,0,0,0.2) 0 4px 10px;
+    color: #fff;
+    margin-bottom: 20px;
+}
+#popup .dialog .footer > .inner .message.error {
+    background: rgb(245, 50, 50);
+    color: #fff;
+}
+#popup .dialog .footer > .inner .message.success {
+    background: rgb(27, 175, 59);
+    color: #fff;
+}
+
+#popup .dialog .footer > .inner .button-wrap .button {
+
+}
+
+#popup .dialog .footer > .inner .button-wrap .button .inner {
+    text-align: center;
+    border-radius: 10px;
+    background: #eb8415;
+    background: -moz-linear-gradient(45deg,  #eb8415 0%, #ffcd1e 100%);
+    background: -webkit-linear-gradient(45deg,  #eb8415 0%,#ffcd1e 100%);
+    background: linear-gradient(45deg,  #eb8415 0%,#ffcd1e 100%);
+
+    border-top: 1px solid rgba(255,255,255,0.3);
+    border-bottom: 1px solid rgba(0,0,0,0.3);
+
+    box-shadow: rgba(0,0,0,0.2) 0 4px 10px;
+
+    color: #002e52;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 10px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 300ms;
+}
+#popup .dialog .footer > .inner .button-wrap .button:active .inner {
+    transform: translateY(2px);
+    box-shadow: rgba(0,0,0,0.2) 0 2px 5px;
+    transition: all 0ms;
+}
+
+.croppie-container .cr-slider-wrap .cr-slider::-webkit-slider-thumb {
+    background: #002e52;
+}

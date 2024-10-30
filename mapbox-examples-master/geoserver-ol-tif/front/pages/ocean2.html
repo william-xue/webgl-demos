@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<!-- <title>map demo</title> -->
+
+<link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="../css/bootstrap-datepicker3.min.css" rel="stylesheet" media="screen">
+<link href="../css/jquery.timepicker.min.css" rel="stylesheet" media="screen">
+<link rel="stylesheet" href="../css/ocean.css" type="text/css">
+<link rel="stylesheet" href="../css/ol.css" type="text/css">
+
+<body>
+    <div class="box">
+        <div id="dashboard">
+            <div id="data_upload" class="part">
+                <div class="title">
+                    <h4>
+                        数据上传
+                    </h4>
+                </div>
+                <div class="center">
+                    <input type="button" value="上传海洋数据" id="data_btn">
+                </div>
+            </div>
+            <!-- <hr class="split"> -->
+            <div class="part">
+                <div class="title">
+                    <h4>
+                        选择日期
+                    </h4>
+                    <div class="container">
+                        <input id="form_datetime" size="16" type="text" value="2021-04-06" class="input" readonly>
+                        <input id="form_hour" size="10" type="text" value="00:00:00" class="input"
+                            onfocus="this.blur();">
+                    </div>
+                </div>
+            </div>
+            <hr class="split">
+            <div style="" class="part">
+                <!--海洋-->
+                <div class="title">
+                    <h4>
+                        选择海洋要素数值
+                    </h4>
+                </div>
+                <div style="">
+                    <div class="type"><input name="checkbox" value="ssh" type="radio" class="tui-checkbox "><b>ssh</b>
+                        <div class="choose">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <input name="checkbox" value="Real" type="checkbox" class="squ-checkbox">Real
+                                    </td>
+                                    <td>
+                                        <input name="checkbox" value="Pred" type="checkbox" class="squ-checkbox">Pred
+                                    </td>
+                                    <td>
+                                        <input name="checkbox" value="Corr" type="checkbox" class="squ-checkbox">Corr
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <input name="checkbox" value="Error_Before" type="checkbox"
+                                            class="squ-checkbox">Error_Before
+                                    </td>
+                                    <td style="width: 40%;">
+                                        <input name="checkbox" value="Error_After" type="checkbox"
+                                            class="squ-checkbox">Error_After
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="type"><input name="checkbox" value="temperature" type="radio"
+                            class="tui-checkbox "><b>temperature</b>
+                        <div class="choose">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <input name="checkbox" value="Real" type="checkbox" class="squ-checkbox">Real
+                                    </td>
+                                    <td>
+                                        <input name="checkbox" value="Pred" type="checkbox" class="squ-checkbox">Pred
+                                    </td>
+                                    <td>
+                                        <input name="checkbox" value="Corr" type="checkbox" class="squ-checkbox">Corr
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <input name="checkbox" value="Error_Before" type="checkbox"
+                                            class="squ-checkbox">Error_Before
+                                    </td>
+                                    <td>
+                                        <input name="checkbox" value="Error_After" type="checkbox"
+                                            class="squ-checkbox">Error_After
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="type"><input name="checkbox" value="SWH" type="radio" class="tui-checkbox "><b>SWH</b>
+                        <div class="choose">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <input name="checkbox" value="Real" type="checkbox" class="squ-checkbox">Real
+                                    </td>
+                                    <td>
+                                        <input name="checkbox" value="pred" type="checkbox" class="squ-checkbox">Pred
+                                    </td>
+                                    <td>
+                                        <input name="checkbox" value="Corr" type="checkbox" class="squ-checkbox">Corr
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <input name="checkbox" value="Error_Before" type="checkbox"
+                                            class="squ-checkbox">Error_Before
+                                    </td>
+                                    <td>
+                                        <input name="checkbox" value="Error_After" type="checkbox"
+                                            class="squ-checkbox">Error_After
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="type"><input name="checkbox" value="wave_dirn" type="radio"
+                            class="tui-checkbox "><b>wave_direction</b>
+                        <div class="choose">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <input name="checkbox" value="Fore" type="checkbox" class="squ-checkbox">Fore
+                                    </td>
+                                    <td>
+                                        <input name="checkbox" value="Pred" type="checkbox" class="squ-checkbox">Pred
+                                    </td>
+                                    <td>
+                                        <input name="checkbox" value="Re" type="checkbox" class="squ-checkbox">Re
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input name="checkbox" value="Re-fore" type="checkbox"
+                                            class="squ-checkbox">Re-fore
+                                    </td>
+                                    <td colspan="2">
+                                        <input name="checkbox" value="Re-pred" type="checkbox"
+                                            class="squ-checkbox">Re-pred
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="">
+                <div class="center">
+                    <input type="button" value="渲染" id="draw_btn">
+                </div>
+            </div>
+        </div>
+        <div class="vis-content">
+            <div class="vis">
+                <div id="maptitle1">标题</div>
+                <div id="mapPanel1">
+                    <div class="titlelng"
+                        style="text-align: center;font-size: 16px;font-weight: bold;writing-mode: tb;transform: rotate(180deg);">
+                        Latitude(°)</div>
+                    <div class="left"></div>
+                    <div id="map1"></div>
+                    <div class="right">
+                        <img id="legend1" src="" style="height: 100%;" />
+                    </div>
+                </div>
+                <div class="top1"></div>
+                <div class="titlelng" style="text-align: center;font-size: 16px;font-weight: bold;">Longitude(°)</div>
+                <div id="mapfooter1">
+                    <div class="scale"></div>
+                    <div class="mapval">无</div>
+                    <div class="lnglat" id="lnglat1"></div>
+                </div>
+            </div>
+            <div class="vis">
+                <div id="maptitle2">标题</div>
+                <div id="mapPanel2">
+                    <div class="titlelng"
+                        style="text-align: center;font-size: 16px;font-weight: bold;writing-mode: tb;transform: rotate(180deg);">
+                        Latitude(°)</div>
+                    <div class="left"></div>
+                    <div id="map2"></div>
+                    <div class="right">
+                        <img id="legend2" src="" style="height: 100%;" />
+                    </div>
+                </div>
+                <div class="top2"></div>
+                <div class="titlelng" style="text-align: center;font-size: 16px;font-weight: bold;">Longitude(°)</div>
+                <div id="mapfooter2">
+                    <div class="scale"></div>
+                    <div class="mapval">无</div>
+                    <div class="lnglat" id="lnglat2"></div>
+                </div>
+            </div>
+
+            <div class="vis">
+                <div id="maptitle3">标题</div>
+                <div id="mapPanel3">
+                    <div class="titlelng"
+                        style="text-align: center;font-size: 16px;font-weight: bold;writing-mode: tb;transform: rotate(180deg);">
+                        Latitude(°)</div>
+                    <div class="left"></div>
+                    <div id="map3"></div>
+                    <div class="right">
+                        <img id="legend3" src="" style="height: 100%;" />
+                    </div>
+                </div>
+                <div class="top3"></div>
+                <div class="titlelng" style="text-align: center;
+            font-size: 16px;
+            font-weight: bold;">Longitude(°)</div>
+                <div id="mapfooter3">
+                    <div class="scale"></div>
+                    <div class="mapval">无</div>
+                    <div class="lnglat" id="lnglat3"></div>
+                </div>
+            </div>
+
+            <div class="vis">
+                <div id="maptitle4">标题</div>
+                <div id="mapPanel4">
+                    <div class="titlelng"
+                        style="text-align: center;font-size: 16px;font-weight: bold;writing-mode: tb;transform: rotate(180deg);">
+                        Latitude(°)</div>
+                    <div class="left"></div>
+                    <div id="map4"></div>
+                    <div class="right">
+                        <img id="legend4" src="" style="height: 100%;" />
+                    </div>
+                </div>
+                <div class="top4"></div>
+                <div class="titlelng" style="text-align: center; font-size: 16px; font-weight: bold;">Longitude(°)</div>
+                <div id="mapfooter4">
+                    <div class="scale"></div>
+                    <div class="mapval">无</div>
+                    <div class="lnglat" id="lnglat4"></div>
+                </div>
+            </div>
+
+            <div class="vis">
+                <div id="maptitle5">标题</div>
+                <div id="mapPanel5">
+                    <div class="titlelng"
+                        style="text-align: center;font-size: 16px;font-weight: bold;writing-mode: tb;transform: rotate(180deg);">
+                        Latitude(°)</div>
+                    <div class="left"></div>
+                    <div id="map5"></div>
+                    <div class="right">
+                        <img id="legend5" src="" style="height: 100%;" />
+                    </div>
+                </div>
+                <div class="top5"></div>
+                <div class="titlelng" style="text-align: center;font-size: 16px;font-weight: bold;">Longitude(°)</div>
+                <div id="mapfooter5">
+                    <div class="scale"></div>
+                    <div class="mapval">无</div>
+                    <div class="lnglat" id="lnglat5"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="text/javascript" src="../jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="../bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/bootstrap-datepicker.min.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="../js/bootstrap-datepicker.zh-CN.min.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="../js/jquery.timepicker.min.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="../js/ol.js" charset="UTF-8"></script>
+    <script type="text/javascript">
+        var speciald = ["2022-3-17", "2022-3-18"]
+        $('#form_datetime').datepicker({
+            language: 'zh-CN',  //用自己设置的时间文字
+            format: "yyyy-mm-dd",
+            autoclose: 1,
+            beforeShowDay: function (date) {
+                var d = date;
+                var curr_date = d.getDate();
+                var curr_month = d.getMonth() + 1;
+                var curr_year = d.getFullYear();
+                var formatDate = curr_year + "-" + curr_month + "-" + curr_date;
+
+                //特殊日期的匹配
+                if ($.inArray(formatDate, speciald) != -1) {
+                    return { classes: 'specialdays' };
+                }
+                return;
+            }
+
+        });
+        $('#form_hour').timepicker({
+            timeFormat: 'G:i',
+            step: 60,
+            show2400: true,
+            maxTime: '23：00',
+            disableTextInput: true,
+        })
+        $('#add_hour').on('click', function () {
+            // console.log("hello");
+            $('#form_hour').timepicker('show');
+        });
+
+        function getLocalTime(nS) {
+            return new Date(parseInt(nS) * 1000).toLocaleString().replace(/:\d{1,2}$/, ' ');
+        }
+
+        let mylayers = [], mylayer = ``  // 存影像服务, 加载的影像名称
+        $('#draw_btn').on('click', function () {
+            if ($("#form_datetime").val() === '' || $("#form_hour").val() === '') {
+                alert("请选择日期，时间");
+                return;
+            } else if ($(".type").children("input:checked").length === 0) {
+                alert('请勾选海洋要素数值！')
+            } else {
+                let first_name = $(".type").children("input:checked").val()
+                let inputs = $(".type").children("input:checked").siblings('.choose').find('input')
+                let middle_names = [], uncheck_names = [], check_names = []
+                for (let i = 0; i < inputs.length; i++) {
+                    if ($(inputs[i]).attr("checked")) {
+                        check_names.push($(inputs[i]).val())
+                    }else{
+                        uncheck_names.push($(inputs[i]).val())
+                    }
+                }
+                middle_names = check_names.concat(uncheck_names)
+                // 未勾选二级名称
+                if (middle_names.length === 0) {
+                    alert("请勾选有单选框的复选框选项")
+                    return;
+                } else {
+                    console.log(middle_names)
+                    // 再看时间戳
+                    let riqi = $("#form_datetime").val() + ' ' + $("#form_hour").val()
+                    let shijiancuo = (new Date(riqi)).getTime();
+                    console.log(shijiancuo)
+
+                    // 清空layers
+                    for (let i = 0; i < mylayers.length; i++) {
+                        maps[i] && maps[i].removeLayer(mylayers[i])
+                    }
+                    mylayers = [];
+                    for (let i = 0; i < middle_names.length; i++) {
+                        let map = maps[i];
+                        let middle_name = middle_names[i]
+                        let name = first_name + "_" + middle_name + "_" + shijiancuo
+                        console.log('名称', name)
+                        let maptitle = $("#form_datetime").val() + '_' + first_name + '_' + middle_name + '   '
+                        mylayer = 'tif2022:' + name
+                        let wmsSource = new ol.source.ImageWMS({
+                            url: '/mygeoserver/geoserver/tif2022/wms',
+                            // projection: 'EPSG:4326',
+                            params: { 'LAYERS': mylayer },
+                            // params: { 'LAYERS': 'ol_base:heliu' },
+                            ratio: 1,
+                            serverType: 'geoserver',
+                            crossOrigin: 'anonymous',
+                        });
+                        let layer = new ol.layer.Image({
+                            source: wmsSource
+                        })
+                        mylayers.push(layer)
+                        map.addLayer(layer)
+                        // 图例
+                        const graphicUrl = wmsSource.getLegendUrl(map.getView().getResolution());
+                        const img = document.getElementById('legend'+(i+1));
+                        console.log(graphicUrl)
+                        img.src = graphicUrl;
+
+                        // 专题图整饬
+                        $("#maptitle"+(i+1)).html(maptitle)
+                        $("#mapfooter"+(i+1)+" .scale").html("Scale 1 : " + $(".ol-scale-line"+(i+1)+"-inner").html())
+                        // $("#mapfooter .lnglat").html("Scale 1 : " + $(".ol-scale-line-inner").html())
+                    }
+                }
+            }
+        });
+
+        var tdtLayer = new ol.layer.Tile({
+            title: "谷歌矢量地图服务",
+            source: new ol.source.XYZ({
+                // url: "http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}",
+                // 天地图路网
+                // url: "https://t0.tianditu.gov.cn/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=acd0145627cbd82850e902ec254b593d"
+                // arcgis server
+                url: 'http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetWarm/MapServer/tile/{z}/{y}/{x}'
+                // 高德路网
+                // url: 'https://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}'
+            })
+        });
+        let maps = []
+        let map1, map2, map3, map4, map5;
+        for (let i = 1; i < 6; i++) {
+            maps.push(new ol.Map({
+                target: 'map' + i,                          // 关联到对应的div容器
+                layers: [
+                    // new ol.layer.Tile({                 // 瓦片图层
+                    //     source: new ol.source.OSM()     // OpenStreetMap数据源
+                    // })
+                    tdtLayer
+                ],
+                view: new ol.View({                     // 地图视图
+                    projection: 'EPSG:4326',
+                    center: [113, 10],
+                    zoom: 5
+                }),
+                controls: ol.control.defaults().extend([
+                    new ol.control.ScaleLine({
+                        //设置度量单位为米
+                        units: 'metric',
+                        target: 'scalebar',
+                        className: 'ol-scale-line'+i
+                    }), new ol.control.MousePosition({
+                        coordinateFormat: function (coordinate) {
+                            return ol.coordinate.format(coordinate, '经度:{x} 纬度:{y}', 2);
+                        },
+                        projection: 'EPSG:4326',
+                        className: 'custom-mouse-position',
+                        target: document.getElementById('lnglat'+i),
+                        undefinedHTML: '&nbsp;'
+                    })
+                ])
+            }))
+        }
+        maps.forEach((item,idx) => {
+            item.on("moveend", function (e) {
+                // console.log(e)
+                $("#mapfooter"+(idx+1)+" .scale").html("Scale 1 : " + $(".ol-scale-line"+(idx+1)+"-inner").html())
+                let extent = item.getView().calculateExtent()
+                let geLng = (extent[2] - extent[0]) / 5
+                let geLat = (extent[3] - extent[1]) / 5
+                let su = ``, heng = ``;
+                for (let i = 0; i < 5; i++) {
+                    su += `<div class="kedu1"><span>${(geLat * i + extent[1]).toFixed(1)}</span></div>`
+                    heng += `<div class="kedu2"><span>${(geLng * i + extent[0]).toFixed(1)}</span></div>`
+                }
+                $("#mapPanel"+(idx+1)+" .left").html(su)
+                $(".top"+(idx+1)).html(heng)
+            })
+            item.on('singleclick', function (evt) {
+                if (mylayer === '') {
+                    alert('请先加载影像！')
+                    return;
+                }
+                let coor = evt.coordinate;
+                let bbox = (coor[0] - 2) + "," + (coor[1] - 2) + "," + (coor[0] + 2) + "," + (coor[1] + 2)
+                $.get(`/mygeoserver/geoserver/tif2022/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&FORMAT=image%2Fjpeg
+            &TRANSPARENT=true&QUERY_LAYERS=${mylayer}&LAYERS=${mylayer}&exceptions=application%2Fvnd.ogc.se_inimage&INFO_FORMAT=application%2Fjson
+            &FEATURE_COUNT=50&X=50&Y=50&SRS=EPSG%3A404000&STYLES=&WIDTH=101&HEIGHT=101&BBOX=${bbox}`, (e) => {
+                    // console.log(e)
+                    let result = "无"
+                    if (e.features.length !== 0) {
+                        result = e.features[0].properties.GRAY_INDEX
+                    }
+                    $("#mapfooter"+(idx+1)+" .mapval").html(result)
+                })
+            });
+        })
+
+    </script>
+</body>
+
+</html>

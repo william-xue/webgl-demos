@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>layuiAdmin</title>
+    <link rel="stylesheet" href="../layui/css/layui.css">
+    <link rel="stylesheet" href="../css/style.css">
+	<style>
+		.title{
+			font-size: 20px;
+			font-weight: bold;
+			margin-bottom: 24px;
+		}
+		.butAmend{
+			border-radius: 6px;
+		}
+		#demo{
+			margin-top: 30px;
+		}
+		.layui-table-view{
+			width: 98.7%;
+		}
+		.operation {
+			display: flex;
+    		justify-content: space-around;
+			user-select: none;
+		}
+		.operation span{
+			cursor: pointer;
+		}
+		.operation .look{
+			color: #3798fb;
+		}
+		.operation .del{
+			color: #ff6a72;
+		}
+		.layui-laypage-limits{
+			display: none !important;
+		}
+		.greyTr{
+			background-color: #f2f2f2;
+		}
+		.layui-input-block_bottom{
+			display: flex;
+    		justify-content: flex-end;
+		}
+		.addBox{
+			display: none;
+			padding-top: 20px;
+			padding-right: 20px;
+		}
+		.addBox .layui-input-block{
+			width: 31%;
+		}
+		.addBox .layui-input-block1{
+			width: 100%;
+		}
+		.form_look{
+			display: none;
+		}
+
+		.form_look td,.form_look th{
+			max-width: 200px;
+			text-align: center;
+			min-width: 56px;
+		}
+		.show_domTable{
+			max-height: 600px;
+			overflow-y: auto;
+			display: inline-block;
+			margin: auto;
+		}
+	</style>
+</head>
+<body>
+
+<div class="DWtable1Box">
+	<p class="title">采购</p>
+	<button type="button" onclick="addUp()" class="layui-btn layui-btn-normal butAmend">
+		<i class="layui-icon layui-icon-edit"></i>添加
+	</button>
+	<table id="demo" lay-filter="test"></table>
+
+	<div class="addBox">
+		<form class="layui-form" action="" lay-filter="example">
+			
+			<div class="layui-form-item">
+				<div class="layui-inline">
+				  <label class="layui-form-label">日期选择</label>
+				  <div class="layui-input-block layui-input-block1">
+					<input type="text" name="times" id="date1" placeholder="yyyy-MM-dd" autocomplete="off" class="layui-input">
+				  </div>
+				</div>
+			</div>
+			<div class="layui-form-item">
+			  <label class="layui-form-label">选择地址</label>
+			  <div class="layui-input-block">
+				<select class="address_id" name="address_id" >
+				  
+				</select>
+			  </div>
+			</div>
+			<div class="layui-form-item">
+				<label class="layui-form-label">选择企业</label>
+				<div class="layui-input-block">
+				  <select class="taiTu" name="e_id">
+					
+				  </select>
+				</div>
+			  </div>
+			  <div class="layui-form-item">
+				<label class="layui-form-label">选择人员</label>
+				<div class="layui-input-block">
+				  <select class="work" name="work_id">
+				
+				  </select>
+				</div>
+			  </div>
+			  <div class="layui-form-item">
+				<label class="layui-form-label">选择商品</label>
+				<div class="layui-input-block">
+				  <select class="product" name="product_code">
+					
+				  </select>
+				</div>
+			  </div>
+		   
+			<div class="layui-form-item">
+			  <div class="layui-input-block_bottom">
+				<button type="button" class="layui-btn layui-btn-primary" onclick="closeCli()">取消</button>
+				<button type="submit" class="layui-btn layui-btn-normal" lay-submit="" lay-filter="demo1">立即提交</button>
+			  </div>
+			</div>
+		</form>
+	</div>
+
+	<div class="layui-form form_look">
+		<table class="layui-table show_domTable">
+		  <colgroup>
+			<col width="150">
+			<col width="150">
+			<col width="200">
+			<col>
+		  </colgroup>
+		  <thead>
+			<tr>
+			  <th>采购单号</th>
+			  <th>采购商品</th>
+			  <th>供应商家</th>
+			  <th>地址</th>
+			  <th>工作人员</th>
+			  <th>结算时间</th>
+			  <th>运费</th>
+			  <th>其他费用</th>
+			  <th>采购价</th>
+			</tr> 
+		  </thead>
+		  <tbody class="show_dom">
+			
+		  </tbody>
+		</table>
+	  </div>
+</div>
+
+<script type="text/html" id="barDemo">
+	<div class='operation'><span class='look' lay-event="look">查看</span><span class='del' lay-event="del">删除</span></div>
+</script>
+	
+
+<script src="../js/jquery.min.js"></script>
+<script src="../layui/layui.js" type="text/javascript" charset="utf-8"></script>
+<script src="../js/common.js"></script>
+
+<script>
+    layuiModules=['table', 'layer', 'form', 'laydate', 'layedit'];
+	//layui.use(['table','layer','form','laydate']),function(){
+	var laydate = layui.laydate;
+	// var $ = layui.jquery;
+	var layer = layui.layer;
+	var form =layui.form;
+	var layedit = layui.layedit
+	var http="http://localhost:8086",list_data={},list_show=[]
+	// './tableDemo.json' //数据接口
+
+	$.ajax({
+		url:http+"/dataintegration/search/select/all",
+		method:"get",
+		async:false,
+		success(res){
+			console.log(res.data,' kk')
+			list_data=res.data
+			var data=res.data,address_dom='<option value=""></option>',product_dom='<option value=""></option>',taiTu_dom='<option value=""></option>',work_dom='<option value=""></option>';
+			data.address.forEach(item=>{
+				address_dom+='<option value="'+item.addressId+'">'+item.cityDistrict+'</option>'
+			})
+			data.product.forEach(item=>{
+				product_dom+='<option value="'+item.pcode+'">'+item.pname+'</option>'
+			})
+			data.taiTu.forEach(item=>{
+				taiTu_dom+='<option value="'+item.eid+'">'+item.ename+'</option>'
+			})
+			data.work.forEach(item=>{
+				work_dom+='<option value="'+item.wid+'">'+item.wname+'</option>'
+			})
+			$(".address_id").html(address_dom)
+			$(".product").html(product_dom)
+			$(".taiTu").html(taiTu_dom)
+			$(".work").html(work_dom)
+		}
+	})
+
+	function mounted() {
+		$.ajax({
+			url:http+"/dataintegration/search/list/3/1",
+			method:"get",
+			success(res){
+				var data=res.data
+				list_show=data;
+				for(var i=0; i<data.length; i++){
+					data[i].obj=JSON.parse(JSON.stringify(data[i]))
+					for(let j=0; j<list_data.address.length; j++){
+						let trun=data[i],trun1=list_data.address[j]
+						if(trun.address_id==trun1.addressId){
+							data[i].address_id=trun1.cityDistrict
+							continue
+						}
+					}
+					for(let j=0; j<list_data.taiTu.length; j++){
+						let trun=data[i],trun1=list_data.taiTu[j]
+						if(trun.e_id==trun1.eid){
+							data[i].e_id=trun1.ename
+							continue
+						}
+					}
+					for(let j=0; j<list_data.work.length; j++){
+						let trun=data[i],trun1=list_data.work[j]
+						if(trun.work_id==trun1.wid){
+							data[i].work_id=trun1.wname
+							continue
+						}
+					}
+					for(let j=0; j<list_data.product.length; j++){
+						let trun=data[i],trun1=list_data.product[j]
+						if(trun.product_code==trun1.pcode){
+							data[i].product_code=trun1.pname
+							continue
+						}
+					}
+				}
+				layui.use('table', function(){
+					var table = layui.table,width='14.1%';
+					//第一个实例
+					table.render({
+						elem: '#demo'
+						,data:data
+						,limit:10
+						,page: true //开启分页
+						,cols: [[ //表头 , fixed: 'left'
+							{field: 'id', title: '编号', width:width, sort: true,align:"center"}
+							,{field: 'times', title: '日期', width:width,align:"center"}
+							,{field: 'address_id', title: '地址', width:width,align:"center"} 
+							,{field: 'e_id', title: '企业', width: width,align:"center"}
+							,{field: 'work_id', title: '相关人员', width: width,align:"center"}
+							,{field: 'product_code', title: '商品', width: width,align:"center"}
+							,{field: 'operation', title: '操作', width: width,align:"center",toolbar: '#barDemo'}
+							,{field: 'obj', title: 'obj', width:0,align:"center",hide:true}
+						]]
+					});
+				});
+			}
+		})
+		
+
+		table.on('tool(test)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+			var data = obj.data //获得当前行数据
+			,layEvent = obj.event; //获得 lay-event 对应的值
+			if(layEvent === 'look'){
+				$.ajax({
+					url:http+"/dataintegration/search/select",
+					method:"post",
+					async:false,
+					data:JSON.stringify(data.obj),
+					dataType:"json",
+					contentType:"application/json;charset=UTF-8",
+					success(res){
+			// 			` <th>采购单号</th>
+			//   <th>采购商品</th>
+			//   <th>供应商家</th>
+			//   <th>地址</th>
+			//   <th>工作人员</th>
+			//   <th>结算时间</th>
+			//   <th>运费</th>
+			//   <th>其他费用</th>
+			//   <th>采购价</th>`
+						var show_dom="",freight=0,other_fees=0,purchase_price=0;
+						res.data.forEach(item=>{
+
+							
+							for(let j=0; j<list_data.address.length; j++){
+								let trun=item,trun1=list_data.address[j]
+								if(trun.address_id==trun1.addressId){
+									item.address_id=trun1.cityDistrict
+									continue
+								}
+							}
+							for(let j=0; j<list_data.taiTu.length; j++){
+								let trun=item,trun1=list_data.taiTu[j]
+								if(trun.e_id==trun1.eid){
+									item.e_id=trun1.ename
+									continue
+								}
+							}
+							for(let j=0; j<list_data.work.length; j++){
+								let trun=item,trun1=list_data.work[j]
+								if(trun.worker_code==trun1.wid){
+									item.worker_code=trun1.wname
+									continue
+								}
+							}
+							for(let j=0; j<list_data.product.length; j++){
+								let trun=item,trun1=list_data.product[j]
+								if(trun.purchase_product_code==trun1.pcode){
+									item.purchase_product_code=trun1.pname
+									continue
+								}
+							}
+							
+
+							if(!isNaN(Number(item.freight))) freight+=Number(item.freight);
+							if(!isNaN(Number(item.other_fees))) other_fees+=Number(item.other_fees);
+							if(!isNaN(Number(item.purchase_price))) purchase_price+=Number(item.purchase_price);
+							show_dom+=`<tr>
+							<td>${item.purchase_code}</td>
+							<td>${item.purchase_product_code}</td>
+							<td>${item.e_id}</td>
+							<td>${item.address_id}</td>
+							<td>${item.worker_code}</td>
+							<td>${item.settlement_time}</td>
+							<td>${item.freight||''}</td>
+							<td>${item.other_fees||''}</td>
+							<td>${item.purchase_price||''}</td>
+						</tr>`
+						})
+						show_dom+=`<tr class="greyTr">
+							<td colspan="6">合计</td>
+							<td>${freight}</td>
+							<td>${other_fees}</td>
+							<td>${purchase_price}</td>
+						</tr>`
+						$(".show_dom").html(show_dom)
+					}
+				})
+				layer.open({
+					type: 1 //此处以iframe举例
+					,title: '当你选择该窗体时，即会在最顶端'
+					,area: ['84.5%', 'auto']
+					,shade: 0
+					,maxmin: true
+					,offset: [ //为了演示，随机坐标
+					60
+					,60
+					] 
+					,content: $(".form_look")
+				})
+			}else if(layEvent === 'del'){
+				console.log(data)
+			}
+		})
+	}
+
+	function addUp(){
+		console.log("添加")
+		layer.open({
+			type: 1 //此处以iframe举例
+			,title: '当你选择该窗体时，即会在最顶端'
+			,area: ['80%', 'auto']
+			,shade: 0
+			,maxmin: true
+			,offset: [ //为了演示，随机坐标
+			60
+			,60
+			] 
+			,content:$(".addBox")
+		});
+
+		//日期
+		laydate.render({
+			elem: '#date1'
+		});
+		
+		//提交事件
+		form.on('submit(demo1)', function(data){
+			console.log(data.field,' kkkKK')
+			data.field.status="3"
+			data.field.id=""
+			$.ajax({
+				url:http+"/dataintegration/search/create",
+				method:"post",
+				async:false,
+				data:JSON.stringify(data.field),
+				dataType:"json",
+				contentType:"application/json;charset=UTF-8",
+				success(res){
+					console.log(res,' ckandd')
+				}
+			})
+			
+			return true;
+		});
+		
+	}
+
+	function closeCli(){
+		layer.closeAll();
+	}
+</script>
+</body>
+</html>
+

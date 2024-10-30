@@ -1,0 +1,97 @@
+<html>
+    <head>
+        <title>
+            Diatom DAO Map        </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="shortcut icon" type="image/png" href="./img/favicon.ico">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+        <link href='./assets/css/mapbox-gl.css' rel='stylesheet' />
+        <link rel="stylesheet" href="./assets/css/mapbox-gl-geocoder.css" type="text/css">
+
+        <link href='./assets/css/common.css' rel='stylesheet' />
+        <link href='./style.css' rel='stylesheet' />
+        
+    </head>
+    <body>
+        <div id="map"></div>
+        <a href="https://diatom.fund/" target="_blank" class="logo">
+            <span>Diatom DAO Map</span>
+        </a>
+
+        <div id="popup" class="hidden">
+            <div class="dialog">
+
+                <div class="header">
+                    <div class="inner">
+                        <div class="col col-title">
+                            <div class="inner">
+                                Add your card </div>
+                        </div>
+                        <a href="#" class="col col-close close-popup">
+                            <div class="inner">
+                                x
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="body">
+                    <div class="inner">
+                        <div class="file-wrap">
+                            <a class="">
+                                <span>Choose image</span>
+                                <input type="file" id="upload" value="Choose a file" accept="image/*" />
+                            </a>
+                        </div>
+                        <div class="image-container hidden"></div>
+
+                        <div class="location-country">
+                            <div class="location">Berlin</div>
+                            <div class="country-code">DE</div>
+                        </div>
+                        <div class="latlng">
+                            <div class="lat">
+
+                            </div>
+                            <div class="lng">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="footer">
+                    <div class="inner">
+                        <div class="message">
+
+                        </div>
+                        <div class="button-wrap">
+                            <a href="#" class="submit-card button">
+                                <div class="inner">
+                                    Add Card                                </div>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <script>
+            window.config = {
+                style: 'bWFwYm94Oi8vc3R5bGVzL2phdmFqaW04NS9ja3d3bm1uNHAxaWFkMTVudXdoaWU4MGdz',
+                at: 'cGsuZXlKMUlqb2lhbUYyWVdwcGJUZzFJaXdpWVNJNkltTnJkMlYwY25WbGFqQTRNRFV5Y1d4d2MyWTJNbVptYkhBaWZRLlp6b3Z1SzF5ZVhnSWRtOUlOa2lCSXc=',
+            };
+        </script>
+        <script src='./assets/js/mapbox-gl.js'></script>
+        <script src="./assets/js/mapbox-gl-geocoder.min.js"></script>
+        <!-- <script src="//diatomdaomap.com/assets/js/frontend.min.js"></script> -->
+        <script src="./assets/maps/frontend.js"></script>
+            </body>
+</html>

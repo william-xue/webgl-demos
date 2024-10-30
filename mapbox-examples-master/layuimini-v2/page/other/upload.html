@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .uploadbody{
+            width: 400px;
+            height: 300px;
+            margin: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgb(0 0 0 / 20%);
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="uploadbody">
+    <form method="post" enctype="multipart/form-data" action="http://127.0.0.1:9990/upload">
+        <input class="form-control" type="file" name="file_data" value="请上传excel文件">
+        <input type="submit" value="提交">
+    </form>
+</div>
+</body>
+</html>

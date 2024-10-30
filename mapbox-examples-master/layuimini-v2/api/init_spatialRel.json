@@ -1,0 +1,58 @@
+{
+  "homeInfo": {
+    "title": "实体关系全览",
+    "href": "page/overview/index.html"
+  },
+  "logoInfo": {
+    "title": "xxxxxxxx",
+    "image": "images/logo.png",
+    "href": "",
+    "loginOutHref": "page/login-2.html"
+  },
+  "menuInfo": [
+    {
+      "title": "",
+      "icon": "fa fa-address-book",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "实体关系全览",
+          "href": "page/overview/index.html",
+          "icon": "fa fa-edit",
+          "target": "_self"
+        },
+        {
+          "title": "实体关系编辑",
+          "href": "page/vis/edit.html",
+          "icon": "fa fa-edit",
+          "target": "_self"
+        },
+        {
+          "title": "实体关系查询",
+          "href": "page/neovis/search.html",
+          "icon": "fa fa-window-maximize",
+          "target": "_self"
+        },
+        {
+          "title": "地理实体识别",
+          "href": "page/vis/question.html",
+          "icon": "fa fa-window-maximize",
+          "target": "_self"
+        },
+        {
+          "title": "实体关系地图",
+          "href": "page/spatialRel/map.html",
+          "icon": "fa fa-file-text",
+          "target": "_self"
+        },
+        {
+          "title": "用户管理",
+          "href": "page/user/add.html",
+          "icon": "fa fa-file-text",
+          "target": "_self"
+        }
+      ]
+    }
+  ]
+}

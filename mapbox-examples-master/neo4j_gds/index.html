@@ -1,0 +1,276 @@
+<style type="text/css" media="screen">
+  /*
+.nodes-image {
+	margin:-100;
+}
+*/
+  @import url("//maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css");
+
+  .imageblock .content img,
+  .image img {
+    max-width: 900px;
+    max-height: 300px;
+  }
+
+  .deck h3,
+  .deck h4 {
+    display: block !important;
+    margin-bottom: 8px;
+    margin-top: 5px;
+  }
+
+  .listingblock {
+    margin: 8px;
+  }
+
+  .pull-bottom {
+    position: relative;
+    bottom: 1em;
+  }
+
+  .admonitionblock td.icon [class^="fa icon-"] {
+    font-size: 2.5em;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, .5);
+    cursor: default
+  }
+
+  .admonitionblock td.icon .icon-note:before {
+    content: "\f05a";
+    color: #19407c
+  }
+
+  .admonitionblock td.icon .icon-tip:before {
+    content: "\f0eb";
+    text-shadow: 1px 1px 2px rgba(155, 155, 0, .8);
+    color: #111
+  }
+
+  .admonitionblock td.icon .icon-warning:before {
+    content: "\f071";
+    color: #bf6900
+  }
+
+  .admonitionblock td.icon .icon-caution:before {
+    content: "\f06d";
+    color: #bf3400
+  }
+
+  .admonitionblock td.icon .icon-important:before {
+    content: "\f06a";
+    color: #bf0000
+  }
+
+  .admonitionblock.note.speaker {
+    display: none;
+  }
+</style>
+<style type="text/css" media="screen">
+  /* #editor.maximize-editor .CodeMirror-code { font-size:24px; line-height:26px; } */
+</style>
+<article class="guide" ng-controller="AdLibDataController">
+  <carousel class="deck container-fluid">
+
+    <slide class="row-fluid">
+      <div class="col-sm-12">
+        <h3>Graph model: London Train Routes</h3>
+        <br />
+        <div>
+          <!-- <div class="content">
+              <img src="./londonTrain.png" width="65000000000">
+            </div> -->
+
+          <div class="paragraph">
+            <p>We will be working with an dataset that shows the connections between different stations across the
+              london.
+              Note that we have 1 node labels (<code>Train</code>) and 1 relationship types
+              (<code>:DISTANCE</code>).</p>
+          </div>
+        </div>
+      </div>
+    </slide>
+
+    <slide class="row-fluid">
+      <div class="col-sm-12">
+        <h3>Loading the data</h3>
+        <br />
+        <div>
+          <div class="paragraph">
+            <p>We will use the Cypher command <code>LOAD CSV</code> to import our data into Neo4j from CSV files hosted
+              on GitHub. It will parse the CSV files line by line as objects that can then be manipulated using Cypher.
+            </p>
+          </div>
+          <div class="paragraph">
+            <p>We begin by creating uniqueness constraints on each of the nodes, which make for efficient queries. There
+              is also an index created based on the geo-coordinates of each airport that can be used for spatial queries
+              (not shown in this guide).</p>
+          </div>
+          <div class="listingblock">
+            <div class="content">
+              <pre mode="cypher"
+                class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding"
+                data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->
+CREATE CONSTRAINT trains IF NOT EXISTS ON (c:Train) ASSERT c.name IS UNIQUE;<!--/code--></pre>
+            </div>
+          </div>
+          <div class="paragraph">
+            <p>Next we will import the Trian, set their properties, and create
+              <code>DISTANCE</code>
+              relationships between them.
+            </p>
+          </div>
+          <div class="listingblock">
+            <div class="content">
+              <pre mode="cypher"
+                class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding"
+                data-lang="cypher"
+                lang="cypher"><!--code class="cypher language-cypher"-->
+LOAD CSV WITH HEADERS FROM 'file:///trains.csv' AS row
+MERGE (a:Train{name: row.source})
+MERGE (b:Train{name: row.target})
+MERGE (a)-[r:DISTANCE]-&gt;(b)
+ON CREATE SET r.distance = toInteger(row.distance)
+            </div>
+          </div>
+        </div>
+      </div>
+    </slide>
+
+    <slide class="row-fluid">
+      <div class="col-sm-12">
+        <h3>Data visualization</h3>
+        <br />
+        <div>
+          <div class="paragraph">
+            <p>run the following query, which will give you the schema of the graph:</p>
+          </div>
+          <div class="listingblock">
+            <div class="content">
+              <pre mode="cypher"
+                class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding"
+                data-lang="cypher"
+                lang="cypher"><!--code class="cypher language-cypher"-->CALL db.schema.visualization()<!--/code--></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </slide>
+
+    <slide class="row-fluid">
+      <div class="col-sm-12">
+        <h3>Path Finding</h3>
+        <br />
+        <div>
+          <div class="paragraph">
+            <p>Generally speaking, the purpose of path finding is to find the shortest path between two or more
+              nodes. In the case of our train route graph, this would help us identify which train staion connections
+              would
+              be required to minimize the overall transport distance.</p>
+          </div>
+          <div class="paragraph">
+            <p>In this section we will use the common <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm"
+                target="_blank">Dijkstra&#8217;s algorithm</a> to find the shortest path between two nodes.</p>
+          </div>
+        </div>
+      </div>
+    </slide>
+
+    <slide class="row-fluid">
+      <div class="col-sm-12">
+        <h3>Creating a weighted graph projection</h3>
+        <br />
+        <div>
+          <div class="paragraph">
+            <p>In this case, we will want to use route distance as a weight in Dijkstra so the resulting shortest paths
+              reflect
+              those with the shortest physical distances. To do this we must first include route distance as a
+              relationship property in our graph projection, and we must set UNDIRECTED orientation like so:</p>
+          </div>
+          <div class="listingblock">
+            <div class="content">
+              <pre mode="cypher"
+                class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding"
+                data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->CALL gds.graph.project(
+    'routes-weighted',
+    'Train',
+    {
+      DISTANCE: {orientation: 'UNDIRECTED'}
+    },
+    {
+        relationshipProperties: 'distance'
+    }
+) YIELD graphName, nodeProjection, nodeCount, relationshipProjection, relationshipCount<!--/code--></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </slide>
+
+    <slide class="row-fluid">
+      <div class="col-sm-12">
+        <h3>Dijkstra&#8217;s algorithm: calculating the shortest path given a source node</h3>
+        <br />
+        <div>
+          <div class="paragraph">
+            <p>Example: calculate the shortest distance from the 'Regent Park' station to the 'High Street Kensington'
+              station using our weighted graph projection:</p>
+          </div>
+          <div class="listingblock">
+            <div class="content">
+              <pre mode="cypher"
+                class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding"
+                data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (source:Train{name: 'Regent Park'}), (target:Train{name: 'High Street Kensington'})
+CALL gds.shortestPath.dijkstra.stream('routes-weighted', {
+    sourceNode: source,
+    targetNode: target,
+    relationshipWeightProperty: 'distance'
+})
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
+RETURN
+    index,
+    gds.util.asNode(sourceNode).name AS sourceNodeName,
+    gds.util.asNode(targetNode).name AS targetNodeName,
+    totalCost,
+    [nodeId IN nodeIds | gds.util.asNode(nodeId).iata] AS nodeNames,
+    costs,
+    nodes(path) as path
+ORDER BY index<!--/code--></pre>
+            </div>
+          </div>
+          <div class="paragraph">
+            <p>We can see in the above query that we are specifying a source and target node and using the
+              <code>relationshipWeightProperty</code> of <code>distance</code>. From there, many things are returned,
+              including the total cost (similar to distance, usually representing the straight-line distance between two
+              nodes, etc.), and a listing of
+              the trains along this path. In this case, we see that the shortest path is 4 hops
+              long&#8201;&#8212;&#8201;perhaps not practical, but the total distance is minimized.
+            </p>
+          </div>
+          <div class="paragraph">
+            <p>Give this a try with your favorite airports!</p>
+          </div>
+        </div>
+      </div>
+    </slide>
+
+    <slide class="row-fluid">
+      <div class="col-sm-12">
+        <h3>Cleaning up</h3>
+        <br />
+        <div>
+          <div class="paragraph">
+            <p>Finally, to free up memory, drop unused graph projections!</p>
+          </div>
+          <div class="listingblock">
+            <div class="content">
+              <pre mode="cypher"
+                class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding"
+                data-lang="cypher"
+                lang="cypher"><!--code class="cypher language-cypher"-->CALL gds.graph.drop('routes-weighted');<!--/code--></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </slide>
+
+  </carousel>
+</article>

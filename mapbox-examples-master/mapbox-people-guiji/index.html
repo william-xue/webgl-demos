@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Animate a point along a route</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+    <script src="./data/data.js"></script>
+</head>
+
+<body>
+    <style>
+        .overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        .overlay button {
+            font: 600 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            background-color: #3386c0;
+            color: #fff;
+            display: inline-block;
+            margin: 0;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .overlay button:hover {
+            background-color: #4ea0da;
+        }
+    </style>
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+
+    <div id="map"></div>
+    <div class="overlay">
+        <button id="replay">Replay</button>
+    </div>
+
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1Ijoiemhlbmd5dWFuMDEiLCJhIjoiY2tweHJuaWMyMDd4aDJ2cGR4azJpMHA3ZyJ9.2uE3aEVVqriGOKNU11xEnw';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [114, 32],
+            zoom: 3
+        });
+
+        // San Francisco
+        const origin = [-122.414, 37.776];
+
+        // Washington DC
+        const destination = [-122.414, 37.776];//[-77.032, 38.913];
+
+        let route = getRouteFragment(origin, destination)
+
+        // A single point that animates along the route.
+        // Coordinates are initially set to origin.
+        const point = {
+            'type': 'FeatureCollection',
+            'features': [
+                {
+                    'type': 'Feature',
+                    'properties': {},
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': origin
+                    }
+                }
+            ]
+        };
+
+        map.on('load', () => {
+            // Add a source and layer displaying a point which will be animated in a circle.
+            map.addSource('route', {
+                'type': 'geojson',
+                'data': route
+            });
+
+            map.addSource('point', {
+                'type': 'geojson',
+                'data': point
+            });
+
+            map.addLayer({
+                'id': 'route',
+                'source': 'route',
+                'type': 'line',
+                'paint': {
+                    'line-width': 2,
+                    'line-color': '#007cbf'
+                }
+            });
+
+            map.addLayer({
+                'id': 'point',
+                'source': 'point',
+                'type': 'symbol',
+                'layout': {
+                    // This icon is a part of the Mapbox Streets style.
+                    // To view all images available in a Mapbox style, open
+                    // the style in Mapbox Studio and click the "Images" tab.
+                    // To add a new image to the style at runtime see
+                    // https://docs.mapbox.com/mapbox-gl-js/example/add-image/
+                    'icon-image': 'airport-15',
+                    'icon-rotate': ['get', 'bearing'],
+                    'icon-rotation-alignment': 'map',
+                    'icon-allow-overlap': true,
+                    'icon-ignore-placement': true
+                }
+            });
+
+
+
+            datas.forEach(element => {
+                console.log(element)
+                const { name, data } = element;
+
+                let route = {
+                    'type': 'FeatureCollection',
+                    'features': [
+                        {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': [[], []]
+                            }
+                        }
+                    ]
+                };
+
+
+                let arc = []
+                for (let index = 0; index < data.features.length - 1; index++) {
+                    const element = data.features[index];
+                    const next = data.features[index + 1];
+                    const origin = element.geometry.coordinates;
+                    const destination = next.geometry.coordinates;
+
+                    let arc1 = getRouteFragmentArc(origin, destination)
+                    arc = arc.concat(arc1)
+                }
+                console.log(arc);
+                route.features[0].geometry.coordinates = arc;
+
+                map.addSource('route' + name, {
+                    'type': 'geojson',
+                    'data': route
+                });
+
+                map.addLayer({
+                    'id': 'route' + name,
+                    'source': 'route' + name,
+                    'type': 'line',
+                    'paint': {
+                        'line-width': 2,
+                        'line-color': '#007cbf'
+                    }
+                });
+            })
+        });
+
+
+
+
+        function getRouteFragment(origin, destination) {
+            // A simple line from origin to destination.
+            const route = {
+                'type': 'FeatureCollection',
+                'features': [
+                    {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [origin, destination]
+                        }
+                    }
+                ]
+            };
+
+            // Calculate the distance in kilometers between route start/end point.
+            const lineDistance = turf.length(route.features[0]);
+
+            const arc = [];
+
+            // Number of steps to use in the arc and animation, more steps means
+            // a smoother arc and animation, but too many steps will result in a
+            // low frame rate
+            const steps = 500;
+
+            // Draw an arc between the `origin` & `destination` of the two points
+            for (let i = 0; i < lineDistance; i += lineDistance / steps) {
+                const segment = turf.along(route.features[0], i);
+                arc.push(segment.geometry.coordinates);
+            }
+
+            // Update the route with calculated arc coordinates
+            route.features[0].geometry.coordinates = arc;
+            return route;
+        }
+
+        function getRouteFragmentArc(origin, destination) {
+            // A simple line from origin to destination.
+            const route = {
+                'type': 'FeatureCollection',
+                'features': [
+                    {
+                        'type': 'Feature',
+                        'geometry': {
+                            'type': 'LineString',
+                            'coordinates': [origin, destination]
+                        }
+                    }
+                ]
+            };
+
+            // Calculate the distance in kilometers between route start/end point.
+            const lineDistance = turf.length(route.features[0]);
+            console.log(lineDistance)
+            // lineDistance = lineDistance *10
+
+            let arc = [];
+
+            // Number of steps to use in the arc and animation, more steps means
+            // a smoother arc and animation, but too many steps will result in a
+            // low frame rate
+            const steps = 100;
+
+            // Draw an arc between the `origin` & `destination` of the two points
+            for (let i = 0; i < lineDistance; i += lineDistance / steps) {
+                const segment = turf.along(route.features[0], i);
+                console.log(segment.geometry.coordinates)
+                arc.push(segment.geometry.coordinates);
+            }
+
+            // Update the route with calculated arc coordinates
+            // route.features[0].geometry.coordinates = arc;0
+            return arc;
+        }
+    </script>
+
+</body>
+
+</html>

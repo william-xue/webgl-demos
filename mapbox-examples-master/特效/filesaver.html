@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./filesaver.js"></script>
+</head>
+<body>
+    <button onclick="download()">dianwo 下载</button>
+</body>
+<script>
+    try {
+        var isFileSaverSupported = !!new Blob;
+        console.log(isFileSaverSupported);
+        
+    } catch (e) {
+        console.error(e);
+    }
+
+    function download(){
+        alert()
+        var blob = new Blob(["Hello, world!"], {type: "text/plain;charset=utf-8"});
+        window.saveAs(blob, "../hello world.txt");
+    }
+</script>
+</html>

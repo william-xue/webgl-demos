@@ -1,0 +1,70 @@
+body,td,th {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+.toolbars {
+	background-color: #E6E6FA;
+	border-top-width: 1px;
+	border-top-style: solid;
+	border-top-color: #0000CD;
+	font-size: 13px;
+	font-weight: bold;
+	text-align: right;
+	vertical-align: middle;
+	height: 25px;
+	border-bottom-width: 2px;
+	border-bottom-style: solid;
+	border-bottom-color: #FFFFFF;
+}
+a:link {
+	color: #FF8C00;
+}
+a:visited {
+	color: #FF8C00;
+}
+a:hover {
+	color: #CC3300;
+}
+.content {
+	font-size: 14px;
+}
+.title1 {
+	font-size: 14px;
+	font-weight: bold;
+	color: #FF0000;
+}
+.header {
+	background-image: url(headerbg.gif);
+	background-repeat: repeat-x;
+	background-position: bottom;
+	height: 40px;
+	position: relative;
+	border-width: 0px 0px 1px 0px;
+	border-color: #adb2ad; 
+	border-style: solid;
+}
+.headerright {
+	color: #666666;
+	text-align: right;
+	vertical-align: middle;
+}
+.mapctrl {
+	font-weight: bold;
+	border: 5px solid #FFFFFF;
+}
+.mapctrl a:link {
+	color: #CC0000;
+}
+.mapctrl a:visited {
+	color: #CC0000;
+}
+.mapctrl a:hover {
+	color: #000000;
+}
+.distance {
+	background-color:#FFFFFF;
+	color:#000000;
+}
+.addrinfo {
+	font-size: 16px;
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- jQuery -->
+  <script type="text/javascript" src="../libs/jquery-2.1.4.min.js"></script>
+  <script type="text/javascript" src="../libs/jquery.cookie.js"></script>
+    <!-- Openlayers -->
+<!-- <link rel="stylesheet" href="https://openlayers.org/en/latest/css/ol.css" /> -->
+<!-- <script type="text/javascript" src="https://openlayers.org/en/latest/build/ol.js"></script> -->
+<!-- <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL,Object.assign"></script> -->
+<link rel="stylesheet" href="../libs/ol.css" />
+<script type="text/javascript" src="../libs/ol.js"></script> 
+<!-- ol-ext -->
+<link rel="stylesheet" href="../libs/ol.ext.css" />
+<script type="text/javascript" src="../libs/ol.ext.js"></script>
+<link rel="stylesheet" href="./style.css" />
+<style>
+    .hideOpacity .layerswitcher-opacity {
+      display:none;
+    }
+    .hideOpacity .ol-layerswitcher .layerup {
+      height: 1.5em;
+    }
+    .showPercent .layerSwitcher .ol-layerswitcher .layerswitcher-opacity-label {
+      display: block;
+    }
+    html,body,.showPercent{
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .ol-header > div {
+      width:100%; 
+    }
+    .toggleVisibility {
+      padding-left: 1.6em;
+      cursor: pointer;
+      border-bottom: 2px solid #369;
+      margin-bottom: 0.5em; 
+    }
+    .toggleVisibility:before {
+      background-color: #fff;
+      border: 2px solid #369;
+      box-sizing: border-box;
+      content: "";
+      display: block;
+      height: 1.2em;
+      left: 0.1em;
+      margin: 0;
+      position: absolute;
+      width: 1.2em;
+    }
+    .toggleVisibility.show:before {
+      background: #369;
+    }
+</style>
+</head>
+<body class="showPercent">
+    <div class="external layerSwitcher"><b>External layer switcher</b></div>
+    <div id="map"></div>
+
+
+  <!-- <div class="options">
+    <h2>Options:</h2>
+    <input id="dils" type="checkbox" checked="checked" onchange="displayInLayerSwitcher(this.checked);"/>
+    <label for="dils">display "Pirate Map" in LayerSwitcher (zoom out to make it visible).</label>
+    <br/>
+    <input id="opb" type="checkbox" onchange="$('body').toggleClass('hideOpacity');" />
+    <label for="opb">hide opacity bar</label>
+    <br/>
+    <input id="percent" type="checkbox" onchange="$('body').toggleClass('showPercent');" />
+    <label for="percent">show percent information</label>
+  </div> -->
+</body>
+<script type="text/javascript" src="map.js"></script>
+<script>
+  // 验证登录
+  // let username = $.cookie('username')
+  // let password = $.cookie('password')
+  // console.log(username,password)
+  // // if(!username || !password ){
+  // if(username !== 'admin' || password !== '123456' ){
+  //   window.location.href = '../user/login.html';
+  // }
+</script>
+</html>

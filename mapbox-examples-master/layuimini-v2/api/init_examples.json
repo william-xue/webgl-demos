@@ -1,0 +1,330 @@
+{
+  "homeInfo": {
+    "title": "page one",
+    "href": "page/defined/welcome-1-1.html"
+  },
+  "logoInfo": {
+    "title": "Hello world",
+    "image": "images/logo.png",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+      "title": "静态地图",
+      "icon": "fa fa-lemon-o",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "ARCGIS JS",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "白膜数据展示（v4）",
+              "href": "../../arcgis/model.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "demo-addMapServer",
+              "href": "../../arcgis/addMapServer.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "demo-SailorMoon美少女战士",
+              "href": "../../arcgis/moon/SailorMoon.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "Leaflet",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "克里金空间插值",
+              "href": "../../leaflet_kriging/lealfet-kriging.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "绘制",
+              "href": "../../leaflet-draw/index.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "添加一张图片（leaflet的栅格图片只能位于矢量的下面）",
+              "href": "../../leaflet-img/index.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "导航",
+              "href": "../../leaflet-supermap-daohang/index.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "Oenlayers",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "TIF展示对比",
+              "href": "../../geoserver-ol-tif/front/index.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "ol_ext-geoserver-popup-layerswitch/",
+              "href": "../../ol_ext-geoserver-popup-layerswitch/",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "超图",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "校园设施综合管理系统",
+              "href": "../../CampusManagementSystem/index.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "404",
+              "href": "page/404.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "百度地图",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "assignment",
+              "href": "../../baidumap/zuoye/map.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "404",
+              "href": "page/404.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "高德地图",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "常规功能",
+              "href": "../../gaode_map/map.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "高德画等时线",
+              "href": "../../gaode_dengshixian/map.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "气象",
+      "icon": "fa fa-slideshare",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "可视化",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "作品-气象示例",
+              "href": "http://data.cma.cn/dataGis/gis.html",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "D3.JS",
+      "icon": "fa fa-slideshare",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "assignment",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "交互地图",
+              "href": "../../d3/assignment/index.html",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            }
+          ]
+        }
+        
+      ]
+    },
+
+    {
+      "title": "mapbox",
+      "icon": "fa fa-address-book",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "mapbox-case-showdata",
+          "href": "../../mapbox-case-showdata/",
+          "icon": "fa fa-home",
+          "target": "_self"
+        },
+        {
+          "title": "mapbox-dengshixian",
+          "href": "../../mapbox-dengshixian/",
+          "icon": "fa fa-home",
+          "target": "_self"
+        },
+        {
+          "title": "mapbox-diatomdaomap.com/",
+          "href": "../../mapbox-diatomdaomap.com/",
+          "icon": "fa fa-home",
+          "target": "_self"
+        },
+        {
+          "title": "mapbox-monitor-car",
+          "href": "../../mapbox-monitor-car/",
+          "icon": "fa fa-home",
+          "target": "_self"
+        },
+        {
+          "title": "mapbox-music/",
+          "href": "../../mapbox-music/",
+          "icon": "fa fa-home",
+          "target": "_self"
+        },
+        {
+          "title": "mapbox-news-location",
+          "href": "../../mapbox-news-location/",
+          "icon": "fa fa-home",
+          "target": "_self"
+        },
+        {
+          "title": "mapbox-people-guiji",
+          "href": "../../mapbox-people-guiji/",
+          "icon": "fa fa-home",
+          "target": "_self"
+        },
+        {
+          "title": "mapbox-three",
+          "href": "../../mapbox-three/model.html",
+          "icon": "fa fa-home",
+          "target": "_self"
+        }
+      ]
+    },
+
+    {
+      "title": "作品展示",
+      "icon": "fa fa-address-book",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "Homepage",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "page one",
+              "href": "page/welcome-1-12.html",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            },
+            {
+              "title": "page two",
+              "href": "page/welcome-2-11.html",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            }
+          ]
+        }
+      ]
+    },
+
+    
+    {
+      "title": "知识图谱neo4j",
+      "icon": "fa fa-slideshare",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "neo4j_gds",
+          "href": "../../neo4j_gds/",
+          "icon": "fa fa-tachometer",
+          "target": "_self"
+        },
+        {
+          "title": "neo4j-neovis",
+          "href": "../../neo4j-neovis/index.html",
+          "icon": "fa fa-tachometer",
+          "target": "_self"
+        },
+        {
+          "title": "spider_leaflet_neo4j_pois-主页",
+          "href": "../../spider_leaflet_neo4j_pois1/index.html",
+          "icon": "fa fa-tachometer",
+          "target": "_self"
+        },
+        {
+          "title": "vis-master-主页",
+          "href": "../../vis-master/docs/index.html",
+          "icon": "fa fa-tachometer",
+          "target": "_self"
+        },
+        {
+          "title": "vis-vis",
+          "href": "../../vis-vis/index.html",
+          "icon": "fa fa-tachometer",
+          "target": "_self"
+        }
+      ]
+    }
+  ]
+}

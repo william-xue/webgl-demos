@@ -1,0 +1,205 @@
+body {
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(purple), to(blue));
+    padding: 30px 40px;
+    padding-top: 5px;
+    padding-bottom: 0px;
+    text-align: center;
+    background-position: center 0;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    -webkit-background-size: cover;
+    height: 100%;
+    font-family: OpenSans-Light, PingFang SC, Hiragino Sans GB, Microsoft Yahei, Microsoft Jhenghei, sans-serif;
+}
+html,body{
+    height: 100%;
+}
+
+.links line {
+    stroke: rgb(240, 240, 240);
+    stroke-opacity: 0.8;
+}
+
+.links line.inactive {
+    stroke-opacity: 0;
+}
+
+.nodes circle {
+    stroke: #fff;
+    stroke-width: 1.5px;
+}
+
+.nodes circle:hover {
+    cursor: pointer;
+}
+
+.nodes circle.inactive {
+    display: none !important;
+}
+
+.texts text {
+    display: none;
+}
+
+.texts text:hover {
+    cursor: pointer;
+}
+
+.texts text.inactive {
+    display: none !important;
+}
+
+#indicator {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    text-align: left;
+    color: #f2f2f2;
+    font-size: 20px;
+}
+
+#indicator > div {
+    margin-bottom: 4px;
+}
+
+#indicator span {
+    display: inline-block;
+    width: 30px;
+    height: 14px;
+    position: relative;
+    top: 2px;
+    margin-right: 8px;
+}
+
+#mode {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+#mode span {
+    display: inline-block;
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: color, background-color .3s;
+    -o-transition: color, background-color .3s;
+    -ms-transition: color, background-color .3s;
+    -moz-transition: color, background-color .3s;
+    -webkit-transition: color, background-color .3s;
+}
+
+#mode span.active, #mode span:hover {
+    background-color: rgb(2, 131, 2);
+    color: white;
+    cursor: pointer;
+    font-weight:bold;
+}
+
+#mode span:hover {
+    background-color: rgb(112,128,144);
+    color: white;
+    cursor: pointer;
+    font-weight:bold;
+}
+
+#info {
+    position: absolute;
+    bottom: 220px;
+    left: 20px;
+    text-align: left;
+    width: 170px;
+    /* background-color:rgba(255,255,255,0.5) */
+}
+
+#info p {
+    color: rgb(151, 211, 208);
+    font-size: 12px;
+    margin-bottom: 5px;
+    margin-top: 0px;
+}
+
+#info p span {
+    color: rgb(255, 255, 255);
+    margin-right: 15px;
+}
+
+#search input {
+    position: absolute;
+    top: 130px;
+    left: 0px;
+    /* color: #fff; */
+    border: none;
+    outline: none;
+    box-shadow: none;
+    width: 200px;
+    background-color: rgb(135, 206, 235);
+}
+
+#search button {
+    position: absolute;
+    top: 170px;
+    left: 0px;
+    color: #fff;
+    border: none;
+    border-radius: 15px;
+    outline: none;
+    box-shadow: none;
+    width: 200px;
+    height: 30px;
+    background-color: #4e6ef2;
+}
+
+#svg2 g.row:hover {
+    stroke-width: 1px;
+    stroke: #fff;
+}
+.input-group{
+    /* margin-top: 20px; */
+    bottom: -60px;
+    width: 500px;
+    position: absolute;
+    left: 500px;
+}
+.form-control{
+    background-color: skyblue;
+}
+.form-control::-webkit-input-placeholder {
+    color: #767676;
+    border-right: 10px;
+}
+.btn{
+    background-color: #5cb85c;
+    color: white;
+    font-weight: bold;
+}
+*::-webkit-scrollbar {
+    /*滚动条整体样式*/
+    width : 10px;  /*高宽分别对应横竖滚动条的尺寸*/
+    height: 1px;
+    }
+   *::-webkit-scrollbar-thumb {
+    /*滚动条里面小方块*/
+    border-radius   : 10px;
+    background-color: rgba(135, 206, 235, 0.4);
+    background-image: -webkit-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.2) 75%,
+        transparent 75%,
+        transparent
+    );
+    }
+   *::-webkit-scrollbar-track {
+    /*滚动条里面轨道*/
+    box-shadow   : inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background   : -webkit-gradient(linear, 0 0, 0 100%, from(purple), to(blue));
+    
+    border-radius: 10px;
+    }

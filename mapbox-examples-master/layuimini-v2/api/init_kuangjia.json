@@ -1,0 +1,132 @@
+{
+  "homeInfo": {
+    "title": "page one",
+    "href": "page/defined/welcome-1-1.html"
+  },
+  "logoInfo": {
+    "title": "Hello world",
+    "image": "images/logo.png",
+    "href": ""
+  },
+  "menuInfo": [
+    
+    {
+      "title": "Menu1",
+      "icon": "fa fa-lemon-o",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "Homepage",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "page one",
+              "href": "page/defined/welcome-1-1.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "page two",
+              "href": "page/defined/welcome-2-1.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            }
+          ]
+        },
+        {
+          "title": "Others",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "map",
+              "href": "page/defined/mapbox/index.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "charts",
+              "href": "page/defined/echarts.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            },
+            {
+              "title": "404",
+              "href": "page/404.html",
+              "icon": "fa fa-snowflake-o",
+              "target": "_self"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Menu 2",
+      "icon": "fa fa-address-book",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "Homepage",
+          "href": "",
+          "icon": "fa fa-home",
+          "target": "_self",
+          "child": [
+            {
+              "title": "page one",
+              "href": "page/welcome-1-12.html",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            },
+            {
+              "title": "page two",
+              "href": "page/welcome-2-11.html",
+              "icon": "fa fa-tachometer",
+              "target": "_self"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Menu3",
+      "icon": "fa fa-slideshare",
+      "href": "",
+      "target": "_self",
+      "child": [
+        
+      ]
+    },
+    {
+      "title": "Menu4",
+      "icon": "fa fa-slideshare",
+      "href": "",
+      "target": "_self",
+      "child": [
+        
+      ]
+    },
+    {
+      "title": "Menu5",
+      "icon": "fa fa-slideshare",
+      "href": "",
+      "target": "_self",
+      "child": [
+        
+      ]
+    },
+    {
+      "title": "Menu6",
+      "icon": "fa fa-slideshare",
+      "href": "",
+      "target": "_self",
+      "child": [
+        
+      ]
+    }
+  ]
+}

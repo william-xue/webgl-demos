@@ -1,0 +1,330 @@
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>High-speed railway</title>
+    <!-- <script src='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css' rel='stylesheet' /> -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.js"></script>
+    <script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.l7-2.0.0/dist/l7.js"></script>
+    <link rel="stylesheet" href="./style.css" type="text/css">
+
+    <style>
+        .btn-list {
+            position: fixed;
+            top: 100px;
+            left: 100px;
+        }
+
+        body {
+            padding: 100px;
+            cursor: url('./Cursors1.png'), default;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='map'></div>
+    <div class='map-overlay' id='features'>
+        <h2> Railway in UK </h2>
+        <h2> xxxx</h2>
+
+
+        <input type="checkbox" id="Railway">
+        <label for="railway">Railway</label>
+        <input type="checkbox" id="Road">
+        <label for="road">Road</label>
+
+
+        <div class='button-line'>
+            <div class='pure-button-group'>
+                <button class="pure-button" id="button-fly-globe">
+                    globe
+                </button>
+                <button class="pure-button pure-button-disabled" id="button-fly-mercator">
+                    mercator
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- info-box -->
+    <div class="info-box">
+        <h2>2011 and 2019 statistic overview</h2>
+        <div id='pd'>
+            <p>- Hover to see statistic graph.</p>
+        </div>
+    </div>
+
+    <ul class="btn-list">
+        <li onclick="editCursor('default')"><button>default</button></li>
+        <li onclick="editCursor('pointer')"><button>pointer</button></li>
+        <li onclick="editCursor('auto')"><button>auto</button></li>
+        <li onclick="editCursor('crosshair')"><button>crosshair</button></li>
+        <li onclick="editCursor('move')"><button>move</button></li>
+        <li onclick="editCursor('text')"><button>text</button></li>
+        <li onclick="editCursor('help')"><button>help</button></li>
+        <li onclick="editCursor('wait')"><button>wait</button></li>
+        <li onclick="editCursor('')"><button>手</button></li>
+    </ul>
+
+    <!-- <nav id="menu"
+    style="font-size: 13px;background: #3887be;border: none;position: absolute;top: 350px;color: white;padding: 10px;width: 100px;cursor: pointer;"
+    onclick="toggleHeatmap()">Toggle Heatmap</nav>
+  <nav id="menu"
+    style="font-size: 13px;background: #3887be;border: none;position: absolute;top: 400px;color: white;padding: 10px;width: 100px;cursor: pointer;"
+    onclick="openNewMap()">Open Flow Map</nav> -->
+
+    <script type="text/javascript" src="./data.js"></script>
+    <script>
+
+        // mapboxgl.accessToken = 'pk.eyJ1IjoiMjY1MTA1OHgiLCJhIjoiY2t6eTZ6MGg3MDh2bjJ2bzNic2h3a2FzcCJ9.1vx_kQ2C7tzOqSUDrzi_bw';
+        // var map = new mapboxgl.Map({
+        //   container: 'map',
+        //   style: 'mapbox://styles/2651058x/cl0splwz900lk15qgqttgtuc2',
+        //   center: [-3.1276, 55.5072],
+        //   zoom: 5,
+        // });
+
+        mapboxgl.accessToken = 'pk.eyJ1Ijoiemhlbmd5dWFuMDEiLCJhIjoiY2tweHJuaWMyMDd4aDJ2cGR4azJpMHA3ZyJ9.2uE3aEVVqriGOKNU11xEnw';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/zhengyuan01/clefhl6q6000101tauiyrwtuj',
+            center: [-3.1276, 55.5072],
+            zoom: 2,
+            // attributionControl: false,
+            // interactive: false,
+            projection: 'globe'
+        });
+
+        const scene = new L7.Scene({
+            id: 'map',
+            map: new L7.Mapbox({
+                mapInstance: map,
+            }),
+        });
+
+        // L7增加layer
+        scene.on('loaded', () => {
+            const atomLayer = new L7.EarthLayer()
+            .color('#2E8AE6')
+            .shape('atomSphere');
+            scene.addLayer(earthlayer);
+
+            const layer = new L7.LineLayer()
+                // .source([
+                //     { "lng1": 91.111891, "lat1": 29.662557, "lng2": 116.395645, "lat2": 39.929986 },
+                //     { "lng1": 91.111891, "lat1": 29.662557, "lng2": 11.530635, "lat2": 29.544606 },
+                //     { "lng1": 91.111891, "lat1": 29.662557, "lng2": 121.487899, "lat2": 31.249162 }
+                // ], {
+                //     parser: {
+                //         type: 'json',
+                //         x: 'lng1',
+                //         y: 'lat1',
+                //         x1: 'lng2',
+                //         y1: 'lat2',
+                //     },
+                // })
+                .source([
+                    { "coord": [[104.195397, 35.86166],[100.992541, 15.870032]] },
+                    { "coord": [[91.111891, 29.662557],[116.395645, 39.929986]] },
+                    // { "lng1": 91.111891, "lat1": 29.662557, "lng2": 11.530635, "lat2": 29.544606 },
+                    // { "lng1": 91.111891, "lat1": 29.662557, "lng2": 121.487899, "lat2": 31.249162 }
+                ], {
+                    parser: {
+                        type: 'json',
+                        coordinates: 'coord'
+                    },
+                })
+                .size(10)
+                // .size(0.5)
+                // .shape('greatcircle')
+                .shape('arc3d')
+                .active(true)
+                .animate({
+                    interval: 2,
+                    trailLength: 2,
+                    duration: 1
+                })
+                // .animate({
+                //     enable: true,
+                //     interval: 0.1,
+                //     trailLength: 0.5,
+                //     duration: 2,
+                // })
+                .color('#b97feb')
+                .style({
+                    // opacity: 0.8,
+                    segmentNumber: 60,
+                    globalArcHeight: 20
+                });
+            scene.addLayer(layer);
+        });
+
+        map.on('load', function () {
+
+
+            // 添加数据源
+            // map.addSource('source-railway', {
+            //   type: 'geojson',
+            //   data: data_railway,
+            // });
+
+            // map.addSource('source-road', {
+            //   type: 'geojson',
+            //   data: data_road,
+            // });
+
+            // map.addSource('source_railway', {
+            //   type: 'vector',
+            //   url: 'mapbox://2651058x.cl106iwty0kq421s255gnxpx3-2vgs0'
+            // });
+
+            // map.addSource('source_road', {
+            //   type: 'vector',
+            //   url: 'mapbox://2651058x.cl106kry06g6828pcc4zrcm4d-17ls8'
+            // });
+
+            // 数据源添加完成后添加图层
+
+            // map.addLayer({
+            //   id: 'layer-railway',
+            //   type: 'line',
+            //   source: 'source_railway',
+            //   'source-layer': 'Railway0321',
+            //   layout: {
+            //     visibility: 'none',
+            //   },
+            //   paint: {
+            //     'line-color': '#295b43',
+            //     'line-width': 1,
+            //   },
+            // });
+            // map.addLayer({
+            //   id: 'layer-road',
+            //   type: 'line',
+            //   source: 'source_road',
+            //   'source-layer': 'Road0321',
+            //   layout: {
+            //     visibility: 'none',
+            //   },
+            //   paint: {
+            //     'line-color': [
+            //       'case',
+            //       ['==', ['get', 'type'], 'Major Highway'],
+            //       '#00008B',
+            //       ['==', ['get', 'type'], 'Secondary Highway'],
+            //       '#483D8B',
+            //       ['==', ['get', 'type'], 'Road'],
+            //       '#6495ED',
+            //       ['==', ['get', 'type'], 'Ferry Route'],
+            //       '#1E90FF',
+            //       '#00BFFF',
+            //     ],
+            //     'line-width': 2,
+            //   },
+            // });
+
+
+            // var popup = new mapboxgl.Popup({
+            //   closeButton: false,
+            //   closeOnClick: false
+            // });
+            // map.on('mousemove', function (e) {
+            //   var features = map.queryRenderedFeatures(e.point);
+            //   // console.log(features);
+            //   let feature = features.find(f => 'layer-road' === f.layer.id)
+            //   if (!feature) return;
+            //   const { latitude, longitude, region_name, road_name, road_type, } = feature.properties;
+            //   popup.remove()
+            //   popup.setLngLat(e.lngLat).setHTML(
+            //     `<div>
+            //         <b>type:</b>&nbsp;${feature.properties['type']}
+            //     </div>`
+            //   ).addTo(map);
+            // });
+        });
+
+        document.getElementById('Railway').addEventListener("change", function (e) {
+            console.log(e)
+            if (e.target.checked) {
+                map.setLayoutProperty('layer-railway', 'visibility', 'visible');
+            } else {
+                map.setLayoutProperty('layer-railway', 'visibility', 'none');
+            }
+        });
+
+        document.getElementById('Road').addEventListener("change", function (e) {
+            play = !play
+            play ? animate() : cancelAnimationFrame(playFlag)
+        });
+
+
+        let flyFlag = 'mercator', center = [-3.1276, 55.5072], play = true, playFlag = 0;
+
+        map.on('zoomend', function () {
+
+            map.setProjection({
+                name: flyFlag,
+                center: center,
+                // parallels: [Number(lat1Input.value), Number(lat2Input.value)]
+            });
+        })
+
+        // Fly to function
+        document.getElementById('button-fly-globe').addEventListener('click', () => {
+            center = [-3.1276, 55.5072];
+            flyFlag = 'globe';
+
+            map.easeTo({
+                center: center,
+                zoom: 2,
+                speed: 0.2,
+                curve: 1,
+                duration: 2000,
+                maxDuration: 4,
+                easing(t) {
+                    return t;
+                }
+            });
+
+        });
+
+        document.getElementById('button-fly-mercator').addEventListener('click', () => {
+            flyFlag = 'mercator'
+
+            // center = [113.1276, 32.5072];
+            center = [-3.1276, 55.5072];
+            map.easeTo({
+                center,
+                zoom: 3.6,
+                speed: 0.2,
+                duration: 5000,
+                curve: 1,
+                easing(t) {
+                    return t;
+                }
+            });
+        });
+
+        const animate = () => {
+            let [x, y] = center
+            x -= 0.5
+            if (x <= -180) x = 180
+            center = [x, y]
+            map.setCenter(center)
+            playFlag = requestAnimationFrame(animate)
+        }
+        // animate()
+
+
+        function editCursor(cursor) {
+            map.getCanvas().style.cursor = cursor
+        }
+    </script>
+
+</body>
+
+</html>

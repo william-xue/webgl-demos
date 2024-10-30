@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xxx</title>
+    <style>
+        .layui-card {border:1px solid #f2f2f2;border-radius:5px;}
+        .icon {margin-right:10px;color:#1aa094;}
+        .icon-cray {color:#ffb800!important;}
+        .icon-blue {color:#1e9fff!important;}
+        .icon-tip {color:#ff5722!important;}
+        .layuimini-qiuck-module {text-align:center;margin-top: 10px}
+        .layuimini-qiuck-module a i {display:inline-block;width:100%;height:60px;line-height:60px;text-align:center;border-radius:2px;font-size:30px;background-color:#F8F8F8;color:#333;transition:all .3s;-webkit-transition:all .3s;}
+        .layuimini-qiuck-module a cite {position:relative;top:2px;display:block;color:#666;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;font-size:14px;}
+        .welcome-module {width:100%;height:210px;}
+        .panel {background-color:#fff;border:1px solid transparent;border-radius:3px;-webkit-box-shadow:0 1px 1px rgba(0,0,0,.05);box-shadow:0 1px 1px rgba(0,0,0,.05)}
+        .panel-body {padding:10px}
+        .panel-title {margin-top:0;margin-bottom:0;font-size:12px;color:inherit}
+        .label {display:inline;padding:.2em .6em .3em;font-size:75%;font-weight:700;line-height:1;color:#fff;text-align:center;white-space:nowrap;vertical-align:baseline;border-radius:.25em;margin-top: .3em;}
+        .layui-red {color:red}
+        .main_btn > p {height:40px;}
+        .layui-bg-number {background-color:#F8F8F8;}
+        .layuimini-notice:hover {background:#f6f6f6;}
+        .layuimini-notice {padding:7px 16px;clear:both;font-size:12px !important;cursor:pointer;position:relative;transition:background 0.2s ease-in-out;}
+        .layuimini-notice-title,.layuimini-notice-label {
+            padding-right: 70px !important;text-overflow:ellipsis!important;overflow:hidden!important;white-space:nowrap!important;}
+        .layuimini-notice-title {line-height:28px;font-size:14px;}
+        .layuimini-notice-extra {position:absolute;top:50%;margin-top:-8px;right:16px;display:inline-block;height:16px;color:#999;}
+    </style>
+    <style type="text/css">
+        
+    </style>
+    <link rel="stylesheet" href="../layui/css/layui.css">
+    <link rel="stylesheet" href="../js/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="../css/style.css">
+    
+    <script src="../layui/layui.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/neovis.js"></script>
+</head>
+
+<body>
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            
+            <div class="layui-row ">
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-header"><i class="fa fa-bullhorn icon icon-tip"></i>搜索表单</div>
+                        <div class="layui-card-body">
+                            <form class="layui-form layui-form-pane" action="">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">cypher查询:</label>
+                                    <div class="layui-input-inline" style="width: 520px;">
+                                        <input type="text" autocomplete="off" class="layui-input search_sql"
+                                            placeholder="请输入cypher语句进行查询，例如：MATCH (n) RETURN n limit 10">&nbsp;&nbsp;
+                                    </div>
+                                    <div class="layui-input-inline">
+                                        <button class="layui-btn" id="btn_submit_search_sql">搜索</button>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">实体:</label>
+                                    <div class="layui-input-inline">
+                                        <select id="search_entity" name="search_entity">
+                                            <option selected>故障</option>
+                                            <option>汽车零部件</option>
+                                        </select>
+                                    </div>
+                                    <div class="layui-input-inline" style="width: 320px;">
+                                        <input type="text" name="username" lay-verify="required" 
+                                        placeholder="请输入实体 name, 支持模糊查询" autocomplete="off" class="layui-input query_name">
+                                    </div>
+                                    <div class="layui-inline">
+                                        <button class="layui-btn" id="btn_submit_entity">搜索单个实体</button>
+                                    </div>
+                                    <div class="layui-inline">
+                                        <button class="layui-btn" id="btn_submit_relation">搜索实体和关系</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <div class="layui-col-md12">
+                    <div class="layui-card">
+                        <div class="layui-card-header"><i class="fa fa-fire icon"></i>图谱可视化</div>
+                        <div class="layui-card-body">
+                            <div id="viz" style="height: 520px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</body>
+<script>
+    $(function () {
+        var viz;
+        var config = {
+            container_id: "viz",
+            url: 'http://localhost:8008/api/neo/javaCode/excute',
+            server_url: "bolt://localhost:7687",
+            server_user: "neo4j",
+            server_password: "123",
+            arrows: false,
+            labels: {
+                "汽车": {
+                    "caption": "name",
+                    "size": 16,
+                    "color":'green',
+                    "community": "name",
+                    // "image": 'https://visjs.org/images/visjs_logo.png',
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                    "title_properties": [
+                        "name",
+                        "行驶里程",
+                        "VIN_code"
+                    ],
+                },
+                "汽车零部件": {
+                    "caption": "name",
+                    group: "community",
+                },
+                "供应商": {
+                    "caption": "name",
+                },
+                "区域": {
+                    "caption": "name",
+                },
+                "故障": {
+                    "caption": "name",
+                },
+                "故障原因": {
+                    "caption": "name",
+                },
+                "经销商": {
+                    "caption": "name",
+                },
+                "维修人员": {
+                    "caption": "name",
+                },
+                "维修商": {
+                    "caption": "name",
+                },
+                "维修服务": {
+                    "caption": "name",
+                },
+            },
+            relationships: {
+                // "IsPartOf": {
+                //     "thickness": "weight",
+                //     // "caption": 'type',
+                //     "caption": true,
+                // },
+                // "关系":{},
+
+            },
+            initial_cypher: "MATCH p = ()-[]->() RETURN p"
+        };
+
+        viz = new NeoVis.default(config);
+        viz.render();
+
+        $("#btn_submit_search_sql").click(function (e) {
+            e.preventDefault();
+            const cql = $('.search_sql').val();
+            config['initial_cypher'] = ($.trim(cql) === '') ? "MATCH p = (n)-[]->(m) RETURN p" : cql;
+            try {
+                viz.clearNetwork()
+                viz.reinit(config)
+                viz.render()
+            } catch (err) {
+                alert('cypher语句有误，请检查')
+            }
+        });
+
+        $("#btn_submit_entity").click((e)=>{
+            e.preventDefault();
+            const entity = $('#search_entity').val();
+            const name = $('.query_name').val();
+            config['initial_cypher'] = "MATCH (n:`" + entity + "`) where n.name =~'.*"+ name +".*'  RETURN n" ;
+            try {
+                viz.clearNetwork()
+                viz.reinit(config)
+                viz.render()
+            } catch (err) {
+                alert('有误，请检查')
+            }
+        })
+
+        $("#btn_submit_relation").click((e)=>{
+            e.preventDefault();
+            const entity = $('#search_entity').val();
+            const name = $('.query_name').val();
+            // MATCH (n:Major{name:''}) optional match (n)-[r*0..3]->(x) return n,r,x
+            config['initial_cypher'] = "MATCH (n:`" + entity + "`) where n.name =~'.*"+ name +".*' optional match (n)-[r*0..1]->(x) return n,r,x" ;
+            try {
+                viz.clearNetwork()
+                viz.reinit(config)
+                viz.render()
+            } catch (err) {
+                alert('有误，请检查')
+            }
+        })
+        
+
+        $("#btn_download").click(function (e) {
+            e.preventDefault();
+            const cql = $('.search_sql').val();
+            if (cql.trim() === '') {
+                alert('请输入下载语句，如MATCH (n:GY3) RETURN n LIMIT 25')
+                return;
+            }
+            $.ajax({
+                url: "/api/neo/javaCode/excute",
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify([cql]),
+                async: false,
+                contentType: 'application/json; charset=UTF-8',
+                timeout: 5000,
+                success: function (result) {
+                    console.log(result)
+                    var blob = new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json,charset=utf-8;' });
+                    let fileName = new Date().getTime() + ".json";
+                    //IE浏览器使用msSaveBlob
+                    if (window.navigator.msSaveBlob) {
+                        window.navigator.msSaveBlob(blob, fileName);
+                    } else {
+                        var aLink = document.createElement('a');
+                        aLink.download = fileName;
+                        aLink.href = URL.createObjectURL(blob);
+                        aLink.click();
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+
+                }
+            })
+        });
+
+    })
+</script>
+</html>

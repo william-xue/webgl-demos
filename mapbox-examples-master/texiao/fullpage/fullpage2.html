@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/4.0.17/fullpage.min.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="./examples.css" /> -->
+    <script src="https://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/4.0.17/fullpage.min.js" integrity="sha512-zAHJKGyoPf2Y20Wi4uo32sa/vSvwKfY4tYUt6gJfmkA79X0wt5ZfaxL5GqJ5cMnmvGslWi5PKTo51rHRZqYbJg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    
+    <style>
+
+        /* Style for our header texts
+        * --------------------------------------- */
+        h1{
+            font-size: 5em;
+            font-family: arial,helvetica;
+            color: #fff;
+            margin:0;
+        }
+        .intro p{
+            color: #fff;
+        }
+    
+        /* Centered texts in each section
+        * --------------------------------------- */
+        .section{
+            text-align:center;
+        }
+        
+        #section2 .fp-overflow , #section2 .fp-overflow .intro {
+            height: 100%;
+        }
+
+        .fp-watermark{
+            display: none !important;
+        }
+    
+        /* Bottom menu
+        * --------------------------------------- */
+        #infoMenu li a {
+            color: #fff;
+        }
+        </style>
+</head>
+<body>
+    <div id="fullpage">
+        <div class="section" id="section0">
+            <div class="intro">
+                <h1>第二slide第一屏!</h1>
+            </div>
+        </div>
+
+        <div class="section" id="section3">
+            <div class="intro">
+                <h1>第二slide第二屏!</h1>
+            </div>
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+        var myFullpage = new fullpage('#fullpage', {
+            anchors: ['firstPage', 'secondPage', '3rdPage', '4thPage'],
+            sectionsColor: ['#663D0F', '#11BC9B', '#7E8F7C', 'skyblue'],
+            scrollBar: true
+        });
+    </script>    
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Exploring the 2018 World Coup </title>
+    <link rel="stylesheet" href="styles.css"/>
+    <script src="https://d3js.org/d3.v5.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+    <header>
+        <!-- <img src="assets/fifa_russia_logo.png" alt="WC Russia Logo" id="logo"/> -->
+        <h1 id="title">Exploring Match Statistics for 2018 World Cup</h1>
+    </header>
+    <div class="wrap">
+        <div class="view">
+
+            <table id="matchTable">
+                <thead>
+                <tr>
+                    <th style="text-align:center">Team</th>
+                    <th style="text-align:center">Goals<span class="glyphicon glyphicon-sort"></span><br/></th>
+                    <th style="text-align:center">Round/Result</th>
+                    <th style="text-align:center">Wins</th>
+                    <th style="text-align:center">Losses</th>
+                    <th style="text-align:center">Total Games</th>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td id="goalHeader" style="padding-right: 0px;"></td>
+                </tr>
+                </thead>
+                <tbody>
+                <!--Add rows here-->
+                </tbody>
+            </table>
+
+        </div>
+        <div class="view">
+            <svg width="800" height="900">
+                <g id="tree"></g>
+            </svg>
+        </div>
+    </div>
+</div>
+<!--<script type="application/javascript" src="load_hacker.js"></script>-->
+<script type="application/javascript" src="js/tree.js"></script>
+<script type="application/javascript" src="js/table.js"></script>
+<script type="application/javascript" src="js/script.js"></script>
+</body>
+</html>

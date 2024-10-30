@@ -1,0 +1,217 @@
+html, body {
+    padding: 0;
+    margin: 0;
+    /* 和外围之间没有间隙 */
+    height: 100%;
+    width: 100%;
+    background-color: rgb(30, 30, 30);
+    
+} 
+#top {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 8%;
+    display: flex;
+    /*实现垂直居中*/
+    align-items: center;
+    background-color: rgb(54, 114, 81);
+}
+#map {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    /* border: 1 solid black; */
+    border-top: 1px solid rgb(180, 180, 180);
+} 
+#toolbar {
+    padding: 0;
+    margin: 0;
+    width: 3%;
+    height: 50%;
+    position: absolute;
+    top:20%;
+    right:1%;
+    /* background-color: rgb(210, 215, 221); */
+    opacity: 100%;
+    border: none;
+} 
+.toolbar_table {
+    padding: 0;
+    margin: 0;
+    width: 100px;
+    height: 100%;
+    border: 1;
+} 
+#top_div {
+    background-color: rgb(57, 127, 94);
+    /* border-radius: 6px; */
+    width: 120px;
+    height: 50px;
+    text-align: center;
+} 
+#top_p {
+    padding: 0;
+    margin: 0;
+    color: white;
+    font-size: 28pt;
+} 
+
+.toolbar_table_div {
+
+  
+    width: 40px;
+    height: 40px;
+    /* border-radius: 3px;  */
+    text-align: center;
+    background-color: rgb(240, 231, 231);
+    border: 2px solid rgb(92, 84, 84);
+}
+.toolbar_table_separation {
+    float: right;
+    width: 100%;
+    height: 9px;
+    background: rgb(18, 18, 18);
+   
+}
+
+#div_mapType {
+    z-index: 999;  
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    visibility: hidden;
+} 
+/* #div_mapType img：ID为div_mapType中所有的image都是用一下的样式 */
+#div_mapType img {
+
+    margin: 3px;
+    border: 1px solid rgb(245, 245, 245);
+    cursor: pointer;
+    border-radius: 4px;
+} 
+
+#div_xy1{
+    z-index: 999;  
+    text-align: center;
+    position: absolute;
+    left: 20px;
+    top: 96%;
+    border-radius: 5px;
+    
+}
+
+#div_distance {
+    visibility: hidden;
+    z-index: 999;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    background: rgba(35, 35, 35, 0.7);
+    border-radius: 4px;
+    font-size: 13pt;
+    line-height: 20pt;
+    margin: 1pt;
+    padding: 1pt;
+    color: white;
+    border: 1px solid rgb(240, 240, 240);
+    font-family: Microsoft YaHei;
+
+} 
+#div_drawtools{
+    visibility: hidden;
+    width: 50px;
+    z-index: 999;  
+    position: absolute;
+    right: 50px;
+    bottom: 40px;
+    /* background-color: rgb(150, 150, 150); */
+    opacity: 1;
+    
+}
+/* 测量工具 */
+#div_measuretools{
+    visibility: hidden;
+    width: 50px;
+    z-index: 999;  
+    position: absolute;
+    right: 50px;
+    bottom: 40px;
+    /* background-color: rgb(150, 150, 150); */
+    opacity: 1;
+}
+/* 统计工具 */
+#div_statisticstools{
+    visibility: hidden;
+    width: 50px;
+    z-index: 999;  
+    position: absolute;
+    right: 50px;
+    bottom: 40px;
+    /* background-color: rgb(150, 150, 150); */
+    opacity: 1;
+}
+.div_dialog { 
+    /* 整个坐标查询的框 */
+    visibility: hidden;
+    z-index: 999;
+    position: absolute;
+    right: 35%;
+    top: 45%;
+    background: rgba(35, 35, 35, 0.7);
+    border-radius: 4px;
+    font-size: 13pt;
+    line-height: 20pt;
+    margin: 0pt;
+    padding: 0pt;
+    color: white;
+    border: 1px solid rgb(133, 133, 133);
+    font-family: Microsoft YaHei;
+    box-shadow: rgb(11, 234, 235) 0px 0px 10px inset;   
+} 
+.div_dialog_header {
+    /* 整个框最上面一层 “坐标查询” 那一条*/
+    width: 100%;
+    height: 10%;
+    text-align: center;
+    background: rgba(25, 25, 25, 0.7);
+    border-bottom: thin solid rgb(145, 145, 145);
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px; 
+} 
+.div_dialog_body {
+    /* 内部的输入框和确定按钮 */
+    width: 100%;
+    height: 90%;
+    background-color: rgba(46,87,113,0.6);
+    text-align: center;
+    overflow: hidden;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+} 
+.div_dialog input {
+    /* div_dialog 的所有input都采用以下样式 */
+    color: white;
+    background-color: rgb(100, 100, 100);
+    border: 1 solid rgb(25, 25, 25);
+    line-height: 18px;
+    margin-top: 15px;
+    margin-bottom: 8px;
+} 
+
+.div_dialog button {
+    /* div_dialog 的所有button都采用以下样式 */
+    color: white;
+    background:linear-gradient(to top,rgb(45,45,45),rgb(145,145,145));/*设置按钮为渐变颜色*/
+    border: 1 solid rgb(25, 25, 25);
+    border-radius: 4px;
+    font-size: 12pt;
+    margin-bottom: 8px;
+} 
+.div_dialog img {
+    /* div_dialog 的所有img都采用以下样式 */
+    float:right;
+    margin-right: 6px;
+    margin-top: 4px;
+} 

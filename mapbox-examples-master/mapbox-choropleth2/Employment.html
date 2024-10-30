@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8' />
+  <title>Employment</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.js'></script>
+  <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.js"
+    type="application/javascript"></script>
+  <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/d3/7.3.0/d3.js" type="application/javascript"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    .map-overlay {
+      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+      position: absolute;
+      width: 330px;
+      top: 0;
+      left: 0;
+      padding: 10px;
+    }
+
+    .map-overlay .map-overlay-inner {
+      background-color: #fff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .map-overlay table {
+      border: none;
+      width: 100%;
+    }
+
+    .map-overlay h2 {
+      line-height: 24px;
+      display: block;
+      margin: 0 0 10px;
+    }
+
+    .map-overlay label {
+      font: 16px/18px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+      vertical-align: bottom;
+      margin: 0;
+      padding: 0;
+    }
+
+    .map-overlay .legend .bar {
+      height: 10px;
+      width: 100%;
+      background: linear-gradient(to right, #fca107, #7f3121);
+    }
+
+    .map-overlay input {
+      display: inline;
+      vertical-align: middle;
+      margin: 5px;
+      padding: 0;
+    }
+
+    .map-overlay input[type='range'] {
+      width: 250px;
+    }
+
+    .map-overlay p.credit {
+      margin: 5px 0 0 0;
+      padding: 0;
+    }
+
+    .map-legend {
+      position: absolute;
+      width: 100px;
+      height: 200px;
+      bottom: 40px;
+      right: 40px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id='map'></div>
+
+  <div class='map-overlay'>
+    <div class='map-overlay-inner'>
+      <h2>Employment</h2>
+      <table>
+        <tr>
+          <td>
+            <input id='slider' type='range' min='0' max='10' step='1' value='0' list='tickmarks' />
+            <datalist id='tickmarks'>
+              <option value='0' label='2009'></option>
+              <option value='1'></option>
+              <option value='2'></option>
+              <option value='3'></option>
+              <option value='4'></option>
+              <option value='5'></option>
+              <option value='6'></option>
+              <option value='7'></option>
+              <option value='8'></option>
+              <option value='9'></option>
+              <option value='10' label='2019'></option>
+            </datalist>
+          </td>
+          <td>
+            <label id='year'>2009</label>
+          </td>
+        </tr>
+
+        <tr>
+          <td class='radios'>
+            <input type='radio' name='radio' value='Fulltime' checked /><label>Fulltime</label>
+            <input type='radio' name='radio' value='Parttime' /><label>Parttime</label>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class='map-legend'>
+    <canvas id='legend' width='100' height='200'> </canvas>
+  </div>
+
+  <script>
+
+      // create legend at bottom right
+      const elRadios = document.getElementsByClassName('radios');
+
+      const canvas = document.getElementById('legend');
+
+      const ctx = canvas.getContext('2d');
+
+      const lingrad = ctx.createLinearGradient(0, 0, 0, 200);
+      lingrad.addColorStop(0, 'rgb(190,92,55)');
+      lingrad.addColorStop(0.25, 'rgb(215,136,81)');
+      lingrad.addColorStop(0.5, 'rgb(219,191,146)');
+      lingrad.addColorStop(0.75, 'rgb(243,225,175)');
+      lingrad.addColorStop(1, 'rgb(247,247,233)');
+      ctx.fillStyle = lingrad;
+      ctx.fillRect(10, 10, 20, 200);
+      ctx.font = "16px 'Helvetica Neue'";
+      ctx.textBaseline = 'top';
+      ctx.fillText('High', 40, 10);
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('Low', 40, 200 - 10);
+  </script>
+
+  <script>
+    // Mapbox token
+    mapboxgl.accessToken = 'pk.eyJ1IjoidWNmbml1byIsImEiOiJjbGQxbG84MTAwMGNiM3ZxdmJka25xZG1tIn0.FV0Vr6GvCXas8vmbLPu2KQ';
+    
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/ucfniuo/clhl78c5x01me01prgnrk1fec',
+      center: [-0.32959416954927195,51.33228141841316],
+      zoom: 9.5,
+    });
+
+    map.addControl(new mapboxgl.NavigationControl());
+    
+    // global varible
+    let londons = {}, data_fulltime = [], data_parttime = [] , years = [
+      '2009',
+      '2010',
+      '2011',
+      '2012',
+      '2013',
+      '2014',
+      '2015',
+      '2016',
+      '2017',
+      '2018',
+      '2019',
+    ] , yearcol = 'Year_2009', pickLayer = 'Fulltime';
+
+    const toNumber = function (data) {
+      return {
+        Year_2009: Number(data['Year_2009']),
+        Year_2010: Number(data['Year_2010']),
+        Year_2011: Number(data['Year_2011']),
+        Year_2012: Number(data['Year_2012']),
+        Year_2013: Number(data['Year_2013']),
+        Year_2014: Number(data['Year_2014']),
+        Year_2015: Number(data['Year_2015']),
+        Year_2016: Number(data['Year_2016']),
+        Year_2017: Number(data['Year_2017']),
+        Year_2018: Number(data['Year_2018']),
+        Year_2019: Number(data['Year_2019']),
+      }
+    }
+
+    const getPaint = function (layer, field) {
+      let res = {}
+      switch (layer) {
+        case "Fulltime":
+          res = {
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              ['get', field],
+              0,
+              '#F2F12D',
+              15,
+              '#EED322',
+              30,
+              '#E6B71E',
+              45,
+              '#DA9C20',
+              60,
+              '#CA8323',
+              80,
+              '#B86B25',
+              100,
+              '#A25626',
+              200,
+              '#723122'
+            ],
+            'fill-opacity': 0.75
+          }
+          break;
+        case "Parttime":
+          res = {
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              ['get', field],
+              0,
+              '#F2F12D',
+              15,
+              '#EED322',
+              30,
+              '#E6B71E',
+              40,
+              '#DA9C20',
+              50,
+              '#CA8323',
+              60,
+              '#B86B25',
+              70,
+              '#A25626',
+              80,
+              '#723122'
+            ],
+            'fill-opacity': 0.75
+          }
+          break;
+        default:
+          break;
+      }
+
+      // res = {
+      //   'fill-color': '#723122'
+      // }
+      return res
+    }
+
+    map.on('load', async function () {
+
+      londons = await $.get('./assets/London.json')
+
+      console.log(londons)
+
+      let _full = await d3.csv('./assets/Fulltime.csv')
+      let _part = await d3.csv('./assets/Parttime.csv')
+
+      londons.features.forEach(element => {
+        const { type, geometry, properties } = element
+        let fulltime = _full.find(it => it.Code === properties.GSS_CODE)
+        let parttime = _part.find(it => it.Code === properties.GSS_CODE)
+
+        fulltime && data_fulltime.push({
+          type,
+          geometry,
+          properties: {
+            ...properties,
+            ...toNumber(fulltime)
+          }
+        })
+
+        parttime && data_parttime.push({
+          type,
+          geometry,
+          properties: {
+            ...properties,
+            ...toNumber(parttime),
+          }
+        })
+
+      });
+
+      map.addSource('source_fulltime', {
+        'type': 'geojson',
+        'data': {
+          type: "FeatureCollection",
+          features: data_fulltime
+        }
+      })
+
+      map.addSource('source_parttime', {
+        'type': 'geojson',
+        'data': {
+          type: "FeatureCollection",
+          features: data_parttime
+        }
+      })
+
+      map.addLayer({
+        id: 'layer_fulltime',
+        type: 'fill',
+        source: 'source_fulltime',
+        paint: getPaint('Fulltime', 'Year_2009'),
+      });
+
+      map.addLayer({
+        id: 'layer_parttime',
+        type: 'fill',
+        source: 'source_parttime',
+        layout: {
+          visibility: 'none'
+        },
+        paint: getPaint('Parttime', 'Year_2009'),
+      });
+
+      // function that runs when the user changes the data year
+      function setYear(year) {
+        // Set the slider to the correct year
+        document.getElementById('year').textContent = years[year];
+
+        yearcol = 'Year_' + years[year];
+
+        map.setLayoutProperty('layer_fulltime', 'visibility', 'none');
+        map.setLayoutProperty('layer_parttime', 'visibility', 'none');
+
+        let layerName = null, paintFlag = null;
+        if (pickLayer === 'Fulltime') {
+          layerName = 'layer_fulltime'
+        } else if (pickLayer === 'Parttime') {
+          layerName = 'layer_parttime'
+        } 
+        layerName && map.setLayoutProperty(layerName, 'visibility', 'visible');
+        layerName && map.setPaintProperty(layerName, 'fill-color', getPaint(pickLayer, yearcol)['fill-color']);
+      }
+
+      // Assign an event listner to the slider so that the setYear function runs      when     the user changes the slider
+      document
+        .getElementById('slider')
+        .addEventListener('input', function (e) {
+          var year = parseInt(e.target.value);
+          setYear(year);
+        });
+
+      // Event listener for layer switch
+      for (let elRadio of elRadios) {
+        elRadio.addEventListener('change', function (e) {
+          pickLayer = e.target.value;
+          console.log(pickLayer);
+
+          map.setLayoutProperty('layer_fulltime', 'visibility', 'none');
+          map.setLayoutProperty('layer_parttime', 'visibility', 'none');
+          switch (pickLayer) {
+            case 'Fulltime':
+              map.setLayoutProperty('layer_fulltime', 'visibility', 'visible');
+              map.setPaintProperty('layer_fulltime', 'fill-color', getPaint('Fulltime', yearcol)['fill-color']);
+              break;
+            case 'Parttime':
+              map.setLayoutProperty('layer_parttime', 'visibility', 'visible');
+              map.setPaintProperty('layer_parttime', 'fill-color', getPaint('Parttime', yearcol)['fill-color']);
+              break;
+            default:
+              break;
+          }
+        });
+      }
+      // add the line highlight layer
+      map.addLayer({
+        'id': 'line_highlight',
+        'type': 'line',
+        'source': {
+          'type': 'geojson',
+          'data': londons,
+        },
+        'layout': {
+          'visibility': 'visible'
+        },
+        paint: {
+          'line-color': '#adf',
+          'line-width': 4
+        },
+        filter: ['==', 'GSS_CODE', '99999999']
+      });
+
+      var mypopup = new mapboxgl.Popup({ offset: [0, 0], closeButton: false });
+
+      // 四个图层事件      
+      ['layer_fulltime', 'layer_parttime'].forEach(layer => {
+        if (!layer) return;
+
+        map.on('click', layer, function (e) {
+          console.log(e)
+          let value = e.features[0]?.properties?.GSS_CODE;
+          value && map.setFilter('line_highlight', ['==', 'GSS_CODE', value])
+  
+          mypopup
+            .setLngLat(e.lngLat)
+            .setHTML(
+              '<strong>GSS_CODE: ' + e.features[0].properties.GSS_CODE +
+              '</strong>'+
+              '<br /><strong>NAME: ' + e.features[0].properties.NAME +
+              '</strong>'+
+              '<br />2009: ' + e.features[0].properties.Year_2009 +
+              '<br />2010: ' + e.features[0].properties.Year_2010 +
+              '<br />2011: ' + e.features[0].properties.Year_2011 +
+              '<br />2012: ' + e.features[0].properties.Year_2012 +
+              '<br />2013: ' + e.features[0].properties.Year_2013 +
+              '<br />2014: ' + e.features[0].properties.Year_2014 +
+              '<br />2015: ' + e.features[0].properties.Year_2015 +
+              '<br />2016: ' + e.features[0].properties.Year_2016 +
+              '<br />2017: ' + e.features[0].properties.Year_2017 +
+              '<br />2018: ' + e.features[0].properties.Year_2018 +
+              '<br />2019: ' + e.features[0].properties.Year_2019)
+            .addTo(map);
+        });
+
+        
+      })
+
+    });
+  </script>
+</body>
+
+</html>

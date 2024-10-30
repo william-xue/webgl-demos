@@ -1,0 +1,253 @@
+body,html{
+    height:100%;
+    background-color: #F3F2F3;
+    /* text-align: center; */
+}
+
+.box{
+    /* display: inline-block; */
+    width: 96%;
+    height: 100%;
+    margin: 0 auto;
+}
+
+.box .part{
+}
+.box .title{
+    margin-left: 3%;
+}
+
+.box .input{
+    border-radius: 0 !important;
+    border-color: #4472C4 !important;
+    text-align: center !important;
+    margin-bottom: 0 !important;
+}
+
+.box .container{
+    width: 100%;
+    text-align: center;
+    margin-left: -2%;
+
+}
+
+/* #data_upload{
+    margin-bottom: 4%;
+} */
+
+#dashboard{
+    float: left;
+    height: calc(100% - 10px);
+    width: 30%;
+    /* border: 1px solid #D2D2D2; */
+    margin-top: 10px;
+    background-color: white;
+}
+
+.box .vis-content{
+    float: left;
+    height: calc(100% - 10px);
+    width: 68%;
+    margin-top: 10px;
+    background-color: white;
+    display: flex;
+    flex-wrap: wrap;
+}
+.box .vis-content .vis{
+    width: 33%;
+    height: 50%;
+}
+
+/* .center{
+    margin: 10% auto;
+    text-align:center
+} */
+
+#dashboard #sub_btn{
+    width: 131px;
+    height: 33px;
+    color: white;
+    cursor: pointer;
+    background: #4472C4;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    border-radius: 5px;
+}
+/* //设置选中背景 */
+#dashboard .tui-checkbox:checked {
+	background:#1673ff
+}
+/* //设置复选框样式 */
+#dashboard .tui-checkbox {
+	width:15px;
+	height:15px;
+	background-color:#ffffff;
+	border:solid 1px black;
+	-webkit-border-radius:50%;
+	border-radius:50%;
+	font-size:1rem;
+	margin:3%;
+	padding:0;
+	position:relative;
+	display:inline-block;
+	vertical-align:middle;
+	cursor:default;
+	-webkit-appearance:none;
+	-webkit-user-select:none;
+	user-select:none;
+	-webkit-transition:background-color ease 0.1s;
+	transition:background-color ease 0.1s;
+    /* display: block; */
+}
+
+#dashboard .squ-checkbox{
+    margin-right:3%;
+}
+#dashboard.type{
+    display: block;
+}
+
+#dashboard .choose{
+    padding-left: 8%;
+    margin-bottom: 2%;
+}
+
+#dashboard .choose table{
+    width: 84%;
+    border: 0;
+}
+
+#dashboard .choose table td{
+    height: 25px;
+    width: 33%;
+}
+
+#dashboard .center{
+    /* margin-left: -15%; */
+    margin-top: 3%;
+    text-align:center
+}
+
+#dashboard #draw_btn,#dashboard #data_btn{
+    width: 80%;
+    height: 33px;
+    color: white;
+    cursor: pointer;
+    background: #4472C4;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    border-radius: 5px;
+}
+#dashboard .split{
+    width: 90%;
+    margin: 0 auto;
+    /* border-color: #EEEEEE; */
+    background-color: #EEEEEE;
+}
+.specialdays{
+    background-color: gold;
+}
+
+
+.container #date{
+    float: left;
+    margin-left: 2%;
+    height: 30px;
+    line-height: 30px;
+    margin-right: 1%;
+}
+
+.container #hour{
+    float: left;
+    margin-left: 2%;
+    /* line-height: 30px; */
+    margin-right: 1%;
+}
+
+.container .form-horizontal{
+    float: left;
+}
+
+#form_hour:hover{cursor:not-allowed;}
+
+
+
+#maptitle,#maptitle1,#maptitle2,#maptitle3,#maptitle4,#maptitle5{
+    height: 32px;
+    line-height: 32px;
+    font-weight: bold;
+    font-size: 20px;
+    padding-left:10%;
+}
+
+#mapfooter,#mapfooter1,#mapfooter2,#mapfooter3,#mapfooter4,#mapfooter5{
+    height: 25px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+.top,.top1,.top2,.top3,.top4,.top5{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding-left: 10%;
+    height: 25px;
+}
+.top .kedu2,.top1 .kedu2,.top2 .kedu2,.top3 .kedu2,.top4 .kedu2,.top5 .kedu2{
+    width: 20%;
+    border-left: 1px solid #333;
+    height: 4px;
+}
+
+.top .kedu2 span,.top1 .kedu2 span,.top2 .kedu2 span,.top3 .kedu2 span,.top4 .kedu2 span,.top5 .kedu2 span{
+    position: relative;
+    line-height: 30px;
+    margin-left: -10px;
+}
+
+#mapPanel,#mapPanel1,#mapPanel2,#mapPanel3,#mapPanel4,#mapPanel5{
+    height: calc(100% - 100px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#mapPanel .left,#mapPanel1 .left,#mapPanel2 .left,#mapPanel3 .left,#mapPanel4 .left,#mapPanel5 .left{
+    width: 5%;
+    display: flex;
+    flex-direction: column-reverse;
+    height: 100%;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+
+#mapPanel .left .kedu1,#mapPanel1 .left .kedu1,#mapPanel2 .left .kedu1,#mapPanel3 .left .kedu1,#mapPanel4 .left .kedu1,#mapPanel5 .left .kedu1{
+    width: 10%;
+    height: 20%;
+    border-bottom: 1px solid #333;
+}
+
+#mapPanel .left .kedu1 span,#mapPanel1 .left .kedu1 span,#mapPanel2 .left .kedu1 span,#mapPanel3 .left .kedu1 span,#mapPanel4 .left .kedu1 span,#mapPanel5 .left .kedu1 span{
+    position: relative;
+    margin-left: -25px;
+    top: 100%;
+}
+
+#mapPanel .right,#mapPanel1 .right,#mapPanel2 .right,#mapPanel3 .right,#mapPanel4 .right,#mapPanel5 .right{
+    width: 10%;
+    height: 100%;
+}
+
+#map,#map1,#map2,#map3,#map4,#map5{
+    height: 100%;
+    width: 80%;
+    border-left: solid 1px black;
+    border-bottom: solid 1px black;
+}
+
+.ol-scale-line,.ol-scale-line1,.ol-scale-line2,.ol-scale-line3,.ol-scale-line4,.ol-scale-line5{
+    display: none !important;
+}

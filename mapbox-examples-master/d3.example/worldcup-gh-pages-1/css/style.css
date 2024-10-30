@@ -1,0 +1,257 @@
+html {
+  /* background-color: #2196F3; */
+}
+
+body {
+  text-align: center;
+  color: lightblue;
+  font-family: Roboto;
+}
+
+
+/* header */
+
+header {
+  /*font-size: 3em;*/
+  width: 100%;
+  padding: 13px;
+  text-align: center;
+  font-family: Georgia;
+}
+
+header span {
+  font-size: 7vw;
+  display: block;
+  color: lightblue;
+  position: relative;
+}
+
+#start {
+  font-family: Georgia;
+  font-size: 1em;
+  color: white;
+  background-color: orange;
+  margin: 13px;
+  border-radius: 4px;
+  -webkit-transition-duration: 0.4s;
+  /* Safari */
+  transition-duration: 0.4s;
+}
+
+#start:hover {
+  color: orange;
+  background-color: white;
+}
+
+#title {
+  padding: 13px;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#title p,
+h1 {
+  color: white;
+  margin: 0;
+}
+
+#title p {
+  font-size: 2vw;
+}
+
+#title h1 {
+  font-size: 3vw;
+}
+
+#chartExplanation {
+  position: relative;
+  top: 77px;
+}
+
+
+/* content */
+
+#content {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 1300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#mapContainer {
+  width: 70%
+}
+
+aside {
+  width: 29%;
+}
+
+#buttonContainer,
+#chartContainer {
+  max-width: 1300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+/* footer */
+
+footer {
+  position: relative;
+  color: green;
+  width: 100%;
+  height: 300px;
+  padding: 20px;
+  /*font-size: 1em;*/
+}
+
+footer p a {
+  color: #980043;
+}
+
+circle {
+  stroke-width: 0.7;
+  opacity: 0.7;
+}
+
+.cirlce2 {
+  fill: orange;
+  stroke: orangered;
+  stroke-width: 0.7;
+  opacity: 0.7;
+}
+
+.dot,
+.dot2 {
+  -webkit-transition: stroke-width 2s;
+  /* For Safari 3.1 to 6.0 */
+  transition: stroke-width 2s;
+}
+
+.dot:hover {
+  /*stroke: #FFBD21;*/
+  stroke-width: 2px;
+}
+
+.dot2 {
+  /*stroke: orangered;*/
+}
+
+.dot2:hover {
+  /*stroke: orangered;*/
+  stroke-width: 2px;
+}
+
+div.tooltip {
+  line-height: 1;
+  background: rgba(67, 67, 67, 0.8);
+  color: rgb(185, 185, 185);
+  border-radius: 12px;
+  position: absolute;
+  text-align: center;
+  padding: 2px;
+  font: 12px sans-serif;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 1000000;
+}
+
+div.tooltip2 {
+  line-height: 1;
+  /*padding: 22px;*/
+  background: orange;
+  color: white;
+  position: absolute;
+  text-align: center;
+  padding: 4px;
+  font: 16px sans-serif;
+  border: 0px;
+  border-radius: 5px;
+  pointer-events: none;
+  z-index: 1000000;
+}
+
+div.tooltip3 {
+  line-height: 1;
+  /*padding: 22px;*/
+  background: orangered;
+  color: white;
+  position: absolute;
+  text-align: center;
+  padding: 4px;
+  font: 16px sans-serif;
+  border: 0px;
+  border-radius: 5px;
+  pointer-events: none;
+  z-index: 1000000;
+}
+
+.d3-tip {
+  line-height: 1;
+  font-weight: bold;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #efefef;
+  border-radius: 2px;
+}
+
+
+/* Creates a small triangle extender for the tooltip */
+
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+div.years_buttons {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+div.years_buttons div {
+  font-size: 1vw;
+  background-color: orange;
+  color: white;
+  padding: 2px;
+  margin: .1em;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+div.years_buttons div:hover {
+  /*background-color: orange;*/
+  color: lightblue;
+}
+
+text {
+  fill: black;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: orangered;
+  shape-rendering: crispEdges;
+}
+
+@media only screen and (max-width: 660px) {
+  div.years_buttons div {
+    font-size: .55em;
+  }
+}

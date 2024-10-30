@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识图谱</title>
+    <style type="text/css">
+        .img {
+            width: 20px;
+            height: 20px;
+            opacity: 1;
+            position: absolute;
+            z-index: 100000;
+            transition: 2s;
+        }
+
+        .left,
+        .right {
+            width: 10px;
+            height: 10px;
+            border-radius: 100%;
+            position: absolute;
+        }
+
+        .right {
+            right: 0;
+        }
+
+        .under {
+            width: 10px;
+            height: 10px;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            transform: rotate(45deg)
+        }
+
+        .text {
+            width: 50px;
+            font-size: 10px;
+            line-height: 1;
+            position: absolute;
+            top: -1em;
+            left: -15px;
+            text-align: center;
+        }
+
+        #viz {
+            width: 100%;
+            height: 100%;
+            font: 22pt arial;
+            margin: 0 auto;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        html,
+        body,
+        div {
+            margin: 0;
+            padding: 0;
+        }
+
+        .neo-container {
+            justify-content: center;
+        }
+    </style>
+    <script src="./js/jquery-3.6.0.min.js"></script>
+    <script src="./js/Blob.js"></script>
+    <script src="./lib/neovis.js"></script>
+</head>
+
+<body>
+    
+    <div id="viz">
+
+    </div>
+</body>
+<script>
+    $(function () {
+        var viz;
+        var config = {
+            container_id: "viz",
+            server_url: "bolt://localhost:7687",
+            server_user: "neo4j",
+            server_password: "123",
+            arrows: false,
+            labels: {
+                "Authors": {
+                    "caption": "Authors",
+                    "size": 10,
+                    "font": {
+                        "size": 16,
+                        "color": "#000000"
+                    },
+                    // "title_properties": [
+                    //     "name",
+                    //     "pagerank"
+                    // ],
+                },
+                "Language": {
+                    "caption": "Language",
+                    "size": 30,
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                },
+            },
+            relationships: {
+
+            },
+            initial_cypher: "MATCH p = ()-[]->() RETURN p limit 100"
+        };
+
+        viz = new NeoVis.default(config);
+        viz.render();
+
+        $("#btn_submit").click(function (e) {
+            e.preventDefault();
+            const cql = $('.query_by_cql').val();
+            config['initial_cypher'] = ($.trim(cql) === '') ? "MATCH p = (n)-[]->(m) RETURN p limit 50" : cql;
+            try {
+                viz.clearNetwork()
+                viz.reinit(config)
+                viz.render()
+            } catch (err) {
+                alert('cypher语句有误，请检查')
+            }
+        });
+
+        $("#btn_download").click(function (e) {
+            e.preventDefault();
+            const cql = $('.query_by_cql').val();
+            if (cql.trim()===''){
+                alert('请输入下载语句，如MATCH (n:GY3) RETURN n LIMIT 25')
+                return;
+            }
+            $.ajax({
+                url: "/api/neo/javaCode/excute",
+                type: "POST",
+                dataType: "json",
+                data: JSON.stringify([cql]),
+                async: false,
+                contentType: 'application/json; charset=UTF-8',
+                timeout: 5000,
+                success: function (result) {
+                    console.log(result)
+                    var blob = new Blob([JSON.stringify(result.data, null, 2)], { type: 'application/json,charset=utf-8;' });
+                    let fileName = new Date().getTime() + ".json";
+                    //IE浏览器使用msSaveBlob
+                    if (window.navigator.msSaveBlob) {
+                        window.navigator.msSaveBlob(blob, fileName);
+                    } else {
+                        var aLink = document.createElement('a');
+                        aLink.download = fileName;
+                        aLink.href = URL.createObjectURL(blob);
+                        aLink.click();
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+
+                }
+            })
+        });
+
+    })
+</script>
+
+</html>

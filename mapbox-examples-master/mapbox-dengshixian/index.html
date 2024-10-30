@@ -1,0 +1,484 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <style>
+        html,
+        body,
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .toolbar {
+            position: fixed;
+            top: 80px;
+            z-index: 111;
+            left: 50px;
+            /* right: 0; */
+        }
+    </style>
+    <title>高德等实线</title>
+    <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+    <script src="../libs/jquery-2.1.4.min.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.2/mapbox-gl-draw.css"
+        type="text/css">
+</head>
+
+<body>
+    <div class="toolbar">
+        <button onclick="setA()">设置A类点</button>
+
+        <button onclick="setB()">设置B类点</button>
+        <button onclick="clearAll()">清除所有</button>
+        <br />
+        <label>设置A等时线</label>
+        <select id="A_input">
+            <option value="10">10min</option>
+            <option value="30">30min</option>
+            <option value="60">60min</option>
+        </select>
+        <br />
+        <label>设置B等时线</label>
+        <select id="B_input">
+            <option value="10">10min</option>
+            <option value="30">30min</option>
+            <option value="60">60min</option>
+        </select>
+        <br />
+        <label>选择轨迹方式</label>
+        <select id="profile">
+            <option value="walking">walking</option>
+            <option value="cycling">cycling</option>
+            <option value="driving">driving</option>
+        </select>
+        <br />
+        <br />
+        <button onclick="handle()">请求等时圈</button>
+        <button onclick="renderer()">渲染</button>
+    </div>
+
+    <div id="map"></div>
+</body>
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1Ijoiemhlbmd5dWFuMDEiLCJhIjoiY2tweHJuaWMyMDd4aDJ2cGR4azJpMHA3ZyJ9.2uE3aEVVqriGOKNU11xEnw';
+    const map = new mapboxgl.Map({
+        container: 'map', // container ID
+        style: 'mapbox://styles/mapbox/streets-v11', // style URL
+        center: [121.2, 31.3], // starting position [lng, lat]
+        zoom: 13 // starting zoom
+    });
+
+    const draw = new MapboxDraw({
+        displayControlsDefault: false,
+        // Select which mapbox-gl-draw control buttons to add to the map.
+        controls: {
+            polygon: true,
+            point: true,
+            trash: true,
+            combine_features: true,
+            uncombine_features: true,
+            line_string: true,
+        },
+        // Set mapbox-gl-draw to draw by default.
+        // The user does not have to click the polygon control button first.
+        // defaultMode: 'draw_point',//'draw_polygon'
+    });
+    // map.addControl(draw, 'top-left');
+    map.addControl(draw);
+
+    let TYPE = "", APointFeatures = [], BPointFeatures = [],
+        APolygonFeatures = [], BPolygonFeatures = [];
+    // var feature = {
+    //     id: 'unique-id',
+    //     type: 'Feature',
+    //     properties: {},
+    //     geometry: { type: 'Point', coordinates: [114, 32] }
+    // };
+    // var featureIds = draw.add(feature);
+    // console.log(featureIds)
+
+    map.on('draw.create', drawComplete);
+    map.on('draw.delete', drawComplete);
+    map.on('draw.update', drawComplete);
+
+    function drawComplete(e) {
+        // const data = draw.getAll();
+        console.log(e)
+        if (TYPE === 'A') {
+            //添加A点
+            APointFeatures.push(e.features[0])
+            let data = {
+                'type': 'FeatureCollection',
+                'features': APointFeatures,
+            }
+            map.getSource('Apoint').setData(data)
+        } else if (TYPE === 'B') {
+            //添加B点
+            BPointFeatures.push(e.features[0])
+            let data = {
+                'type': 'FeatureCollection',
+                'features': BPointFeatures,
+            }
+            map.getSource('Bpoint').setData(data)
+        }
+    }
+
+
+    function setA() {
+        TYPE = "A"
+        draw.changeMode("draw_point")
+        // draw.deleteAll();
+    }
+
+    function setB() {
+        TYPE = "B"
+        draw.changeMode("draw_point")
+        // draw.deleteAll();
+    }
+
+    function clearAll() {
+        draw.deleteAll();
+        APointFeatures = [];
+        BPointFeatures = [];
+        APolygonFeatures = [];
+        BPolygonFeatures = [];
+        map.getSource('Apoint').setData({
+            'type': 'FeatureCollection',
+            'features': [],
+        })
+        map.getSource('Bpoint').setData({
+            'type': 'FeatureCollection',
+            'features': [],
+        })
+        map.getSource('Apolygon').setData({
+            'type': 'FeatureCollection',
+            'features': [],
+        })
+        map.getSource('Bpolygon').setData({
+            'type': 'FeatureCollection',
+            'features': [],
+        })
+        map.getSource('ResultPolygon').setData({
+            'type': 'FeatureCollection',
+            'features': [],
+        })
+    }
+
+    function handle() {
+        let time_A = document.getElementById('A_input').value
+        let time_B = document.getElementById('B_input').value
+        let profile = document.getElementById('profile').value
+        console.log(time_A, time_B);
+
+        if (APointFeatures.length === 0) {
+            alert("A类点为空")
+            return;
+        }
+        if (BPointFeatures.length === 0) {
+            alert("B类点为空")
+            return;
+        }
+
+        APolygonFeatures = [] // 置空
+        BPolygonFeatures = []
+        APointFeatures.map(item => {
+            let lonlat = item.geometry.coordinates.join(',')
+            getIso({
+                profile,
+                lonlat,
+                minutes: time_A,
+            }).then((data) => {
+                // console.log("geom:", data)
+                APolygonFeatures.push(data.features[0])
+
+                map.getSource('Apolygon').setData({
+                    type: "FeatureCollection",
+                    features: APolygonFeatures,
+                });
+            })
+        })
+
+        BPointFeatures.map(item => {
+            let lonlat = item.geometry.coordinates.join(',')
+            getIso({
+                profile,
+                lonlat,
+                minutes: time_A,
+            }).then((data) => {
+                // console.log("geom:", data)
+                BPolygonFeatures.push(data.features[0])
+
+                map.getSource('Bpolygon').setData({
+                    type: "FeatureCollection",
+                    features: BPolygonFeatures,
+                });
+            })
+        })
+    }
+
+    function renderer() {
+        // 先求A 和 B 一起的bbox，栅格化，再三重遍历，在A中留下，继续遍历，B中存在几次就+几。拿到最终结果，渲染
+        console.log(APolygonFeatures)
+        let Aunion = turf.multiPolygon(APolygonFeatures[0].geometry.coordinates)
+        let Bunion = turf.multiPolygon(BPolygonFeatures[0].geometry.coordinates)
+        for(let i=1;i<APolygonFeatures.length;i++){
+            Aunion = turf.union(Aunion,turf.polygon(APolygonFeatures[i].geometry.coordinates));
+        }
+        for(let i=1;i<BPolygonFeatures.length;i++){
+            Bunion = turf.union(Bunion,turf.multiPolygon(BPolygonFeatures[i].geometry.coordinates));
+        }
+        let ABunion = turf.union(Aunion,Bunion);
+        
+        let bbox = turf.bbox(ABunion)
+        var cellSide = 10;
+        var options = {units: 'meters'};
+        var squareGrid = turf.squareGrid(bbox, cellSide, options);
+        console.log(Aunion,Bunion,ABunion,)
+        console.log(squareGrid,)
+
+        let resutFeatures = []
+        for(let i=0;i<squareGrid.features.length;i++){
+            let f = squareGrid.features[i]
+            let gridpolygon = turf.polygon(f.geometry.coordinates)
+            let centroid = turf.centroid(gridpolygon);
+
+            // 在A当中
+            let booleanInA = APolygonFeatures.some(function(item,i){
+                return turf.booleanIntersects(item,centroid)
+            })
+            if(booleanInA){
+                let num = 1
+                for (let index = 0; index < BPolygonFeatures.length; index++) {
+                    const element = BPolygonFeatures[index];
+                    if(turf.booleanIntersects(element,centroid)){
+                        num ++;
+                    }
+                }
+                // console.log(booleanInA,num)
+                resutFeatures.push(turf.polygon(gridpolygon.geometry.coordinates,{num:num}))
+            }
+        }
+
+        console.log("resutFeatures:", resutFeatures)
+
+        map.getSource('ResultPolygon').setData({
+            type: "FeatureCollection",
+            // features: squareGrid.features,
+            features: resutFeatures,
+        })
+    }
+    // 多面转成单面集合
+    function getPolygonCollectionFromMultiPolygon(mutiPolygon){
+        // multiPolygon.
+    }
+    async function getIso(params) {
+        const { profile, lonlat, minutes } = params;
+        const query = await fetch(
+            `https://api.mapbox.com/isochrone/v1/mapbox/${profile}/${lonlat}?contours_minutes=${minutes}&polygons=true&access_token=${mapboxgl.accessToken}`,
+            { method: 'GET' }
+        );
+        return await query.json();
+    }
+    map.on('load', () => {
+        map.loadImage('../assets/red.png', (error, image) => {
+            if (error) throw error;
+            if (!map.hasImage('REDICON')) map.addImage('REDICON', image);
+        });
+        map.loadImage('../assets/green.png', (error, image) => {
+            if (error) throw error;
+            if (!map.hasImage('GREENICON')) map.addImage('GREENICON', image);
+        });
+
+        // Add a source and layer displaying a point which will be animated in a circle.
+        map.addSource('Apoint', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection',
+                'features': [
+                    {
+                        'type': 'Feature',
+                        'properties': {},
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': [114, 34]
+                        }
+                    }
+                ]
+            }
+        });
+
+        map.addSource('Bpoint', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection',
+                'features': [
+                    {
+                        'type': 'Feature',
+                        'properties': {},
+                        'geometry': {
+                            'type': 'Point',
+                            'coordinates': []
+                        }
+                    }
+                ]
+            }
+        });
+
+        map.addSource('Apolygon', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection',
+                'features': [
+                    {
+                        'type': 'Feature',
+                        'properties': {},
+                        'geometry': {
+                            'type': 'Polygon',
+                            'coordinates': []
+                        }
+                    }
+                ]
+            }
+        });
+
+        map.addSource('Bpolygon', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection',
+                'features': [
+                    {
+                        'type': 'Feature',
+                        'properties': {},
+                        'geometry': {
+                            'type': 'Polygon',
+                            'coordinates': []
+                        }
+                    }
+                ]
+            }
+        });
+
+        map.addSource('ResultPolygon', {
+            'type': 'geojson',
+            'data': {
+                'type': 'FeatureCollection',
+                'features': []
+            }
+        });
+
+        map.addLayer({
+            'id': 'BpointLayer',
+            'source': 'Bpoint',
+            'type': 'symbol',
+            'layout': {
+                'icon-image': 'GREENICON',
+                'icon-size': 0.4,
+            }
+        });
+
+        map.addLayer({
+            'id': 'ApointLayer',
+            'source': 'Apoint',
+            'type': 'symbol',
+            'layout': {
+                'icon-image': 'REDICON',
+                'icon-size': 0.4,
+            }
+        });
+
+        map.addLayer({
+            'id': 'ApolygonLayer',
+            'source': 'Apolygon',
+            'type': 'fill',
+            'layout': {},
+            'paint': {
+                'fill-color': '#003665',
+                'fill-opacity': 0.01,
+                'fill-outline-color': '#003665'
+            },
+        });
+
+        map.addLayer({
+            'id': 'BpolygonLayer',
+            'source': 'Bpolygon',
+            'type': 'fill',
+            'layout': {},
+            'paint': {
+                'fill-color': '#cc3665',
+                'fill-opacity': 0.01,
+                'fill-outline-color': '#cc3665'
+            },
+        });
+
+        map.addLayer({
+            'id': 'AlineLayer',
+            'source': 'Apolygon',
+            'type': 'line',
+            'layout': {},
+            'paint': {
+                'line-color': '#003665',
+                'line-opacity': 0.2,
+                'line-width': 1
+            },
+        });
+
+        map.addLayer({
+            'id': 'BlineLayer',
+            'source': 'Bpolygon',
+            'type': 'line',
+            'layout': {},
+            'paint': {
+                'line-color': '#cc3665',
+                'line-opacity': 0.2,
+                'line-width': 1
+            },
+        });
+
+        map.addLayer({
+            'id': 'ResultPolygonLayer',
+            'source': 'ResultPolygon',
+            'type': 'fill',
+            'layout': {},
+            'paint': {
+                // 'fill-color': '#723122',
+                'fill-color': [
+                    'interpolate',
+                    ['linear'],
+                    ['get', 'num'],
+                    0,
+                    '#F2F12D',
+                    1,
+                    '#EED322',
+                    2,
+                    '#E6B71E',
+                    3,
+                    '#DA9C20',
+                    4,
+                    '#CA8323',
+                    5,
+                    '#B86B25',
+                    7,
+                    '#A25626',
+                    10,
+                    '#8B4225',
+                    25,
+                    '#723122'
+                ],
+                'fill-opacity': 0.5,
+            },
+        });
+
+    });
+
+
+</script>
+
+</html>

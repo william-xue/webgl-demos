@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>leaflet-geoserver-wfs</title>
+    <!-- <link href="../libs/leaflet.css"/> -->
+    <style>
+        html,body{
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #map-container{
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <!-- <script src="../libs/leaflet.js"></script> -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <script src="./jquery-2.1.4.min.js"></script>
+</head>
+
+<body>
+    <div id="map-container"></div>
+</body>
+<script>
+    const url = '/api/wfs_servlet_war_exploded/wfs'
+    const m = L.map('map-container').setView([30, 40], 10)
+    function getColor(arg) {
+        return arg > 150 ? '#800026' :
+            arg > 100 ? '#F80826' :
+                arg > 50 ? '#E3FA1C' :
+                    arg > 20 ? '#00DF03' :
+                        arg > 10 ? '#1F33EF' :
+                            '#4BD3Ef';
+    }
+    //add style
+    function styles(feat) {
+        console.log(feat)
+        return {
+            fillColor: getColor(feat.properties.id),
+            weight: 2,
+            opacity: 0.8,
+            color: 'white',
+            dashArray: '3',
+            fillOpacity: 0.8
+        };
+    }
+
+    function loadWFS(url, layer, callback, crs = 'EPSG:4326', options = {}) {
+        const params = {
+            service: 'WFS',
+            version: '1.1.0',
+            request: 'GetFeature',
+            typeName: layer,
+            outputFormat: 'application/json',
+            srsName: crs
+
+        }
+        const url_str = url + L.Util.getParamString(params, url)
+        console.log(url_str)
+        $.ajax({
+            // type:'POST',
+            url: url_str,
+            dataType: 'json',
+            success: loadWFSHandler,
+            error: function (rst) {
+                console.log('request error.')
+            }
+        })
+        function loadWFSHandler(geojson) {
+            console.log(geojson)
+            layer = L.geoJson(geojson, options)
+            console.log(geojson)
+            console.log('xxoo')
+            callback(layer)
+        }
+
+    }
+    function toLatLng(coords) {
+        return L.CRS.EPSG3857.unproject(L.point(coords))
+    }
+    var lyr = ''
+
+    function highlightFeature(e) {
+        const layer = e.target
+        layer.setStyle({
+            weight: 5,
+            color: '#666',
+            // dashArray:'',
+            fillOpacity: 0.7
+        });
+        // bring this layer in front of ohter popups
+        if (!L.Browser.ie && !L.Browser.opera && L.Browser.edge) {
+            layer.bringToFront()
+        }
+    }
+    function resetHighlight(e) {
+
+        lyr.resetStyle(e.target)
+
+
+        // body...
+    }
+    //窗口绽放
+    function zoomToFeature(e) {
+        // alert(e.target.getBounds())
+        m.fitBounds(e.target.getBounds())
+    }
+    //add listeners
+    function onEachFeature(feature, layer) {
+        layer.on({
+            mouseover: highlightFeature,
+            mouseout: resetHighlight,
+            click: zoomToFeature
+        })
+    }
+    const options = {
+        onEachFeature: onEachFeature,
+        // style: styles,
+        coordsToLatLng: toLatLng
+    }
+
+    loadWFS(url, 'daping:china', callback = function (layer) {
+        // layer.onEachFeature=onEachFeature
+        lyr = layer
+        layer.addTo(m)
+
+    }, 'epsg:3857', options)
+
+</script>
+
+</html>

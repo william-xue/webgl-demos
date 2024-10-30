@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title data-i18n="resources.title_bufferAnalystServiceGeometry"></title>
+    <style>
+        #toolbar {
+            position: fixed;
+            top: 50px;
+            right: 50%;
+            z-index: 400;
+        }
+
+        #resultPanel {
+            position: fixed;
+            right: 10px;
+            top: 10px;
+            height: 800px;
+            overflow-y: auto;
+            color: #272c1d;
+            z-index: 1111;
+            padding: 20px;
+            background-color: aliceblue;
+            box-shadow: 0 0 20px #ccc;
+            display: none;
+        }
+
+        .title {
+            position: fixed;
+            top: 10px;
+            left: 50px;
+            z-index: 1111;
+
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            z-index: 1111;
+            width: 100%;
+            height: 100px;
+            /* background-color: cornflowerblue; */
+            background-image: linear-gradient(to right, rgb(97, 86, 86) -6%, #703ccc, #000 110%);
+            -webkit-animation:Glow 1.5s ease infinite alternate;
+	        animation:Glow 1.5s ease infinite alternate;
+        }
+
+        @-webkit-keyframes Glow {
+            from {
+                text-shadow:  0 0 20px #fff, 0 0 30px #fff, 0 0 40px #00a67c, 0 0 60px #00a67c;
+            }
+            to {
+                text-shadow:  0 0 10px #fff, 0 0 15px #fff, 0 0 20px #00a67c, 0 0 30px #00a67c;
+            }
+        }
+        @keyframes Glow {
+            from {
+                text-shadow:  0 0 20px #fff, 0 0 30px #fff, 0 0 40px #00a67c, 0 0 60px #00a67c;
+            }
+            to {
+                text-shadow:  0 0 10px #fff, 0 0 15px #fff, 0 0 20px #00a67c, 0 0 30px #00a67c;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="./leaflet.css" />
+    <link rel="stylesheet" href="./iclient-leaflet.css" />
+    <script type="text/javascript" src="./jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="./leaflet.js"></script>
+    <script type="text/javascript" src="./iclient-leaflet.js"></script>
+</head>
+
+<body style=" margin: 0;overflow: hidden;background: #fff;width: 100%;height:100%;position: absolute;top: 0;">
+    <div class="header">
+        <div class="title" style="color: #ccc;">
+            <h1>南京市区导航</h1>
+        </div>
+        <div id="toolbar">
+            <button id="setstart">设置起点</button>
+            <button id="setend">设置终点</button>
+            <button id="walkNav" style="background-color: rgb(74, 216, 221);">步行导航</button>
+            <button id="drivingNav" style="background-color: rgb(16, 130, 236);">驾车导航</button>
+            <button id="clear" style="background-color: rgb(57, 177, 137);">清除</button>
+        </div>
+    </div>
+    <div id="map" style="margin-top: 100px; width: 100%;height: calc(100% - 100px)"></div>
+    <div id="resultPanel"></div>
+    <script type="text/javascript">
+        var map, bufferAnalystService, geoBufferAnalystParams, resultLayer,
+            queryService, queryByGeometryParameters, resultLayer1,
+            baseUrl = "https://iserver.supermap.io/iserver/services/map-world/rest/maps/World",
+            busiUrl = "http://localhost:8090/iserver/services/map-20220120/rest/maps/test%4020200120",
+            serviceUrl = "http://localhost:8090/iserver/services/spatialAnalysis-20220120/restjsr/spatialanalyst";
+        map = L.map('map', {
+            crs: L.CRS.EPSG4326,
+            center: [31.93, 118.85],
+            maxZoom: 18,
+            zoom: 10
+        });
+        L.supermap.tiledMapLayer(baseUrl, { noWrap: true }).addTo(map); // 添加底图
+        L.supermap.tiledMapLayer(busiUrl, { noWrap: true }).addTo(map); // 添加业务图层
+        L.control.scale().addTo(map); // 添加比例尺
+
+        // 地图点击事件
+        let startP, endP, type;
+        map.on('click', function (e) {
+            if (type !== '') {
+                if (type === 'drawStart') {
+                    L.circle(e.latlng, { radius: 1000, color: 'red', fillColor: 'blue', fillOpacity: 1 }).addTo(map)
+                    startP = e.latlng;
+                } else if (type === 'drawEnd') {
+
+                    L.circle(e.latlng, { radius: 1000, color: 'blue', fillColor: 'red', fillOpacity: 1 }).addTo(map)
+                    endP = e.latlng;
+                }
+                type = '';
+            }
+        })
+
+        // 起点
+        $("#setstart").click(() => {
+            type = 'drawStart';
+        })
+        // 终点
+        $("#setend").click(() => {
+            type = 'drawEnd';
+        })
+        // 步行
+        $("#walkNav").click(() => {
+            if (!startP || !endP) return;
+            routing(startP, endP, 'walking', 'brown')
+        })
+        // 驾车
+        $("#drivingNav").click(() => {
+            if (!startP || !endP) return;
+            routing(startP, endP, 'driving', 'pink')
+        })
+        // 在线请求路线
+        function routing(startP, endP, type, color) {
+            let routeUrl = `http://restapi.amap.com/v3/direction/${type}?key=93491b0fb44d1770a55eb86d219a8ffb&origin=${startP.lng},${startP.lat}&destination=${endP.lng},${endP.lat}`
+            fetch(routeUrl, {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'default'
+            }).then(res => res.json()).then((result) => {
+                console.log(result)
+                $("#resultPanel").css('display', 'block')
+                const { info, route, } = result
+                let steps = route.paths[0].steps
+                let latlngs = []
+                let features = []
+                let html = `<h3>路线详情：</h3>
+                <div style="font-size:18px;">距离：${route.paths[0].distance}米 ; 总耗时：${(route.paths[0].duration / 60).toFixed(2)} 分钟 </div>`;
+                steps.map((item, index) => {
+                    var polylines = item.polyline.split(';')
+                    for (let i = 0; i < polylines.length; i++) {
+                        let lng = parseFloat(polylines[i].split(',')[0])
+                        let lat = parseFloat(polylines[i].split(',')[1])
+                        latlngs.push([lat, lng]);
+                    }
+                    html += `<div style="font-size:12px;">${item.instruction}, 耗时 ${(item.duration / 60).toFixed(2)} 分钟 </div>`
+                })
+
+                $("#resultPanel").html(html);
+                L.polyline(latlngs, { color: color }).addTo(map);
+            })
+        }
+
+        $("#clear").click(() => {
+            clearMap()
+            startP = null;
+            endP = null;
+            $("#resultPanel").css('display', 'none')
+        })
+
+        // 清除地图上的图层
+        function clearMap() {
+            //移除除底图外的所有图层
+            map.eachLayer(function (layer) {
+                if (!layer._container || ('' + jQuery(layer._container).attr('class')).replace(/\s/g, '') != 'leaflet-layer') {
+                    layer.remove();
+                }
+            });
+            editableLayers = new L.FeatureGroup();
+            map.addLayer(editableLayers);
+        }
+
+
+    </script>
+</body>
+
+</html>

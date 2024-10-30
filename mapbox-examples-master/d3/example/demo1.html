@@ -1,0 +1,130 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script src="../d3.v5.min.js"></script>
+  <script src = "http://d3js.org/d3.transform.js"></script>
+  <style>
+    .tooltip {
+      font-size: 15px;
+      width: auto;
+      padding: 10px;
+      height: auto;
+      position: absolute;
+      background-color: #108f7e;
+      opacity: .6;
+      border-radius: 5px;
+      color: #ffffff;
+      display: none;
+    }
+
+    #container {
+      background-color: #ffffff;
+      /* width: 1250px; */
+      /* height: 650px; */
+    }
+  </style>
+</head>
+
+<body>
+  <div id="svgcontainer"></div>
+
+  <div id="container"></div>
+  <div class="test">
+    <svg width="300" height="400">
+      <rect x="0" y="0" width="300" height="200" fill="red">ssss</rect>
+    </svg>
+  </div>
+  <div class="testCss"> woshi </div>
+
+  <ul id="list">
+    <li></li>
+    <li></li>
+    <li></li>
+  </ul>
+
+  <p class="tp"></p>
+  <div class="td"></div>
+
+  <script>
+    var width = 300;
+    var height = 300;
+    var svg = d3.select("#svgcontainer")
+      .append("svg").attr("width", width).attr("height", height);
+
+    svg.append("line")
+   .attr("x1", 100)
+   .attr("y1", 100)
+   .attr("x2", 200) 
+   .attr("y2", 200)
+   .style("stroke", "rgb(255,0,0)")
+   .style("stroke-width", 2);
+
+   svg.append('rect')
+   .attr('x',20).attr('y',20).attr('width',100).attr('height',100).attr('fill','green').attr('transform','translate(30,30) rotate(45)')
+
+
+  //  一个状态转换到另一个状态
+   const t = d3.transition().duration(2000);
+   d3.select("body")
+   .transition()
+   .style("background-color", "lightblue").duration(5000);
+
+
+
+  </script>
+  <script type="text/javascript">
+    //  https://iowiki.com/d3js/d3js_quick_guide.html
+
+    console.log(d3.select('#container'))
+    console.log(d3.select('div'))
+    console.log(d3.select('#container').text())
+    d3.select('div.test').append(`span`).text('你好吗')
+    d3.select('div.test').append(`span`).html(`<svg width = "100" height = "100">
+        <rect x = "0" y = "0" width = "30" height = "20" fill="pink"></rect>
+     </svg>`)
+
+
+    d3.select(".testCss").attr("style", "background: #ccccccd7;");
+    d3.select(".testCss").style('color', 'yellow');
+    d3.select(".testCss").style('height', '200px').style('width', '200px')
+    // style 在attr 后面作用，attr 会替换style
+    console.log(d3.select(".testCss").classed('myanotherclass'));          //check
+    d3.select(".testCss").classed('myanotherclass', true);    //add
+    // d3.select(".testCss").classed('myanotherclass', false);   //remove
+    console.log(d3.select(".testCss").classed('myanotherclass'));
+
+    var element = d3.select(".testCss")
+    // element.classed("myanotherclass", !element.classed("myanotherclass"));
+
+    // data join
+    d3.select("#list").selectAll("li").data([10, 20, 30, 25, 15]).text(function (d) { return d; }).enter()
+      .append("li")
+      .text(function (d) { return "This is dynamically created element and the value is " + d; });
+
+    d3.select("#list").selectAll("li").data(['red', 'green', 'blue', 'pink', 'black']).style('color', function (d) { return d; });
+
+    d3.select("#list").selectAll("li")
+      .data([10, 30, 25, 15])
+      .exit()
+      .remove()
+
+
+    d3.select(".tp")
+      .datum(50)
+      .text(function (d) {
+        return "Used existing paragraph element and the data " + d + " is assigned.";
+      });
+    d3.select(".td")
+      .datum(100)
+      .append("p")
+      .text(function (d) {
+        return "Created new paragraph element and the data " + d + " is assigned.";
+      });
+
+
+  </script>
+
+</body>
+
+</html>

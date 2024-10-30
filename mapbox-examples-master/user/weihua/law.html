@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>法律法规</title>
+  <link href="../css/bootstrap.min.css" rel="stylesheet">
+  <link href="../css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="../css/style.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    <div class="panel panel-primary">
+      <div class="panel-heading" role="tab" id="headingOne">
+        <h4 class="panel-title">
+          <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            章节1
+          </a>
+        </h4>
+      </div>
+      <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+        <div class="panel-body">
+
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-cyan">
+      <div class="panel-heading" role="tab" id="headingTwo">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+            第二章 遵纪守法是每个公民应尽的责任
+          </a>
+        </h4>
+      </div>
+      <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+        <div class="panel-body">
+          且说三关狄元帅平生梗直，铁性无私，智勇双全。自从幼年山西家乡遭逢水难，王禅老祖救了他，带上水帘洞传授兵书武略，知他仙道无缘，王侯有位。学艺数年，命他下山扶助宋君，原是一条国栋金梁，与单单赛花公主有宿世良缘。自从押送征衣，上年大破西辽，仁宗天子知他英勇，杨宗保败亡，便封他镇守此关。号令威严，兵遵将应，就是朝中文武，何人不看重这小英雄？
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-danger">
+      <div class="panel-heading" role="tab" id="headingThree">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+            第三回 火叉岗焦先锋问路　安平关秃总兵阵亡
+          </a>
+        </h4>
+      </div>
+      <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+        <div class="panel-body">
+          话说狄元帅奉旨征代西辽，以为本事高强，所以只带得五万雄兵，四员虎将。点兵三千，令焦廷贵为前部先锋，点孟定国领兵三千为后队解粮官，大队人马排开行伍向西辽大道而行。且喜天色晴明，风和日暖，正是行兵的时候。一自出了雄关，行有十余天，人烟稠密地方还属中原辖管，也有文官武职接送，纷纷不绝不断。元帅一路甚是安然，日行程夜睡宿，不再烦谈。
+        </div>
+      </div>
+    </div>
+    <div class="panel panel-primary">
+      <div class="panel-heading" role="tab" id="headingFourth">
+        <h4 class="panel-title">
+          <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseFourth" aria-expanded="false" aria-controls="collapseThree">
+            第4回 火叉岗焦先锋问路　安平关秃总兵阵亡
+          </a>
+        </h4>
+      </div>
+      <div id="collapseFourth" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFourth">
+        <div class="panel-body">
+          话说狄元帅奉旨征代西辽，以为本事高强，所以只带得五万雄兵，四员虎将。点兵三千，令焦廷贵为前部先锋，点孟定国领兵三千为后队解粮官，大队人马排开行伍向西辽大道而行。且喜天色晴明，风和日暖，正是行兵的时候。一自出了雄关，行有十余天，人烟稠密地方还属中原辖管，也有文官武职接送，纷纷不绝不断。元帅一路甚是安然，日行程夜睡宿，不再烦谈。
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script type="text/javascript" src="../js/jquery.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/perfect-scrollbar.min.js"></script>
+<script type="text/javascript" src="../js/main.min.js"></script>
+<script>
+// 按钮示例
+$('#myButton').on('click', function () {
+    var $btn = $(this).button('loading');
+    setTimeout(function() {
+        $btn.button("reset")
+    }, 3e3)
+});
+</script>
+</html>

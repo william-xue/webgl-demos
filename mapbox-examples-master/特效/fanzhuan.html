@@ -1,0 +1,31 @@
+<html>
+
+<head>
+    <title>bilibili</title>
+    <!--设置翻转动画-->
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation-name: site-mirror;
+            animation-duration: 8s;
+        }
+        @keyframes site-mirror {
+            from {transform: none;}
+            to {transform: perspective(800px) rotateY(180deg);}
+        }
+    </style>
+</head>
+
+<body>
+    <iframe id="bilibili" src="https://www.bilibili.com" frameborder="0">
+
+    </iframe>
+    <script>
+        // document.getElementById("bilibili").style.transform = "perspective(800px) rotateY(180deg)"
+    </script>
+</body>
+</html>

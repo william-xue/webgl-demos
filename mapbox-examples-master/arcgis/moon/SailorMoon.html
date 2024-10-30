@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>SailorMoon</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.40/esri/css/esri.css">
+    <link rel="stylesheet" href="./SailorMoon'scss.css">
+
+    <script src="https://js.arcgis.com/3.39/"></script>
+    <script src="./SailorMoon'sjs.js"></script>
+
+    <script>
+        var map;
+        var tiled_image;
+        var tiled;
+        var normalizedVal;
+        var glayer;
+        var drawtool;
+        var graphic;
+        var markerSymbol;
+        var lineSymbol;
+        //距离量算用的三个变量---------
+        var drawtool_distance;
+        var drawtool_area;
+        var geometryService;
+        var geometryUnit;
+        var lengthUnit;
+        var areasUnit;
+        var picMarkerSymbol;
+        var graUtils;
+        var drawtool_select;
+        var glayer_select; //用于显示选择要素 
+        require(["dojo/dom",
+            "dojo/on",
+            "esri/map",
+            "esri/layers/ArcGISTiledMapServiceLayer", "esri/layers/ArcGISDynamicMapServiceLayer",
+            "esri/geometry/Point",
+            "esri/geometry/webMercatorUtils",
+            "esri/layers/GraphicsLayer", "esri/toolbars/draw", "esri/graphic",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/symbols/SimpleLineSymbol", "esri/symbols/SimpleFillSymbol", "esri/symbols/CartographicLineSymbol", "esri/Color",
+            "esri/tasks/GeometryService",
+            "esri/tasks/LengthsParameters",
+            "esri/tasks/AreasAndLengthsParameters",
+            "esri/symbols/PictureMarkerSymbol",
+            "esri/tasks/QueryTask", "esri/graphicsUtils", "esri/SpatialReference", "esri/tasks/query",
+            "dojo/domReady!"],
+            function (dom, on, Map, ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, Point, webMercatorUtils, GraphicsLayer, draw, graphic,
+                SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, CartographicLineSymbol, Color, GeometryService, LengthsParameters,AreasAndLengthsParameters,
+                PictureMarkerSymbol, QueryTask, graphicsUtils, SpatialReference, Query) {
+
+                map = new Map("map", { slider: false, logo: false });
+                //添加影像图
+                tiled_image = new ArcGISTiledMapServiceLayer("http://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer");
+                map.addLayer(tiled_image);
+                tiled = new ArcGISDynamicMapServiceLayer("http://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer");
+                map.addLayer(tiled);
+                var pt = new Point(-90, 40);
+                map.centerAndZoom(pt, 5);
+
+                on(map, 'mouse-move', mousemove_xy);
+                ///定义一个graphicslayer并添加到map中
+                glayer = new GraphicsLayer();
+                map.addLayer(glayer);
+
+                glayer_select = new GraphicsLayer();
+                map.addLayer(glayer_select);
+
+                ///定义点 线 面三种符号
+                markerSymbol = new SimpleMarkerSymbol();
+                lineSymbol = new SimpleLineSymbol();
+                fillSymbol = new SimpleFillSymbol();
+                CartographicLineSymbol = new CartographicLineSymbol();
+
+                markerSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_DIAMOND, 20, new SimpleLineSymbol(), new Color([255, 0, 0]));
+                lineSymbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 120, 0]), 3);
+                fillSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NULL, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, Color([255, 0, 0]), 3), Color([0, 0, 255]));
+                lineSymbol_select = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 255, 0]), 3);
+                fillSymbol_select = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NULL, lineSymbol_select, Color([0, 255, 0]));
+
+
+                //选择要素
+                drawtool_select = new draw(map);
+                drawtool_select.on("draw-end", select_draw_Hanlder);
+
+                ///定义drawtool对象
+                drawtool = new draw(map);
+                ///添加drewend事件，绘画结束后添加
+                drawtool.on("draw-end", addGraphic);
+
+                normalizedVal = webMercatorUtils;
+                ////
+
+                //定义geometryservice对象--------------------------------------
+                geometryService = new GeometryService("https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer");
+                geometryUnit = GeometryService.UNIT_US_NAUTICAL_MILE;
+                lengthUnit = GeometryService.UNIT_US_NAUTICAL_MILE;
+                areasUnit = GeometryService.UNIT_SQUARE_MILES;
+                geometryService.on("lengths-complete", outputDistance);
+                geometryService.on("areas-and-lengths-complete", outputArea);
+
+                picMarkerSymbol = new PictureMarkerSymbol("./images/bubble2.png", 32, 40);
+
+               //测量距离
+               drawtool_distance = new draw(map);
+                drawtool_distance.on("draw-end", distance_draw_Hanlder);
+                
+                // 面积测量
+                drawtool_area = new draw(map);
+                drawtool_area.on("draw-end", area_draw_Hanlder);
+
+                //为每一次距离量算生成一个新的长度参数对象---------------------------------
+                function createNewLengthsPara() {
+                    return new LengthsParameters();
+                }
+                window.createNewLengthsPara = createNewLengthsPara;
+
+                function createNewAreasAndLengthsPara() {
+                    return new AreasAndLengthsParameters();
+                }
+                window.createNewAreasAndLengthsPara = createNewAreasAndLengthsPara;
+
+                function createNewGraphic() {
+                    return new graphic();
+                }   window.createNewGraphic = createNewGraphic;
+
+                //用于测量距离的drawtool----------------------------------------
+                drawtool_distance = new draw(map);
+                drawtool_distance.on("draw-end", distance_draw_Hanlder);
+
+                //生成一个新的point：
+                function createNewPoint(lng, lat) {
+                    return new Point(lng, lat);
+                }
+                window.createNewPoint = createNewPoint;
+
+             
+
+                //为每一次查询实例化一个QueryTask对象---------------------------------
+                function createNewQueryTask(url) {
+                    return new QueryTask(url);
+                }
+                window.createNewQueryTask = createNewQueryTask;
+                //为每一次查询实例化一个Query对象---------------------------------
+                function createNewQuery() {
+                    return new Query();
+                }
+                window.createNewQuery = createNewQuery;
+                graUtils = graphicsUtils;
+                //////为距离设置一个距离参数，把线的信息放到参数里
+                function createNewLengthsPara(){
+                      return new LengthsParameters();
+                }
+                window.createNewLengthsPara=createNewLengthsPara;
+
+            }
+
+        );
+
+    </script>
+
+</head>
+
+<body onload="initPage();">
+    <div id="top">
+        <table id="top_table">
+            <tr>
+                <td>&nbsp</td>
+                <td>
+                    <div id="top_div">
+                        <img src="./images/美少女2.jpg" width="50" height="50">
+                        <img src="./images/hrbnu.png" width="50" height="50">
+                    </div>
+                </td>
+                <td>
+                    <p id="top_p">美少女战士</p>
+                </td>
+            </tr>
+        </table>
+
+    </div>
+    <div id="map"></div>
+    <div id="toolbar">
+        <!-- 底端的工具栏 -->
+        <table>
+
+            <td>
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="setTool('pan');">
+                    <image src=".\images/pan.png" width="28" height="28" title="平移">
+                </div>
+
+
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="setTool('zoomin');">
+                    <image src=".\images/zoomin.png" width="28" height="28" title="放大">
+                </div>
+
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="setTool('zoomout');">
+                    <image src=".\images/zoomout.png" width="28" height="28" title="缩小">
+                </div>
+
+
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="setTool('full');">
+                    <image src=".\images/fullextent.png" width="28" height="28" title="全图">
+                </div>
+                <!-- 工具与工具之间出现分隔条： -->
+                
+                <div class="toolbar_table_separation"></div>
+                
+                <div class="toolbar_table_div" onmousedown="tool('drawtool');">
+                    <img src="./images/pen.png" width="28" height="28" title="绘制工具">
+                </div>
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="glayer.clear();">
+                    <image src=".\images/delete.png" width="28" height="28" title="清除工具">
+                </div>
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this)"
+                    onmousedown="opensearch();">
+                    <img src="./images/查询.png" width="28" height="28" title="查询">
+                </div>
+
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this)"
+                    onmousedown="tool('measuretool');">
+                    <img src="./images/量算.png" width="28" height="28" title="量算">
+                </div>
+
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this)"
+                    onmousedown="tool('statisticstool');">
+                    <img src="./images/统计.png" width="28" height="28" title="统计">
+                </div>
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this)"
+                    onmousedown="tool('statisticstool');">
+                    <img src="./images/缓冲区.png" width="28" height="28" title="缓冲区">
+                </div>
+            </td>
+
+        </table>
+
+
+    </div>
+    <div id="div_mapType">
+        <image src="./images/streetMap.png" id="street_map" onclick="setMap('street')"></image>
+        <image src="./images/imageMap.png" id="image_map" onclick="setMap('image')"></image>
+    </div>
+
+    <div id="div_xy1" onload="xy();"
+        style="background-color: rgb(12, 11, 10,0.1); width: 230px;color: rgb(200, 220, 237);">
+        坐标
+    </div>
+    <!-- background-color: rgb(12, 11, 10,0.4);中的0.4是设置div背景的透明程度 -->
+    <div id="div_distance"></div>
+
+    <!-- 绘画工具 -->
+    <div id="div_drawtools">
+        <table class="toolbar_table">
+
+            <td>
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="draw_handler('point');">
+                    <img src="./images/point.png" width="28" height="28" title="绘制点">
+                </div>
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="draw_handler('line');">
+                    <img src="./images/Line.png" width="28" height="28" title="绘制线">
+                </div>
+
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="draw_handler('polyline');">
+                    <img src="./images/polyline.png" width="28" height="28" title="折线">
+                </div>
+
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="draw_handler('ellipse');">
+                    <img src="./images/Ellipse.png" width="28" height="28" title="椭圆">
+                </div>
+
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="draw_handler('triangle');">
+                    <img src="./images/Triangle.png" width="28" height="28" title="三角形">
+                </div>
+
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="draw_handler('polygon');">
+                    <img src="./images/Polygon.png" width="28" height="28" title="多边形">
+                </div>
+
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="draw_handler('circle');">
+                    <img src="./images/circle.png" width="28" height="28" title="圆">
+                </div>
+
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="draw_handler('rectangle');">
+                    <img src="./images/rectangle.png" width="28" height="28" title="矩形">
+                </div>
+
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="close_tools('drawtool');">
+                    <img src="./images/clear.png" width="28" height="28" title="关闭">
+                </div>
+            </td>
+
+        </table>
+    </div>
+    <!-- 量算距离和面积的工具： -->
+    <div id="div_measuretools">
+        <table class="toolbar_table">
+            <td>
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="measureDistance('polyline')">
+                    <img src="./images/测量尺.png" width="28" height="28" title="距离量算">
+                </div>
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="measureArea('polygon');">
+                    <img src="./images/面积查询.png" width="28" height="28" title="面积量算">
+                </div>
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="close_tools('measuretool');">
+                    <img src="./images/clear.png" width="28" height="28" title="关闭">
+                </div>
+            </td>
+
+        </table>
+    </div>
+
+    <!-- 统计人口老龄化和男女比例问题 -->
+    <div id="div_statisticstools">
+        <table class="toolbar_table">
+            <td>
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="showdialog('llh');">
+                    <img src="./images/老龄化.png" width="28" height="28" title="老龄化">
+                </div>
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="showdialog('nf');">
+                    <img src="./images/男女比例.png" width="28" height="28" title="男女比例">
+                </div>
+                <div class="toolbar_table_div" onmouseover="toolbar_img_over(this);" onmouseout="toolbar_img_out(this);"
+                    onmousedown="close_tools('statisticstool');">
+                    <img src="./images/clear.png" width="28" height="28" title="关闭">
+                </div>
+            </td>
+
+        </table>
+    </div>
+    <!-- 人口老龄化 -->
+    <div class="div_dialog" id="div_llh">
+        <div class="div_dialog_header">&nbsp;人&nbsp;口&nbsp;老&nbsp;龄&nbsp;化
+            <img onclick="closedialog('llh');" src="./images/delete.png">
+        </div>
+        <div class="div_dialog_body">
+            你要查询的是2007年出现人口老龄化的州吗？
+            <br>
+            <button onclick="searchLocation();">&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;</button>
+        </div>
+    </div>
+
+    <!-- 男女比例 -->
+    <div class="div_dialog" id="div_nf">
+        <div class="div_dialog_header">&nbsp;男&nbsp;女&nbsp;比&nbsp;例
+            <img onclick="closedialog('nf');" src="./images/delete.png">
+        </div>
+        <div class="div_dialog_body">
+            你要统计的是Florida州，男性居民数量多于女性居民数量的县吗？
+            <br>
+            <button onclick="searchAddress();">&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;</button>
+        </div>
+
+        <!-- 人口查询 -->
+        <div class="div_dialog" id="div_searchPopu">
+            <div class="div_dialog_header">&nbsp;人&nbsp;口&nbsp;查&nbsp;询
+                <img onclick="closeSearchPopu();" src="./images/delete.png">
+            </div>
+            <div class="div_dialog_body">
+                &nbsp;&nbsp;&nbsp;&nbsp;人&nbsp;口>&nbsp;<input type="text" id="txt_Popu"
+                    size="12px">&nbsp;&nbsp;&nbsp;&nbsp;<br>
+                <button onclick="searchPopu();">&nbsp;&nbsp;确&nbsp;&nbsp;定&nbsp;&nbsp;</button>
+            </div>
+            <div id="div_distance"></div>
+</body>
+
+</html>

@@ -1,0 +1,277 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Network | 武器查询</title>
+
+  <style type="text/css">
+    body,
+    select {
+      font: 10pt sans;
+    }
+
+    #mynetwork {
+      position: relative;
+      width: 100%;
+      height: 800px;
+      border: 1px solid lightgray;
+    }
+
+    table.legend_table {
+      font-size: 11px;
+      border-width: 1px;
+      border-color: #d3d3d3;
+      border-style: solid;
+    }
+
+    table.legend_table,
+    td {
+      border-width: 1px;
+      border-color: #d3d3d3;
+      border-style: solid;
+      padding: 2px;
+    }
+
+    div.table_content {
+      width: 80px;
+      text-align: center;
+    }
+
+    div.table_description {
+      width: 100px;
+    }
+
+    #operation {
+      font-size: 28px;
+    }
+
+    #network-popUp {
+      display: none;
+      position: absolute;
+      top: 350px;
+      left: 170px;
+      z-index: 299;
+      width: 250px;
+      height: 120px;
+      background-color: #f9f9f9;
+      border-style: solid;
+      border-width: 3px;
+      border-color: #5394ed;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .vis-edit-mode {
+      width: 50px;
+    }
+  </style>
+
+  <!-- <script type="text/javascript" src="../exampleUtil.js"></script> -->
+  <!-- <script type="text/javascript" src="../../../lib/jquery-3.6.0.min.js"></script> -->
+  <script type="text/javascript" src="./lib/vis.js"></script>
+  <link href="./lib/vis.css" rel="stylesheet" type="text/css" />
+  <link href="./lib/vis-network.min.css" rel="stylesheet" type="text/css" />
+
+  <script type="text/javascript">
+    // 从url上拿参数值
+    function GetQueryString(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+      var r = window.location.search.substr(1).match(reg); //获取url中"?"符后的字符串并正则匹配
+      var context = "";
+      if (r != null)
+        context = r[2];
+      reg = null;
+      r = null;
+      return context == null || context == "" || context == "undefined" ? "" : context;
+    }
+    let flag = decodeURI(GetQueryString('flag'))
+    console.log(flag)
+
+    var _nodes, _edges, network = null, operateFlag = 'add-node';
+    // randomly create some nodes and edges
+    // var data = getScaleFreeNetwork(25);
+    let color_Discipline = '#7BE141',  color_Category = '#E14104', color_Course = 'rgb(255,168,7)', color_Knowledge2 = 'rgba(97,195,238,0.5)';
+
+    function destroy() {
+      if (network !== null) {
+        network.destroy();
+        network = null;
+      }
+    }
+
+    function draw(nodes = [], edges = []) {
+      destroy();
+      _nodes = new vis.DataSet(nodes);
+      _edges = new vis.DataSet(edges);
+      var data = {
+        nodes: _nodes,
+        edges: _edges
+      }
+      // create a network
+      var container = document.getElementById('mynetwork');
+      var options = {
+        layout: { randomSeed: 2 }, // just to make sure the layout is the same when the locale is changed
+        height: '100%',
+        width: '100%',
+        locale: 'cn',
+      };
+      
+      network = new vis.Network(container, data, options);
+      network.setOptions({ nodes: { shadow: true }, edges: { shadow: true } });
+    }
+
+    function clearPopUp() {
+      document.getElementById('saveButton').onclick = null;
+      document.getElementById('cancelButton').onclick = null;
+      document.getElementById('network-popUp').style.display = 'none';
+    }
+
+    function cancelEdit(callback) {
+      clearPopUp();
+      callback(null);
+    }
+
+    // 删除节点，及其关系 , 注意：先删关系，再删节点
+    function deleteNodeHandler(data, callback) {
+      console.log('deleteNode===>>>', data)
+      let element = data.nodes[0]
+      let node = _nodes.get(element)
+      excuteCypher(`MATCH (n:${node.type}{id:'${node.id}'})<-[r:REL]->() delete r`).then(res => {
+
+        excuteCypher(`MATCH (n:${node.type}{id:'${node.id}'}) delete n`).then(res => {
+          // if 
+          callback(data)
+        })
+      })
+    }
+
+    // 删除边
+    function deleteEdgeHandler(data, callback) {
+      console.log('deleteEdge===>>>', data)
+      let element = data.edges[0]
+      let item = _edges.get(element.id)[0]
+      let from = _nodes.get(item.from)
+      let to = _nodes.get(item.to)
+      excuteCypher(`MATCH (:${from.type}{id:'${from.id}'})<-[r:REL]->(:${to.type}{id:'${to.id}'}) delete r`).then(res => {
+
+        callback(data)
+      })
+    }
+
+    function addEdgeHandler(data, callback) {
+      console.log(data)
+      // let  = network.getConnectedNodes('2')
+      if (!(_edges && _nodes)) return;
+      let from = _nodes.get(data.from)
+      let to = _nodes.get(data.to)
+      // 随机生成一个边的标识
+      let flag = new Date().getTime()
+      excuteCypher(`match (f:${from.type}{id:'${from.id}'}),(t:${to.type}{id:'${to.id}'}) create (f)-[:REL{rel_flag:'${flag}'}]->(t)`).then(r => { })
+
+      callback({ ...data, arrows: 'to' })
+    }
+
+    function init() {
+      const promise1 = excuteCypher('match (n) where n:Country or n:Weapon or n:Category2 or n:Category1 return n ,id(n) as id, labels(n)[0] as label') // 查询单个孤立节点
+      const promise2 = excuteCypher('match (f)-[]->(t) return f,t, id(f) as id_f,  id(t) as id_t') // 查询有关系的节点
+
+      let nodes = [
+        { id: 3, label: 'hex color', color: color_Discipline },
+        { id: 5, label: 'hex color', color: color_Category },
+        { id: 2, label: 'rgb color', color: color_Course },
+        { id: 4, label: 'rgba color', color: color_Knowledge2 },
+      ]
+      let edges = [
+        { from: 2, to: 4, arrows: 'to' },
+        { from: 2, to: 3, arrows: 'to' }
+      ]
+
+      nodes = []; edges = [];
+
+      Promise.all([promise1, promise2]).then(res => {
+        console.log(res)
+        let sigleNodes = res[0].data.map(d => ({
+          id:d['id'],
+          label: d['n']['name'],
+          // color: (label === 'Weapon')? color_Discipline: (label === 'Country'? color_Category: (label === 'Category2'? color_Course: color_Knowledge2))
+          color: d['label'] === 'Weapon'? color_Discipline: d['label'] === 'Country'? color_Category: d['label'] === 'Category2'? color_Course: color_Knowledge2
+        }))
+        nodes = nodes.concat(sigleNodes)
+        console.log(nodes)
+        let rels = res[1].data.map(d => ({ 'from': d['id_f'], 'to': d['id_t'], 'arrows': 'to' }))
+        edges = edges.concat(rels)
+        console.log(edges)
+        draw(nodes, edges);
+      })
+    }
+
+    function excuteCypher(cql, callback) {
+      return new Promise((resovle, reject) => {
+        fetch('/flask/excuteCql', {
+          method: 'post',
+          body: JSON.stringify({
+            cql
+          }),
+          headers: {
+            contentType: "application/json", //必须这样写
+          }
+        }).then(res => res.json()).then(res => {
+          // console.log('res===>>>',res)
+          resovle(res)
+        })
+      })
+
+
+      // $.ajax({
+      //   url:'http://127.0.0.1:8008/api/neo/javaCode/excute',
+      //   // url:'/flask/excuteCql',
+      //   type:'post',
+      //   contentType: "application/json", //必须这样写
+      //   data:JSON.stringify([cql]),
+      //   dataType:'json',
+      //   success:callback,
+      //   error:function(){
+      //     alert('server error!')
+      //   }
+      // })
+    }
+  </script>
+
+</head>
+
+<body onload="init();">
+
+  <div id="network-popUp">
+    <span id="operation">node</span> <br>
+    <table style="margin:auto;">
+      <tr style="display: none;">
+        <td>id</td>
+        <td><input id="node-id" value="new value" /></td>
+      </tr>
+      <tr>
+        <td>type</td>
+        <td>
+          <select id="node-type">
+            <option value="Discipline">Discipline</option>
+            <option value="Category" selected>Category</option>
+            <option value="Course" selected>Course</option>
+            <option value="Knowledge2">Knowledge2</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>label</td>
+        <td><input id="node-label" value="new value" /></td>
+      </tr>
+    </table>
+    <input type="button" value="save" id="saveButton" />
+    <input type="button" value="cancel" id="cancelButton" />
+  </div>
+  <br />
+
+  <div id="mynetwork"></div>
+
+</body>
+
+</html>

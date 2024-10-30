@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Add a 3D model</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+    <script src="https://unpkg.com/three@0.142.0/build/three.min.js"></script>
+    <!-- 鼠标键盘事件 -->
+    <!-- <script src="https://unpkg.com/three@0.126.0/examples/js/controls/OrbitControls.js"></script>   -->
+    <script src="https://unpkg.com/three@0.142.0/examples/js/loaders/GLTFLoader.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="map"></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoicGluZ2Fuc2hhbiIsImEiOiJja2x3M2ZkcHkweXBpMndwOWZ4ZjQ1NTFoIn0.vDeeNsG4fOoX6M8HT5mLCA'; // my
+        // mapboxgl.accessToken = 'pk.eyJ1Ijoiemhlbmd5dWFuMDEiLCJhIjoiY2tweHJuaWMyMDd4aDJ2cGR4azJpMHA3ZyJ9.2uE3aEVVqriGOKNU11xEnw';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/light-v10',
+            zoom: 6,
+            center: [112, 23],
+            pitch: 60,
+            antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
+        });
+
+        const testGeoJson = {
+
+        }
+
+        // parameters to ensure the model is georeferenced correctly on the map
+        // const modelOrigin = [112, 23];
+        const modelOrigin = [112, 10];
+        const modelAltitude = 0;
+        // const modelRotate = [Math.PI / 2, Math.PI, 0];
+        const modelRotate = [Math.PI / 2, 0, 0];
+        // const modelRotate = [0, 0, 0];
+
+        const modelAsMercatorCoordinate = mapboxgl.MercatorCoordinate.fromLngLat(
+            modelOrigin,
+            modelAltitude
+        );
+
+        // transformation parameters to position, rotate and scale the 3D model onto the map
+        const modelTransform = {
+            translateX: modelAsMercatorCoordinate.x,
+            translateY: modelAsMercatorCoordinate.y,
+            translateZ: modelAsMercatorCoordinate.z,
+            rotateX: modelRotate[0],
+            rotateY: modelRotate[1],
+            rotateZ: modelRotate[2],
+            /* Since the 3D model is in real world meters, a scale transform needs to be
+             * applied since the CustomLayerInterface expects units in MercatorCoordinates.
+             */
+            scale: modelAsMercatorCoordinate.meterInMercatorCoordinateUnits()
+        };
+        let meterunit_source = modelAsMercatorCoordinate.meterInMercatorCoordinateUnits()
+        console.log(meterunit_source)
+        let mercatorCoordinate_source = [modelAsMercatorCoordinate.x / meterunit_source, modelAsMercatorCoordinate.y / meterunit_source]
+        console.log(mercatorCoordinate_source)
+
+        console.log("modelTransform====...", modelTransform);
+
+        const THREE = window.THREE;
+
+        // configuration of the custom layer for a 3D model per the CustomLayerInterface
+        const customLayer = {
+            id: '3d-model',
+            type: 'custom',
+            renderingMode: '3d',
+            onAdd: function (map, gl) {
+                let camera = new THREE.Camera();
+                let scene = new THREE.Scene();
+
+                this.camera = camera;
+                this.scene = scene;
+
+                // create two three.js lights to illuminate the model
+                const directionalLight = new THREE.DirectionalLight(0xffffff);
+                directionalLight.position.set(0, 0, 100000).normalize();   // z轴方向的光
+                this.scene.add(directionalLight);
+
+                const directionalLight2 = new THREE.DirectionalLight(0xffffff);
+                directionalLight2.position.set(100000, 0, 0).normalize(); // x轴方向的光
+                this.scene.add(directionalLight2);
+
+                // 辅助坐标系  参数250表示坐标系大小，可以根据场景大小去设置
+                var axisHelper = new THREE.AxesHelper(25000000);
+                this.scene.add(axisHelper);
+
+
+                //设置点位
+                let positions = [];
+                //传入参数
+                // let anypoint = [[114.58, 28.61], [114.58, 28.58], [114.64, 28.60], [114.58, 28.61]]
+                let anypoint = [[
+                    48.1640625,
+                    61.77312286453146
+                ],
+                [
+                    72.7734375,
+                    43.83452678223682
+                ],
+                [
+                    104.4140625,
+                    34.59704151614417
+                ],
+                [
+                    127.96875,
+                    39.639537564366684
+                ],
+                [
+                    120.58593749999999,
+                    64.77412531292873
+                ],
+                [
+                    48.1640625,
+                    61.77312286453146
+                ]]
+                let height = 10000
+                let afterheight = 0;
+                let points = [];
+                //点位集合
+                anypoint.forEach((item) => {
+                    //使用mapbox自带的方法来转换坐标
+                    points.push(mapboxgl.MercatorCoordinate.fromLngLat(item, 0));//转变坐标
+                })
+                for (let i = anypoint.length - 1; i >= 0; i--) {
+                    //把所有点位按顺序放入数组
+                    points.push(mapboxgl.MercatorCoordinate.fromLngLat(anypoint[i], height))
+                    //转换高度
+                    afterheight = mapboxgl.MercatorCoordinate.fromLngLat(anypoint[i], height).z
+                }
+                //终点就是起点，将起点存入终点位置
+                points.push(mapboxgl.MercatorCoordinate.fromLngLat(anypoint[0], 0))
+                //0'                   <-1'
+                // |                    ^
+                // v                   |         
+                //0=>                  1
+                //大概顺序呢就是0=>1=>1'=>0'=>0  （画一面墙）
+                // points.push({x: 0.7890850166666666, y: 0.4106084487442257, z: 0} );
+                // points.push({x: 0.7911307583333334, y: 0.4146309617209688, z: 0});
+                // points.push({x: 0.7911307583333334, y: 0.4146309617209688, z: 0.028629787752927818});
+                // points.push({x: 0.7890850166666666, y: 0.4106084487442257, z: 0.028629787752927818});
+                // points.push({x: 0.7890850166666666, y: 0.4106084487442257, z: 0});
+                // let height = 0.028629787752927818
+                //处理点位数据，拆分三角面
+                // for (let i = 0, j = positions.length, t = uvs.length; i < points.length - 1; i++) {
+                for (let i = 0, j = positions.length; i < points.length - 1; i++) {
+                    let left = points[i]
+                    let right = points[i + 1]
+                    positions[j++] = left.x
+                    positions[j++] = left.y
+                    positions[j++] = 0
+
+                    positions[j++] = right.x
+                    positions[j++] = right.y
+                    positions[j++] = 0
+
+                    positions[j++] = left.x
+                    positions[j++] = left.y
+                    positions[j++] = afterheight
+
+                    positions[j++] = left.x
+                    positions[j++] = left.y
+                    positions[j++] = afterheight
+
+                    positions[j++] = right.x
+                    positions[j++] = right.y
+                    positions[j++] = 0
+
+                    positions[j++] = right.x
+                    positions[j++] = right.y
+                    positions[j++] = afterheight
+                }
+                //开始创建形状
+                let geometry = new THREE.BufferGeometry()
+                geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3))
+                // // 创建材质 图自取  在下面               
+                var texture = new THREE.TextureLoader().load('./11.png');
+
+                // 设置阵列
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.RepeatWrapping;
+                // uv两个方向纹理重复数量
+                texture.repeat.set(1, 3);
+                this.texture = texture
+                // 设置材质
+                var material = new THREE.MeshBasicMaterial({
+                    map: texture,
+                    transparent: true,
+                });
+                // var material = new THREE.MeshPhongMaterial({ // MeshPhongMaterial // MeshLambertMaterial \ MeshNormalMaterial
+                //     color: 0x0000ff,
+                //     // opacity: 0.5,
+                //     // vertexColors: true,
+                //     side: THREE.DoubleSide //两面可见
+                // }); //材质对象
+                //创建
+                let mesh = new THREE.Mesh(geometry, material)
+                //添加到场景
+                scene.add(mesh)
+
+
+                this.map = map;
+                this.matrtial = material;
+                this.mesh = mesh;
+                // use the Mapbox GL JS map canvas for three.js
+                this.renderer = new THREE.WebGLRenderer({
+                    canvas: map.getCanvas(),
+                    context: gl,
+                    antialias: true
+                });
+
+                this.renderer.autoClear = false;
+
+                // var controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);//创建控件对象
+                // controls.addEventListener('change', this.renderer.render(this.scene, this.camera));//监听鼠标、键盘事件
+            },
+            render: function (gl, matrix) {
+                const rotationX = new THREE.Matrix4().makeRotationAxis(
+                    new THREE.Vector3(1, 0, 0),
+                    modelTransform.rotateX
+                );
+                const rotationY = new THREE.Matrix4().makeRotationAxis(
+                    new THREE.Vector3(0, 1, 0),
+                    modelTransform.rotateY
+                );
+                const rotationZ = new THREE.Matrix4().makeRotationAxis(
+                    new THREE.Vector3(0, 0, 1),
+                    modelTransform.rotateZ
+                );
+
+                const m = new THREE.Matrix4().fromArray(matrix);
+                const l = new THREE.Matrix4()
+                    .makeTranslation(
+                        modelTransform.translateX,
+                        modelTransform.translateY,
+                        modelTransform.translateZ
+                    )
+                    .scale(
+                        new THREE.Vector3(
+                            modelTransform.scale,
+                            -modelTransform.scale,
+                            modelTransform.scale
+                        )
+                    )
+                    .multiply(rotationX)
+                    .multiply(rotationY)
+                    .multiply(rotationZ);
+
+                // const m = new THREE.Matrix4().fromArray(matrix);
+
+                // this.camera.projectionMatrix = m.multiply(l);
+                this.camera.projectionMatrix = m;
+                this.renderer.resetState();
+                this.renderer.render(this.scene, this.camera);
+                this.map.triggerRepaint();
+                //设置纹理动画向上偏移
+                requestAnimationFrame(() => { this.texture.offset.y -= 0.03 })
+            },
+            prerender(gl, matrix) {
+                //可选，用于FBO离屏渲染
+            },
+            onRemove(map, gl) {
+                //回收资源
+            }
+        };
+
+        map.on('style.load', () => {
+            map.addLayer(customLayer, 'waterway-label');
+        });
+    </script>
+
+</body>
+
+</html>

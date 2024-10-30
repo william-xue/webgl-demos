@@ -1,0 +1,162 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+ul>li {
+    list-style: none;
+}
+
+img {
+    display: block;
+}
+
+a {
+    text-decoration: none;
+}
+
+.jcsb {
+    display: flex;
+    justify-content: space-between;
+}
+
+.f1 {
+    width: 100%;
+    text-align: center;
+    margin: 2% 0;
+}
+
+.f2 {
+    box-sizing: border-box;
+    padding: 10px 10px;
+    width: 100%;
+    height: 60px;
+    background: rgb(91, 115, 213);
+}
+
+.f2_btn {
+    line-height: 43px;
+    background: rgb(255, 217, 102);
+    width: 110px;
+    display: block;
+    height: 42px;
+    text-align: center;
+}
+
+.f3 {
+    margin: 2% 4%;
+}
+
+.f3_img {
+    margin: 0 auto;
+    width: 80%;
+    height: 80px;
+}
+
+
+/* .f4 {
+    background: rgb(91, 115, 213);
+    padding: 2% 12%;
+}
+
+.f4_div1 {
+    width: 20%;
+    background: rgb(255, 217, 102);
+}
+
+.f5 {
+    padding: 20px 0;
+    margin: 20px 0;
+    width: 100%;
+    background: rgb(91, 115, 213);
+}
+
+.f5_div {
+    width: 26%;
+    margin: 2% auto;
+    background: rgb(255, 217, 102);
+}
+
+.f5_div_div {
+    width: 50%;
+    padding: 20px;
+}
+
+.f5_div_div_div {
+    width: 50%;
+    padding: 20px;
+    margin-top: 2%;
+}
+
+.f5_div_div_img {
+    width: 80%;
+}
+
+.f5_div_div_div_text {
+    margin-top: 10%;
+}
+
+.f5_btn_div {
+    margin: 0 auto;
+    width: 6%;
+}
+
+.f5_btn {
+    line-height: 43px;
+    background: rgb(255, 217, 102);
+    width: 110px;
+    display: block;
+    height: 42px;
+    text-align: center;
+} */
+
+.f5 {
+    padding: 20px 0;
+    width: 100%;
+    background: rgb(91, 115, 213);
+}
+
+.f5_div {
+    width: 20%;
+    background: rgb(255, 217, 102);
+    padding: 20px;
+    margin: 2%;
+}
+
+.f5_div_div {
+    padding: 20px;
+    background: rgb(237, 125, 49);
+}
+
+.f5_div_div_img {
+    width: 80%;
+    height: 20%;
+    margin: 0 auto;
+}
+
+.f5_div_div_text {
+    line-height: 40px;
+    height: 40px;
+    margin-top: 20px;
+    background: rgb(237, 125, 49);
+    text-align: center;
+}
+
+.wrap {
+    flex-wrap: wrap;
+}
+
+.query_by_name {
+    width: 64%;
+    height: 36px;
+}
+
+.btn_submit {
+    width: 100px;
+    height: 40px;
+}
+
+.browse_div {
+    width: 25%;
+    margin: 0 auto;
+}

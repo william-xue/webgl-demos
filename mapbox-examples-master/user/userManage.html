@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="./js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet">
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/materialdesignicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./js/jconfirm/jquery-confirm.min.css">
+
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="./js/jconfirm/jquery-confirm.min.js"></script>
+    <style>
+        body {
+            padding: 10px;
+        }
+
+        .toolbox {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body class="">
+
+    <div class="toolbox">
+        <button id="addUser" class="btn btn-w-md btn-round btn-primary">添加用户</button>
+    </div>
+    <table id="table"></table>
+
+    <script>
+        //操作栏的格式化
+        function actionFormatter(value, row, index) {
+            var id = value;
+            var result = `<div class="btn-group">
+                            <a onclick='editUser(${JSON.stringify(row)})' class="btn btn-xs btn-default" href="#!" title="编辑" data-toggle="tooltip"><i class="mdi mdi-pencil"></i></a>
+                            <a onclick='delUser(${row.id})' class="btn btn-xs btn-default" href="#!" title="删除" data-toggle="tooltip"><i class="mdi mdi-window-close"></i></a>
+                          </div>`
+            // <a class="btn btn-xs btn-default" href="#!" title="查看" data-toggle="tooltip"><i class="mdi mdi-eye"></i></a>
+            return result;
+        }
+        var $table = $('#table')
+
+        function initTable() {
+            fetch('/flask/user/findAll', {
+                method: 'get',
+                headers: {
+                    contentType: "application/json", //必须这样写
+                }
+            }).then(res => res.json()).then(res => {
+                if (!res.success) return;
+                console.log(res.data)
+                var data = res.data
+                $table.bootstrapTable('destroy')
+                $table.bootstrapTable({
+                    sidePagination: "true",
+                    striped: true, // 是否显示行间隔色
+                    //search : "true",
+                    uniqueId: "ID",
+                    pageSize: "10",
+                    pagination: true, // 是否分页
+                    sortable: true, // 是否启用排序
+                    data: data,
+                    columns: [{
+                        field: 'name',
+                        title: '登录名'
+                    },
+                    {
+                        field: 'alias',
+                        title: '昵称'
+                    },
+                    {
+                        field: 'role',
+                        title: '角色'
+                    },
+                    {
+                        field: 'password',
+                        title: '密码'
+                    },
+                    {
+                        field: 'operation',
+                        title: '操作',
+                        width: 120,
+                        align: 'center',
+                        valign: 'middle',
+                        formatter: actionFormatter,
+                    },
+
+                    ]
+                })
+
+            })
+        }
+
+        function editUser(row) {
+            console.log('edit', row)
+            const { id, name, alias, password, role } = row;
+            $.confirm({
+                title: '提示',
+                content: `
+                        <form action="" class="formName">
+                            <div class="form-group">
+                                <label>请输入您的登录名</label>
+                                <input type="text" placeholder="姓名" class="name form-control" value="${name}" />
+                            </div>
+                            <div class="form-group">
+                                <label>请输入您的昵称</label>
+                                <input type="text" placeholder="昵称" class="alias form-control" value="${alias}" />
+                            </div>
+                            <div class="form-group">
+                                <label>请输入您的密码</label>
+                                <input type="text" placeholder="密码" class="password form-control" value="${password}" />
+                            </div>
+                            <div class="form-group">
+                                <label  for="example-select">请输入您的角色</label>
+                                <div>
+                                    <select class="role form-control" name="example-select" size="1" defaultValue="${role}">
+                                        <option value="老师">老师</option>
+                                        <option value="管理员">管理员</option>
+                                        <option value="学生">学生</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>`,
+                buttons: {
+                    formSubmit: {
+                        text: '提交',
+                        btnClass: 'btn-blue',
+                        action: function () {
+                            var name = this.$content.find('.name').val();
+                            var alias = this.$content.find('.alias').val();
+                            var password = this.$content.find('.password').val();
+                            var role = this.$content.find('.role').val();
+                            if (!name || !alias || !role) {
+                                $.alert('请您输入信息');
+                                return false;
+                            }
+                            // 执行更新
+                            fetch('/flask/user/update', {
+                                method: 'post',
+                                body: JSON.stringify({
+                                    user: {
+                                        id, name, alias, role, password
+                                    }
+                                }),
+                                headers: {
+                                    contentType: "application/json", //必须这样写
+                                }
+                            }).then(res => res.json()).then(res => {
+                                if (res.success) {
+                                    $.alert('成功！');
+                                    initTable()
+                                }
+                            })
+                        }
+                    },
+                    cancel: {
+                        text: '取消'
+                    },
+                },
+                onContentReady: function () {
+                    var jc = this;
+                    this.$content.find('form').on('submit', function (e) {
+                        e.preventDefault();
+                        jc.$$formSubmit.trigger('click');
+                    });
+                }
+            });
+        }
+        function delUser(id) {
+            console.log('del', id)
+            $.confirm({
+                title: '提示',
+                content: `<div class="alert alert-success alert-dismissible" role="alert">
+                  <strong>确定删除吗？</strong>
+                </div>`,
+                buttons: {
+                    confirm: {
+                        text: '确认',
+                        action: function () {
+                            fetch('/flask/user/delete/' + id, {
+                                method: 'get',
+                                headers: {
+                                    contentType: "application/json", //必须这样写
+                                }
+                            }).then(res => res.json()).then(res => {
+                                if (res.success) {
+                                    $.alert('删除成功!')
+                                    // $table.bootstrapTable('refresh')
+                                    initTable()
+                                } else {
+                                    $.alert('删除失败!')
+                                }
+                            })
+                        }
+                    },
+                    cancel: {
+                        text: '关闭',
+                        action: function () {
+                        }
+                    },
+                }
+            });
+
+        }
+
+        $(function () {
+            initTable()
+
+            // 添加用户
+            $("#addUser").click(() => {
+                $.confirm({
+                    title: '提示',
+                    content: `
+                        <form action="" class="formName">
+                            <div class="form-group">
+                                <label>请输入您的登录名</label>
+                                <input type="text" placeholder="姓名" class="name form-control" required />
+                            </div>
+                            <div class="form-group">
+                                <label>请输入您的昵称</label>
+                                <input type="text" placeholder="昵称" class="alias form-control" required />
+                            </div>
+                            <div class="form-group">
+                                <label  for="example-select">请输入您的角色</label>
+                                <div>
+                                    <select class="role form-control" name="example-select" size="1">
+                                        <option value="老师">老师</option>
+                                        <option value="管理员">管理员</option>
+                                        <option value="学生">学生</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>`,
+                    buttons: {
+                        formSubmit: {
+                            text: '提交',
+                            btnClass: 'btn-blue',
+                            action: function () {
+                                var name = this.$content.find('.name').val();
+                                var alias = this.$content.find('.alias').val();
+                                var role = this.$content.find('.role').val();
+                                if (!name || !alias || !role) {
+                                    $.alert('请您输入信息');
+                                    return false;
+                                }
+                                // $.alert('您的姓名是： ' + name);
+                                // 执行插入
+                                fetch('/flask/user/add', {
+                                    method: 'post',
+                                    body: JSON.stringify({
+                                        user: {
+                                            name, alias, role,
+                                        }
+                                    }),
+                                    headers: {
+                                        contentType: "application/json", //必须这样写
+                                    }
+                                }).then(res => res.json()).then(res => {
+                                    if (res.success) {
+                                        $.alert('成功！');
+                                        initTable()
+                                    }
+                                })
+                            }
+                        },
+                        cancel: {
+                            text: '取消'
+                        },
+                    },
+                    onContentReady: function () {
+                        var jc = this;
+                        this.$content.find('form').on('submit', function (e) {
+                            e.preventDefault();
+                            jc.$$formSubmit.trigger('click');
+                        });
+                    }
+                });
+
+            })
+
+        })
+
+    </script>
+</body>
+
+</html>

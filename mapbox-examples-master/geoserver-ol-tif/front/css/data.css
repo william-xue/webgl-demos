@@ -1,0 +1,29 @@
+body,html{
+    height:100%;
+    
+}
+
+#box{
+    float: left;
+    height: 90%;
+    width: 30%;
+    border: 1px solid #D2D2D2;
+    padding-top: 3%;
+}
+
+.center{
+    margin: 10% auto;
+    text-align:center
+}
+
+#sub_btn{
+    width: 131px;
+    height: 33px;
+    color: white;
+    cursor: pointer;
+    background: #4472C4;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    border-radius: 5px;
+}

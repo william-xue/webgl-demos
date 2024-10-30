@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>leaflet实现搜索定位</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    html,
+    body,
+    #map {
+      padding: 0;
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .leaflet-container .leaflet-control-search {
+      position: relative;
+      float: left;
+      background: #fff;
+      color: #1978cf;
+      border: 2px solid rgba(0, 0, 0, 0.2);
+      background-clip: padding-box;
+      -moz-border-radius: 4px;
+      -webkit-border-radius: 4px;
+      border-radius: 4px;
+      background-color: rgba(255, 255, 255, 0.8);
+      z-index: 1000;
+      margin-left: 10px;
+      margin-top: 10px;
+    }
+
+    .leaflet-control-search.search-exp {
+      /*expanded*/
+      background: #fff;
+      border: 2px solid rgba(0, 0, 0, 0.2);
+      background-clip: padding-box;
+    }
+
+    .leaflet-control-search .search-input {
+      display: block;
+      float: left;
+      background: #fff;
+      border: 1px solid #666;
+      border-radius: 2px;
+      height: 22px;
+      padding: 0 20px 0 2px;
+      margin: 4px 0 4px 4px;
+    }
+
+    .leaflet-control-search.search-load .search-input {
+      background: url('./icon/loader.gif') no-repeat center right #fff;
+    }
+
+    .leaflet-control-search.search-load .search-cancel {
+      visibility: hidden;
+    }
+
+    .leaflet-control-search .search-cancel {
+      display: block;
+      width: 22px;
+      height: 22px;
+      position: absolute;
+      right: 28px;
+      margin: 6px 0;
+      background: url('./icon/search-icon.png') no-repeat 0 -46px;
+      text-decoration: none;
+      filter: alpha(opacity=80);
+      opacity: 0.8;
+    }
+
+    .leaflet-control-search .search-cancel:hover {
+      filter: alpha(opacity=100);
+      opacity: 1;
+    }
+
+    .leaflet-control-search .search-cancel span {
+      display: none;
+      /* comment for cancel button imageless */
+      font-size: 18px;
+      line-height: 20px;
+      color: #ccc;
+      font-weight: bold;
+    }
+
+    .leaflet-control-search .search-cancel:hover span {
+      color: #aaa;
+    }
+
+    .leaflet-control-search .search-button {
+      display: block;
+      float: left;
+      width: 30px;
+      height: 30px;
+      background: url('./icon/search-icon.png') no-repeat 4px 4px #fff;
+      border-radius: 4px;
+    }
+
+    .leaflet-control-search .search-button:hover {
+      background: url('./icon/search-icon.png') no-repeat 4px -20px #fafafa;
+    }
+
+    .leaflet-control-search .search-tooltip {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      float: left;
+      list-style: none;
+      padding-left: 0;
+      min-width: 120px;
+      max-height: 122px;
+      box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.4);
+      background-color: rgba(0, 0, 0, 0.25);
+      z-index: 1010;
+      overflow-y: auto;
+      overflow-x: hidden;
+      cursor: pointer;
+    }
+
+    .leaflet-control-search .search-tip {
+      margin: 2px;
+      padding: 2px 4px;
+      display: block;
+      color: black;
+      background: #eee;
+      border-radius: .25em;
+      text-decoration: none;
+      white-space: nowrap;
+      vertical-align: center;
+    }
+
+    .leaflet-control-search .search-button:hover {
+      background-color: #f4f4f4;
+    }
+
+    .leaflet-control-search .search-tip-select,
+    .leaflet-control-search .search-tip:hover {
+      background-color: #fff;
+    }
+
+    .leaflet-control-search .search-alert {
+      cursor: pointer;
+      clear: both;
+      font-size: .75em;
+      margin-bottom: 5px;
+      padding: 0 .25em;
+      color: #e00;
+      font-weight: bold;
+      border-radius: .25em;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <script type="text/javascript" src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script type="text/javascript" src="./leaflet-search.js"></script>
+  <script type="text/javascript">
+    //sample data values for populate map
+    var data = [{
+      "loc": [41.575330, 13.102411],
+      "title": "aquamarine"
+    },
+    {
+      "loc": [41.575730, 13.002411],
+      "title": "black"
+    },
+    {
+      "loc": [41.807149, 13.162994],
+      "title": "blue"
+    },
+    {
+      "loc": [41.507149, 13.172994],
+      "title": "chocolate"
+    },
+    {
+      "loc": [41.847149, 14.132994],
+      "title": "coral"
+    },
+    {
+      "loc": [41.219190, 13.062145],
+      "title": "cyan"
+    },
+    {
+      "loc": [41.344190, 13.242145],
+      "title": "darkblue"
+    },
+    {
+      "loc": [41.679190, 13.122145],
+      "title": "Darkred"
+    },
+    {
+      "loc": [41.329190, 13.192145],
+      "title": "Darkgray"
+    },
+    {
+      "loc": [41.379290, 13.122545],
+      "title": "dodgerblue"
+    },
+    {
+      "loc": [41.409190, 13.362145],
+      "title": "gray"
+    },
+    {
+      "loc": [41.794008, 12.583884],
+      "title": "green"
+    },
+    {
+      "loc": [41.805008, 12.982884],
+      "title": "greenyellow"
+    },
+    {
+      "loc": [41.536175, 13.273590],
+      "title": "red"
+    },
+    {
+      "loc": [41.516175, 13.373590],
+      "title": "rosybrown"
+    },
+    {
+      "loc": [41.506175, 13.273590],
+      "title": "royalblue"
+    },
+    {
+      "loc": [41.836175, 13.673590],
+      "title": "salmon"
+    },
+    {
+      "loc": [41.796175, 13.570590],
+      "title": "seagreen"
+    },
+    {
+      "loc": [41.436175, 13.573590],
+      "title": "seashell"
+    },
+    {
+      "loc": [41.336175, 13.973590],
+      "title": "silver"
+    },
+    {
+      "loc": [41.236175, 13.273590],
+      "title": "skyblue"
+    },
+    {
+      "loc": [41.546175, 13.473590],
+      "title": "yellow"
+    },
+    {
+      "loc": [41.239190, 13.032145],
+      "title": "white"
+    }
+    ];
+
+    var map = L.map('map').setView([36.09, 120.35], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: ''
+    }).addTo(map);
+
+    //图层包含搜索的元素
+    var markersLayer = new L.LayerGroup(); //layer contain searched elements
+
+    map.addLayer(markersLayer);
+
+    //添加搜索插件
+    var controlSearch = new L.Control.Search({
+      position: 'topright',
+      layer: markersLayer,
+      initial: false,
+      zoom: 12,
+      marker: false,
+      //缩放到图层函数定义
+      moveToLocation: function (latlng, title, map) {
+        L.circleMarker(latlng,{radius:30}).addTo(map);
+        map.flyTo(latlng)
+      }
+    });
+
+    map.addControl(controlSearch);
+
+    //用来自样本数据的标记填充地图
+    ////////////populate map with markers from sample data
+    for (i in data) {
+      var title = data[i].title, //value searched
+        loc = data[i].loc, //position found
+        marker = new L.Marker(new L.latLng(loc), {
+          opacity: 0,
+          title: title
+        }); //se property searched
+      marker.bindPopup('title: ' + title);
+      markersLayer.addLayer(marker);
+    }
+  </script>
+</body>
+
+</html>

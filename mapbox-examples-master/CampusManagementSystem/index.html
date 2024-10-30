@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>校园综合管理系统</title>
+  <link rel='stylesheet' href='js/bs/css/bootstrap.css'>
+  <link rel="stylesheet" href="js/css/demo1.css">
+  <link rel="stylesheet" href="js/node_modules/leaflet.marker.highlight/index.css">
+  <link rel="stylesheet" href="dist/leaflet/leaflet.draw.css">
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script src='js/bs/js/bootstrap.js'></script>
+  <script include="leaflet.draw,leaflet.miniMap" src="dist/leaflet/include-leaflet.js"></script>
+  <script src="js/echarts.js"></script>
+  <script src="js/node_modules/leaflet.marker.highlight/index.js"></script>
+  <script src="dist/leaflet/leaflet.draw.js"></script>
+
+</head>
+<style>
+  font-family: 微软雅黑;
+
+  * {
+    margin: 0;
+    padding: 0
+  }
+
+  #theul li {
+    list-style: none;
+    float: left;
+    margin-left: 20px;
+    height: 195px;
+    z-index: 200000;
+  }
+
+  #theul li>:first-child:hover {
+    background: #799B59;
+  }
+
+  #theul li:last-child:hover {
+    background: #8cab6e;
+  }
+
+  #theul li:last-child>:first-child:hover {
+    background: #8cab6e;
+  }
+
+  ol,
+  ul {
+    margin: 0;
+    padding: 0;
+  }
+
+  #anniu button {
+    width: 100px;
+    height: 40px;
+  }
+
+  #btn {
+    width: 40px;
+    margin-top: 270px;
+    left: 350px;
+    height: 140px;
+    border: 0;
+    border-left: 1px solid rgb(23, 32, 43, 0.2);
+    background: #f8f8f8;
+    color: #000;
+    cursor: pointer;
+    margin-left: -3px;
+  }
+
+  .box {
+    float: left;
+    position: relative;
+    left: 0;
+    height: 81.5%;
+    width: 19%;
+    margin-left: 0;
+    display: block;
+    transition: margin-left 2s;
+    z-index: 100;
+    min-height: 682px;
+  }
+
+  #maindiv {
+    width: 100%;
+    height: 78%;
+    background: #f8f8f8;
+    margin: 0;
+    padding: 0;
+    min-width: 1770px;
+  }
+
+  #myul li {
+    list-style: none;
+  }
+
+  #myul a {
+    text-decoration: none;
+  }
+
+  #myull li {
+    list-style: none;
+  }
+
+  #myulll li {
+    list-style: none;
+  }
+
+  #myullll li {
+    list-style: none;
+  }
+
+  #anniu button:hover {
+    background-color: rgba(140, 171, 110, 0.3);
+  }
+
+  #myul li:hover {
+    background: #8cab6e;
+    cursor: pointer;
+  }
+
+  #myull li:hover {
+    background: #8cab6e;
+    cursor: pointer;
+  }
+
+  #myulll li:hover {
+    background: #8cab6e;
+    cursor: pointer;
+  }
+
+  #myullll li:hover {
+    background: #8cab6e;
+    cursor: pointer;
+  }
+
+  #biao li {
+    list-style: none;
+  }
+
+  #biao tr:not(:first-child):hover {
+    background: #8cab6e;
+    cursor: pointer;
+  }
+
+  #biao {
+    font-weight: bold;
+  }
+
+  #mytable li {
+    text-align: center;
+    list-style: none;
+    height: 30px;
+    line-height: 30px;
+    font-weight: bold;
+  }
+
+  #build li:hover {
+    background: #8cab6e;
+    cursor: pointer;
+  }
+
+  #build li {
+    list-style: none;
+    font-size: 17px;
+    font-weight: bold;
+  }
+
+  #build li:hover {
+    background: #8cab6e;
+    cursor: pointer;
+  }
+
+  #build span {
+    color: #3c763d;
+  }
+
+  #build a {
+    color: #3c763d;
+    text-decoration: none;
+  }
+
+  #quanju::-webkit-input-placeholder {
+    color: #FFFFFF;
+    opacity: 0.7;
+  }
+
+  body {
+    height: 100%;
+    position: absolute;
+    width: 100%;
+    overflow: auto;
+  }
+
+  #thebuild li:hover {
+    background: #8cab6e;
+    cursor: pointer;
+  }
+
+  #thebuild li {
+    list-style: none;
+    font-size: 17px;
+    font-weight: bold;
+  }
+
+  #thebuild li:hover {
+    background: #8cab6e;
+    cursor: pointer;
+  }
+
+  #thebuild a {
+    color: #3c763d;
+    text-decoration: none;
+  }
+
+  .tooldiv {
+    margin-top: 146px;
+    text-align: center;
+    font-size: 22px;
+    color: #FFFFFF;
+    cursor: pointer;
+    padding-bottom: 9px;
+    padding-top: 9px;
+  }
+
+  #xialai li:hover {
+    cursor: pointer;
+  }
+
+  #xialai2 li:hover {
+    cursor: pointer;
+  }
+
+  .dropdown-menu>li>a:hover {
+    background: #337ab7;
+    color: #FFF;
+  }
+</style>
+
+<body>
+  <!-- 模态框1-->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    style="z-index: 300000">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="myModalLabel" style="font-weight: bold;"><span
+              class="glyphicon glyphicon-edit"></span> 编辑路线</h4>
+        </div>
+        <div class="modal-body">
+          <div class="input-group">
+            <span class="input-group-addon" style="font-weight: bold;">道路名</span>
+            <input type="text" class="form-control" placeholder="请重置道路名" aria-describedby="basic-addon1"
+              id="attributeroad">
+          </div>
+          <br>
+          <div class="input-group">
+            <span class="input-group-addon" style="font-weight: bold;">时间表</span>
+            <input type="text" class="form-control" placeholder="如：7:30-17:00(每10分钟一班)" aria-describedby="basic-addon1"
+              id="attributeroaddd">
+          </div>
+          <br>
+          <div class="input-group">
+            <span class="input-group-addon" style="font-weight: bold;">道路类型</span>
+            <input type="text" class="form-control" placeholder="校内道路、校外道路" aria-describedby="basic-addon1"
+              id="attributeroadd">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" style="font-weight: bold;"
+            id="aa">关闭</button>
+          <button type="button" class="btn btn-primary" onclick="edittest()" style="font-weight: bold;"
+            id="bb">提交</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 模态框1-->
+  <!-- 模态框2 -->
+  <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+    style="z-index: 300000">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">道路信息</h4>
+        </div>
+        <div class="modal-body">
+          <table id="shuoming">
+            <tr>
+              <td>道路名称</td>
+              <td>时间表</td>
+              <td>道路类型</td>
+              <td>道路ID</td>
+            </tr>
+          </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" style="font-weight: bold;"
+            id="aa">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 模态框2 -->
+  <!-- 菜单栏 -->
+  <div
+    style="width: 100%;height: 18.5%;background: #8cab6e;background-image: url('img/beijing1.jpg');background-size: cover;background-repeat: no-repeat;background-position:center center;position: relative;min-width: 1770px;min-height: 154px;">
+    <ul id="theul" style="z-index: 200000;position: absolute;right: 0;bottom: 1px;">
+      <li style="width: 180px;" id="hcqcx">
+        <div class='tooldiv' onclick="clearlist()">缓冲区查询</div>
+        <div style="width: 180px;height: 90px;display: none;" class="right">
+          <div
+            style="width: 180px;height: 45px;background:rgba(255,255,255,0.3);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.1);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
+            aria-expanded="false" aria-controls="collapseOne">
+            <div
+              style="width: 180px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">路灯缓冲区查询</div>
+          </div>
+          <div
+            style="width: 180px;height: 45px;background:rgba(140,171,110,0.2);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.2);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree"
+            aria-expanded="false" aria-controls="collapseThree">
+            <div
+              style="width: 180px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">建筑物缓冲区查询</div>
+          </div>
+        </div>
+      </li>
+      <li style="width: 180px;" id="ldgl">
+        <div class='tooldiv' onclick="clearlist()">路灯管理</div>
+        <div style="width: 180px;height: 90px;display: none;" class="right">
+          <div
+            style="width: 180px;height: 45px;background:rgba(255,255,255,0.3);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.1);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
+            aria-expanded="false" aria-controls="collapseOne">
+            <div
+              style="width: 180px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">路灯查询</div>
+          </div>
+          <div
+            style="width: 180px;height: 45px;background:rgba(140,171,110,0.2);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.2);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseThree"
+            aria-expanded="false" aria-controls="collapseThree">
+            <div
+              style="width: 180px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">路灯登记</div>
+          </div>
+        </div>
+      </li>
+      <li style="width: 270px;" id="nhjk">
+        <div class='tooldiv' onclick="clearlist()">建筑物能耗监控</div>
+        <div style="width: 270px;height: 90px;display: none;" class="right">
+          <div
+            style="width: 270px;height: 45px;background:rgba(255,255,255,0.3);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.1);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion1" href="#collapseOne1"
+            aria-expanded="false" aria-controls="collapseOne1">
+            <div
+              style="width: 270px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">能耗查询</div>
+          </div>
+          <div
+            style="width: 270px;height: 45px;background:rgba(140,171,110,0.2);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.2);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion1" href="#collapseTwo1"
+            aria-expanded="false" aria-controls="collapseTwo1">
+            <div
+              style="width: 270px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">能耗统计</div>
+          </div>
+          <div
+            style="width: 270px;height: 45px;background:rgba(255,255,255,0.3);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.1);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion1" href="#collapseThree1"
+            aria-expanded="false" aria-controls="collapseThree1">
+            <div
+              style="width: 270px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">超标展示</div>
+          </div>
+        </div>
+      </li>
+      <li style="width: 180px;" id="xcgl">
+        <div class='tooldiv' onclick="clearlist()">校车管理</div>
+        <div style="width: 180px;height: 90px;display: none;" class="right">
+          <div
+            style="width: 180px;height: 45px;background:rgba(255,255,255,0.3);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.1);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion110" href="#collapseOne110"
+            aria-expanded="false" aria-controls="collapseOne110">
+            <div
+              style="width: 180px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">路线查询</div>
+          </div>
+          <div
+            style="width: 180px;height: 45px;background:rgba(140,171,110,0.2);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.2);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion110" href="#collapseTwo110"
+            aria-expanded="false" aria-controls="collapseTwo110">
+            <div
+              style="width: 180px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">新增路线&编辑</div>
+          </div>
+          <div
+            style="width: 180px;height: 45px;background:rgba(255,255,255,0.3);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.2);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion110"
+            href="#collapseThree110" aria-expanded="false" aria-controls="collapseThree110">
+            <div
+              style="width: 180px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">删除路线</div>
+          </div>
+        </div>
+      </li>
+      <li style="width: 240px;" id="lhzt">
+        <div class='tooldiv' onclick="clearlist()">绿化专题管理</div>
+        <div style="width: 240px;height: 90px;display: none;" class="right">
+          <div
+            style="width: 240px;height: 45px;background:rgba(255,255,255,0.3);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.1);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion15" href="#collapseOne19"
+            aria-expanded="false" aria-controls="collapseOne19" style="height: 30px;">
+            <div
+              style="width: 240px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">绿化设施</div>
+          </div>
+          <div
+            style="width: 240px;height: 45px;background:rgba(140,171,110,0.2);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.2);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion15" href="#collapseTwo18"
+            aria-expanded="false" aria-controls="collapseTwo18">
+            <div
+              style="width: 240px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">绿化统计</div>
+          </div>
+          <div
+            style="width: 240px;height: 45px;background:rgba(255,255,255,0.3);box-shadow:0px 5px 12px 0px rgba(51,51,51,0.1);"
+            class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion15" href="#collapseThree17"
+            aria-expanded="false" aria-controls="collapseThree17">
+            <div
+              style="width: 240px;height: 45px;text-align: center;line-height: 45px;color: #799B59;font-size: 20px;font-weight: bold;"
+              onclick="clearlist()">绿化维护</div>
+          </div>
+        </div>
+      </li>
+      <!-- 菜单栏搜索框 -->
+      <li style="width: 225px;">
+        <div style="width: 225px;height: 30px;margin-top:155px;color: #FFF3EE">
+          <div class="input-group" style="width: 220px;margin-top: 15.8px;">
+            <input type="text" class="form-control" placeholder="如建筑物、校车路线"
+              style="background: #799B59;border-radius:25px;color:#FFFFFF " id="quanju" value=''>
+            <div
+              style="width: 40px;height: 34px;position: absolute;z-index: 1000000;margin-left: 180px;border-radius:25px;">
+              <button class="btn btn-default" type="button"
+                style="border-radius:25px;background-color: #799B59;width: 35px;height: 28px;background-image: url('img/搜索框.png');background-repeat: no-repeat; background-position:center;border-style: none;margin-top: 4px;"
+                onclick="globalsearch()"></button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+  <!-- 菜单栏 -->
+  <!-- 左边部分 -->
+  <aside class="box" id="test">
+    <div style="width: 320px;height: 100%;background: #f8f8f8;position: absolute;">
+      <!-- 缓冲区部分 -->
+      <div style="width: 320px;height: 100%;box-shadow:2px 0px 22px 3px rgba(115,115,115,0.2);" id="hcq">
+        <div style="width: 320px;height: 70px;background:rgba(140,171,110,0.2);">
+          <img src="img/灯.png" style="margin-left: 30px;margin-top:22px;float: left;">
+          <div
+            style="width: 100px;height: 24px;float: right;margin-top:17px;margin-right: 140px;font-size:21px;color: #666666;font-weight: bold;">
+            缓冲区</div>
+        </div>
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+          <div class="panel panel-default">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="jzwhcqdiv"></div>
+            <div class="panel-heading" role="tab" id="jzw_headingOne">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion" href="#jzw_collapseThree"
+                aria-expanded="false" aria-controls="collapseOne" style="height: 30px;" id="jzwhcqclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-size:17px;font-weight:bold;color: #666666;margin-top: 20px;text-decoration:none">
+                  建筑物缓冲区
+                </a>
+              </div>
+            </div>
+            <div id="jzw_collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="jzw_headingOne">
+              <div class="panel-body">
+                <div class="input-group">
+                  <input type="text" class="form-control" placeholder="请输入缓冲距离..."
+                    aria-describedby="basic-addon2" id="jzwBufferValue">
+                  <span class="input-group-addon" id="basic-addon2" onclick="jzwbufferquery()"
+                    style="cursor: pointer;font-weight: bold;">查询</span>
+                  <span class="input-group-addon" id="basic-addon3" onclick="bufferclear()"
+                    style="cursor: pointer;font-weight: bold;">清除</span>
+                </div>
+                <div id="mytable" style="display: block;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-default" style="margin:0;padding: 0;">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="ldhcqdiv"></div>
+            <div class="panel-heading" role="tab" id="ld_headingThree">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion"
+                href="#ld_collapseThree" aria-expanded="false" aria-controls="collapseThree" style="height: 30px;"
+                id="ldhcqclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-weight:bold;font-size:17px;color: #666666;margin-top: 20px;text-decoration:none">
+                  路灯缓冲查询
+                </a>
+              </div>
+            </div>
+            <div id="ld_collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="ld_headingThree">
+              <div class="panel-body">
+                <div class="input-group">
+                  <input type="text" class="form-control" placeholder="请输入缓冲距离..."
+                    aria-describedby="basic-addon2" id="ldBufferValue">
+                  <span class="input-group-addon" id="basic-addon2" onclick="ldbufferquery()"
+                    style="cursor: pointer;font-weight: bold;">查询</span>
+                  <span class="input-group-addon" id="basic-addon3" onclick="bufferclear()"
+                    style="cursor: pointer;font-weight: bold;">清除</span>
+                </div>
+                <div id="mytable" style="display: block;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 缓冲区部分-->
+      <!-- 路灯管理部分-->
+      <div style="width: 320px;height: 100%;box-shadow:2px 0px 22px 3px rgba(115,115,115,0.2);display: none;" id="ld">
+        <div style="width: 320px;height: 70px;background:rgba(140,171,110,0.2);">
+          <img src="img/灯.png" style="margin-left: 30px;margin-top:22px;float: left;">
+          <div
+            style="width: 100px;height: 24px;float: right;margin-top:17px;margin-right: 140px;font-size:21px;color: #666666;font-weight: bold;">
+            路灯管理</div>
+        </div>
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+          <div class="panel panel-default">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="ldcxdiv"></div>
+            <div class="panel-heading" role="tab" id="headingOne">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne"
+                aria-expanded="false" aria-controls="collapseOne" style="height: 30px;" id="ldcxclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-size:17px;font-weight:bold;color: #666666;margin-top: 20px;text-decoration:none">
+                  路灯查询
+                </a>
+              </div>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse " role="tabpanel" aria-labelledby="headingOne">
+              <div class="panel-body" id="querydiv">
+                <p style="font-weight: bold;font-size: 15px;margin-left: 19px;">损坏路灯查询</p>
+                <p><button id="tty" onclick="queryall()" class="btn btn-default"
+                    style="font-weight: bold;margin-left: 18px;margin-right: 15px;width: 68px;height: 34px;">查
+                    询</button><button id="close" class="btn btn-default"
+                    style="font-weight: bold;width: 68px;height: 34px;">关 闭</button></p>
+                <div id="myul" style="display: block;margin-left:8px;"></div>
+                <div id="myull" style="display: none;margin-left:8px;"></div>
+                <div id="myulll" style="display: none;margin-left:8px;"></div>
+                <div id="myullll" style="display: none;margin-left:8px;"></div>
+                <ul class="pager" style="display: none;" id="tttr">
+                  <li id="previous" class="disabled" style="margin-left: -14px;margin-right: 10px;">
+                    <button onclick="previous()" id="lib" style="font-weight:bold;"
+                      class="btn btn-default disabled">上一页</button>
+                  </li>
+                  <li id="next" style="cursor: pointer;" class="disabled">
+                    <button onclick="next()" id="lia" style="font-weight:bold;"
+                      class="btn btn-default disabled">下一页</button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-default" style="margin:0;padding: 0;">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="lddjdiv"></div>
+            <div class="panel-heading" role="tab" id="headingThree">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion"
+                href="#collapseThree" aria-expanded="false" aria-controls="collapseThree" style="height: 30px;"
+                id="lddjclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-weight:bold;font-size:17px;color: #666666;margin-top: 20px;text-decoration:none">
+                  路灯登记
+                </a>
+              </div>
+            </div>
+            <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+              <div class="panel-body">
+                <div class="input-group">
+                  <input type="text" class="form-control" placeholder="请输入路灯编号 如1、2、20..."
+                    aria-describedby="basic-addon2" id="bianhao">
+                  <span class="input-group-addon" id="basic-addon2" onclick="queryid()"
+                    style="cursor: pointer;font-weight: bold;">查询</span>
+                </div>
+                <div id="mytable" style="display: block;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 路灯管理部分 -->
+      <!-- 交通查询部分 -->
+      <div style="width: 320px;height: 100%;box-shadow:2px 0px 22px 3px rgba(115,115,115,0.2);display: none;" id="bd">
+        <div style="width: 320px;height: 70px;background:rgba(140,171,110,0.2);">
+          <img src="img/房.png" style="margin-left: 30px;margin-top:22px;float: left;">
+          <div
+            style="width: 100px;height: 24px;float: right;margin-top:17px;margin-right: 140px;font-size:21px;font-weight:bold;color: #666666">
+            交通查询</div>
+        </div>
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+          <div class="panel panel-default">
+            <div class="panel-heading" role="tab" id="headingOne" style="height:50px;">
+              <h4 class="panel-title" style="margin-top: 3px;">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-weight:bold;font-size:17px;color: #666666;margin-top: 20px;text-decoration:none;margin-top: 15px;">
+                  路线查询
+                </a>
+              </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+              <div class="panel-body">
+                <div class="row">
+                  <div class="col-lg-2">
+                    <span class="glyphicon glyphicon-sort"
+                      style="position: absolute;margin-top: 30px;margin-left:10px;font-size: 20px;"></span>
+                  </div>
+                  <div class="col-lg-9">
+                    <div class="input-group">
+                      <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-map-marker" style="color: green"></span>
+                      </span>
+                      <div class="dropdown">
+                        <input type="text" class="form-control dropdown-toggle nba1" id="dropdownMenu1" value=""
+                          oninput="gaibian()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1"
+                          style="margin-top: 35px;display: none;width: 169px;" aria-haspopup="true"
+                          aria-expanded="false" id="xialai">
+                          <li>
+                            <a href="#">敬文图书馆</a>
+                          </li>
+                          <li>
+                            <a href="#">学行楼</a>
+                          </li>
+                          <li>
+                            <a href="#">4号校门</a>
+                          </li>
+                          <li>
+                            <a href="#">北苑</a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-lg-2"></div>
+                  <div class="col-lg-9">
+                    <div class="input-group">
+                      <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-map-marker" style="color: red"></span></span>
+                      <div class="dropdown">
+                        <input type="text" class="form-control dropdown-toggle nba2" id="dropdownMenu2" value=""
+                          oninput="gaibian2()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu2"
+                          style="margin-top: 35px;display: none;width: 169px;" aria-haspopup="true"
+                          aria-expanded="false" id="xialai2">
+                          <li>
+                            <a href="#">敬文图书馆</a>
+                          </li>
+                          <li>
+                            <a href="#">学行楼</a>
+                          </li>
+                          <li>
+                            <a href="#">4号校门</a>
+                          </li>
+                          <li>
+                            <a href="#">北苑</a>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div class="row">
+                  <div class="col-lg-6 col-lg-offset-3">
+                    <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                      <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default" onclick="donthave()" style="font-weight: bold;"
+                          data-toggle="tooltip" data-placement="top" title="清除结果"><span
+                            class="glyphicon glyphicon-erase" style="font-size: 22px;"></span></button>
+                      </div>
+                      <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default" onclick="gethave()" style="font-weight: bold;"
+                          data-toggle="tooltip" data-placement="top" title="获取路线"><span class="glyphicon glyphicon-send"
+                            style="font-size: 22px;"></span></button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <div id="biao" style="width: 100%;display: none;padding: 0;margin:0;height: 100%;">
+                  <div class="overflow:auto row pre-scrollable"
+                    style="overflow: auto;width: 100%;margin-left: 0px;height: 100%;">
+                    <table class="table table-bordered" style="width: 100%;height: 100%;">
+                      <tbody id="biaodan" style="overflow: auto;width: 100%;height: 100%;">
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 交通查询部分 -->
+      <!-- 能耗监控 -->
+      <div style="width: 320px;height: 100%;box-shadow:2px 0px 22px 3px rgba(115,115,115,0.2);display: none;" id="nh">
+        <div style="width: 320px;height: 70px;background:rgba(140,171,110,0.2);">
+          <img src="img/房.png" style="margin-left: 30px;margin-top:22px;float: left;">
+          <div
+            style="width: 100px;height: 24px;float: right;margin-top:17px;margin-right: 140px;font-size:21px;font-weight:bold;color: #666666">
+            能耗监控</div>
+        </div>
+        <div class="panel-group" id="accordion1" role="tablist" aria-multiselectable="true">
+          <div class="panel panel-default">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="nhcxdiv"></div>
+            <div class="panel-heading" role="tab" id="headingFour">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion1"
+                href="#collapseOne1" aria-expanded="false" aria-controls="collapseOne1" style="height: 30px;"
+                id="nhcxclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-weight:bold;font-size:17px;color: #666666;margin-top: 20px;text-decoration:none">
+                  能耗查询
+                </a>
+              </div>
+            </div>
+            <div id="collapseOne1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+              <div class="panel-body" id="build" style="max-height:500px;overflow: auto;">
+                <div class="input-group">
+                  <input type="text" class="form-control" placeholder="如食堂、宿舍、图书馆" aria-describedby="basic-addon2"
+                    id="jianzhu">
+                  <span class="input-group-addon" id="basequery" onclick="buildquery()"
+                    style="cursor: pointer;color: #333;font-weight: bold;">查询</span>
+                  <span class="input-group-addon" id="basic-addon2"
+                    style="cursor: pointer;color: #333;font-weight: bold;" onclick="Eliminate()">清除</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-default" style="margin:0;padding: 0;">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="nhtjdiv"></div>
+            <div class="panel-heading" role="tab" id="headingSix">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion1"
+                href="#collapseTwo1" aria-expanded="false" aria-controls="collapseTwo1" style="height: 30px;"
+                id="nhtjclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-weight:bold;font-size:17px;color: #666666;margin-top: 20px;text-decoration:none">
+                  能耗统计
+                </a>
+              </div>
+            </div>
+            <div id="collapseTwo1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSix">
+              <div class="panel-body">
+                <center>
+                  <span style="margin-left: -65px;font-size: 17px;color: #3c763d;font-weight: bold;"><span
+                      class="glyphicon glyphicon-stats"></span>&nbsp;&nbsp;指标：</span>
+                  <select id="selEng" style="font-size: 17px;margin-left: 5px;color: #3c763d;">
+                    <option value="volvo">用电</option>
+                    <option value="saab">用水</option>
+                  </select>
+                  </p>
+                  <p>
+                    <span style="margin-left: -65px;font-size: 17px;color: #3c763d;font-weight: bold;"><span
+                        class="glyphicon glyphicon-cloud"></span>&nbsp;&nbsp;年份：</span>
+                    <select id="selMonth" style="font-size: 17px;margin-left: 5px;color: #3c763d">
+                      <option value="volvo">2013</option>
+                      <option value="saab">2014</option>
+                      <option value="opel">2015</option>
+                    </select>
+                </center>
+                <br>
+                <center><button onclick="Statistics()" class="btn btn-default" data-toggle="tooltip"
+                    data-placement="left" title="点击柱体定位"
+                    style="font-weight: bold;margin-left: -22px;">统计</button><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><button
+                    onclick="clearpoint()" class="btn btn-default disabled" data-toggle="tooltip" data-placement="right"
+                    title="清除查询的结果" style="font-weight: bold;" id="clearpoint">清除</button></center>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-default" style="margin:0;padding: 0;">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="cbzsdiv"></div>
+            <div class="panel-heading" role="tab" id="headingFive">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion1"
+                href="#collapseThree1" aria-expanded="false" aria-controls="collapseThree1" style="height: 30px;"
+                id="cbzsclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-weight:bold;font-size:17px;color: #666666;margin-top: 20px;text-decoration:none">
+                  超标展示
+                </a>
+              </div>
+            </div>
+            <div id="collapseThree1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive">
+              <div class="panel-body">
+                <center>
+                  <span style="margin-left: -65px;font-size: 17px;color: #3c763d;font-weight: bold;"><span
+                      class="glyphicon glyphicon-stats"></span>&nbsp;&nbsp;指标：</span>
+                  <select id="selectT" style="font-size: 17px;margin-left: 5px;color: #3c763d">
+                    <option value="volvo">用电</option>
+                    <option value="saab">用水</option>
+                  </select>
+                  </p>
+                  <p>
+                    <span style="margin-left: -65px;font-size: 17px;color: #3c763d;font-weight: bold;"><span
+                        class="glyphicon glyphicon-cloud"></span>&nbsp;&nbsp;年份：</span>
+                    <select id="selectY" style="font-size: 17px;margin-left: 5px;color: #3c763d">
+                      <option value="volvo">2013</option>
+                      <option value="saab">2014</option>
+                      <option value="opel">2015</option>
+                    </select>
+                </center>
+                <br>
+                <center><button onclick="overproof()" class="btn btn-default" data-toggle="tooltip"
+                    data-placement="left" title="点击柱体查询"
+                    style="font-weight: bold;margin-left: -22px;">统计</button><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><button
+                    onclick="clearquery()" class="btn btn-default disabled" data-toggle="tooltip" data-placement="right"
+                    title="清除查询的结果" style="font-weight: bold;" id="clearquery">清除</button></center>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 能耗监控 -->
+      <!-- 校车管理 -->
+      <div style="width: 320px;height: 100%;display: none;box-shadow:2px 0px 22px 3px rgba(115,115,115,0.2);" id="xc">
+        <div style="width: 320px;height: 70px;background:rgba(140,171,110,0.2);">
+          <img src="img/车.png" style="margin-left: 30px;margin-top:22px;float: left;">
+          <div
+            style="width: 100px;height: 24px;float: right;margin-top:17px;margin-right: 140px;font-size:21px;font-weight:bold;color: #666666">
+            校车管理</div>
+        </div>
+        <div id="main"
+          style="width: 500px;height: 300px;position: absolute;margin-left: 390px;margin-top:300px;z-index: 200000">
+        </div>
+        <div class="panel-group" id="accordion110" role="tablist" aria-multiselectable="true">
+          <div class="panel panel-default">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="lxcxdiv"></div>
+            <div class="panel-heading" role="tab" id="headingFourfive">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion110"
+                href="#collapseOne110" aria-expanded="false" aria-controls="collapseOne110" style="height: 30px;"
+                id="lxcxclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-weight:bold;font-size:17px;color: #666666;margin-top: 20px;text-decoration:none">
+                  路线查询
+                </a>
+              </div>
+            </div>
+            <div id="collapseOne110" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFourfive">
+              <div class="panel-body" id="thebuild" style="max-height:500px;overflow: auto;">
+                <div class="input-group">
+                  <span class="input-group-addon" id="basic-addon1"><span
+                      class="glyphicon glyphicon-random"></span></span>
+                  <input type="text" class="form-control" placeholder="请输入校车路线，如茶苑、茶苑—中北"
+                    aria-describedby="basic-addon2" id="jiaotong">
+                </div>
+                <br>
+                <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                  <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default" onclick="Queryroute1()"
+                      style="font-weight: bold;">查询</button>
+                  </div>
+                  <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default" onclick="Onebuttonquery1()"
+                      style="font-weight: bold;">一键查询</button>
+                  </div>
+                  <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default" onclick="donot1()"
+                      style="font-weight: bold;">清除</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-default" style="margin:0;padding: 0;">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="xzlxdiv"></div>
+            <div class="panel-heading" role="tab" id="headingSixfive">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion110"
+                href="#collapseTwo110" aria-expanded="false" aria-controls="collapseTwo110" style="height: 30px;"
+                id="xzlxclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-weight:bold;font-size:17px;color: #666666;margin-top: 20px;text-decoration:none">
+                  新增路线&编辑
+                </a>
+              </div>
+            </div>
+            <div id="collapseTwo110" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSixfive">
+              <div class="panel-body">
+                <div class="input-group">
+                  <span class="input-group-addon" style="font-weight: bold;width: 80px;">道路名</span>
+                  <input type="text" class="form-control" placeholder="请设置道路名" aria-describedby="basic-addon1"
+                    id="attributename" value="">
+                </div>
+                <div class="input-group" style="margin-top:10px;">
+                  <span class="input-group-addon" style="font-weight: bold;width: 80px;">道路类型</span>
+                  <input type="text" class="form-control" placeholder="校内道路、校外道路" aria-describedby="basic-addon1"
+                    id="attributevalue" value="">
+                </div>
+                <div class="input-group" style="margin-top:10px;">
+                  <span class="input-group-addon" style="font-weight: bold;width: 80px;">时间表</span>
+                  <input type="text" class="form-control" placeholder="如：7:30-17:00(每10分钟一班)"
+                    aria-describedby="basic-addon1" id="attributetime" value="">
+                </div>
+                <br>
+                <br>
+                <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                  <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default" onclick="newadd()" style="font-weight: bold;"
+                      data-toggle="tooltip" data-placement="top" title="新增路线"><span class="glyphicon glyphicon-erase"
+                        style="font-size: 22px;"></span></button>
+                  </div>
+                  <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default disabled" id="bianji" onclick="editt()"
+                      style="font-weight: bold;" data-toggle="tooltip" data-placement="top" title="编辑路线"><span
+                        class="glyphicon glyphicon-edit" style="font-size: 22px;"></span></button>
+                  </div>
+                  <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default" onclick="Submission()" style="font-weight: bold;"
+                      data-toggle="tooltip" data-placement="top" title="提交路线"><span class="glyphicon glyphicon-saved"
+                        style="font-size: 22px;"></span></button>
+                  </div>
+                  <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-default" onclick="shanchu()" style="font-weight: bold;"
+                      data-toggle="tooltip" data-placement="top" title="撤回路线"><span class="glyphicon glyphicon-share"
+                        style="font-size: 22px;"></span></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-default" style="margin:0;padding: 0;">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="sclxdiv"></div>
+            <div class="panel-heading" role="tab" id="headingFivefive">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion110"
+                href="#collapseThree110" aria-expanded="false" aria-controls="collapseThree110" style="height: 30px;"
+                id="sclxclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-weight:bold;font-size:17px;color: #666666;margin-top: 20px;text-decoration:none">
+                  删除路线
+                </a>
+              </div>
+            </div>
+            <div id="collapseThree110" class="panel-collapse collapse" role="tabpanel"
+              aria-labelledby="headingFivefive">
+              <div class="panel-body">
+                <div class="input-group">
+                  <span class="input-group-addon" id="basic-addon1"><span
+                      class="glyphicon glyphicon-retweet"></span></span>
+                  <input type="text" class="form-control" placeholder="请输入道路名" aria-describedby="basic-addon2"
+                    id="daolu">
+                </div>
+                <br>
+                <center>
+                  <button type="button" class="btn btn-default" onclick="search()"
+                    style="font-weight: bold;font-size:20px;" data-toggle="tooltip" data-placement="left"
+                    title="搜索"><span class="glyphicon glyphicon-zoom-in"></span></button>
+                  <button type="button" class="btn btn-default" onclick="cute()"
+                    style="font-weight: bold;font-size:20px;" data-toggle="tooltip" data-placement="right"
+                    title="删除"><span class="glyphicon glyphicon-calendar"></span></button>
+                </center>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 校车管理 -->
+      <!-- 绿化专题 -->
+      <div style="width: 320px;height: 100%;box-shadow:2px 0px 22px 3px rgba(115,115,115,0.2);display: none;" id="lh">
+        <div style="width: 320px;height: 70px;background:rgba(140,171,110,0.2);">
+          <img src="img/花.png" style="margin-left: 30px;margin-top:22px;float: left;">
+          <div
+            style="width: 100px;height: 24px;float: right;margin-top:17px;margin-right: 140px;font-size:21px;font-weight:bold;color: #666666">
+            绿化专题</div>
+        </div>
+        <div class="panel-group" id="accordion15" role="tablist" aria-multiselectable="true">
+          <div class="panel panel-default">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="lhssdiv"></div>
+            <div class="panel-heading" role="tab" id="headingFourone">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion15"
+                href="#collapseOne19" aria-expanded="false" aria-controls="collapseOne19" style="height: 30px;"
+                id="lhssclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-weight:bold;font-size:17px;color: #666666;margin-top: 20px;text-decoration:none">
+                  绿化设施
+                </a>
+              </div>
+            </div>
+            <div id="collapseOne19" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFourone">
+              <div class="panel-body" id="build">
+                <div class="input-group">
+                  <div class="has-success" style="margin-left: 10px;">
+                    <div class="checkbox" style="margin-left: 5px;">
+                      <input type="checkbox" id="checkboxSuccess1" value="option1"
+                        style="margin-top:9px;margin-left: 6px">
+                      <label style="margin-left: 12px">
+                        <span class="glyphicon glyphicon-object-align-bottom" style="font-size: 20px;"></span>
+                        <span style="font-size: 17px;margin-left: 8px;font-weight: bold;">街头座椅</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="has-success" style="margin-left: 10px;">
+                    <div class="checkbox" style="margin-left: 5px;">
+                      <input type="checkbox" id="checkboxSuccess2" value="option1"
+                        style="margin-top:9px;margin-left: 6px">
+                      <label style="margin-left: 12px">
+                        <span class="glyphicon glyphicon-calendar" style="font-size: 20px;"></span>
+                        <span style="font-size: 17px;margin-left: 8px;font-weight: bold;">垃圾桶</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div class="has-success" style="margin-left: 10px;">
+                    <div class="checkbox" style="margin-left: 5px;">
+                      <input type="checkbox" id="checkboxSuccess3" value="option1"
+                        style="margin-top:9px;margin-left: 6px">
+                      <label style="margin-left: 12px">
+                        <span class="glyphicon glyphicon-tree-deciduous" style="font-size: 20px;"></span>
+                        <span style="font-size: 17px;margin-left: 8px;font-weight: bold;">行道树</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-default" style="margin:0;padding: 0;">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="lhtjdiv"></div>
+            <div class="panel-heading" role="tab" id="headingSixone">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion15"
+                href="#collapseTwo18" aria-expanded="false" aria-controls="collapseTwo18" style="height: 30px;"
+                id="lhtjclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-weight:bold;font-size:17px;color: #666666;margin-top: 20px;text-decoration:none">
+                  绿化统计
+                </a>
+              </div>
+            </div>
+            <div id="collapseTwo18" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingSixone">
+              <div class="panel-body">
+                <center>
+                  <span style="margin-left: -65px;font-size: 17px;color: #3c763d;font-weight: bold;"><span
+                      class="glyphicon glyphicon-stats"></span>&nbsp;&nbsp;指标：</span>
+                  <select id="selType" style="font-size: 17px;margin-left: 5px;color: #3c763d">
+                    <option value="volvo">行道树</option>
+                    <option value="saab">垃圾桶</option>
+                  </select>
+                  </p>
+                  <p>
+                    <span style="margin-left: -65px;font-size: 17px;color: #3c763d;font-weight: bold;"><span
+                        class="glyphicon glyphicon-cloud"></span>&nbsp;&nbsp;年份：</span>
+                    <select id="selYear" style="font-size: 17px;margin-left: 5px;color: #3c763d">
+                      <option value="volvo">2014年</option>
+                      <option value="saab">2015年</option>
+                      <option value="opel">2016年</option>
+                    </select>
+                </center>
+                <br>
+                <center><button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left"
+                    title="" onclick="Greeningstatistics()"
+                    style="font-weight: bold;margin-left: -22px;">统计</button><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><button
+                    onclick="clearpointt()" class="btn btn-default disabled" data-toggle="tooltip"
+                    data-placement="right" title="清除查询的结果" style="font-weight: bold;" id="clearpointt">清除</button>
+                </center>
+              </div>
+            </div>
+          </div>
+          <div class="panel panel-default" style="margin:0;padding: 0;">
+            <div style="width: 10px;height: 50px;background: #8BA96E;float: left;display: none;" id="lhwhdiv"></div>
+            <div class="panel-heading" role="tab" id="headingFiveone">
+              <div class="panel-title" role="button" data-toggle="collapse" data-parent="#accordion15"
+                href="#collapseThree17" aria-expanded="false" aria-controls="collapseThree17" style="height: 30px;"
+                id="lhwhclick">
+                <a class="collapsed"
+                  style="margin-left: 20px;font-weight:bold;font-size:17px;color: #666666;margin-top: 20px;text-decoration:none">
+                  绿化维护
+                </a>
+              </div>
+            </div>
+            <div id="collapseThree17" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFiveone">
+              <div class="panel-body">
+                <center>
+                  <span style="margin-left: -65px;font-size: 17px;color: #3c763d;font-weight: bold;"><span
+                      class="glyphicon glyphicon-stats"></span>&nbsp;&nbsp;指标：</span>
+                  <select id="selectype" style="font-size: 17px;margin-left: 5px;color: #3c763d">
+                    <option value="volvo">行道树</option>
+                    <option value="saab">垃圾桶</option>
+                  </select>
+                  </p>
+                  <p>
+                    <span style="margin-left: -65px;font-size: 17px;color: #3c763d;font-weight: bold;"><span
+                        class="glyphicon glyphicon-cloud"></span>&nbsp;&nbsp;年份：</span>
+                    <select id="selectyear" style="font-size: 17px;margin-left: 5px;color: #3c763d">
+                      <option value="volvo">2014年</option>
+                      <option value="saab">2015年</option>
+                      <option value="opel">2016年</option>
+                    </select>
+                </center>
+                <br>
+                <center><button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="left"
+                    title="数量统计" onclick="Maintain()"
+                    style="font-weight: bold;margin-left: -10px;">统计</button><span>&nbsp;</span>
+                  <button type="button" class="btn btn-default" data-toggle="tooltip" data-placement="right"
+                    title="查看三年增长趋势" onclick="theyear()" style="font-weight: bold;">历年趋势</button>
+                </center>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 绿化专题 -->
+    <!-- 滑动按钮 -->
+    <div style="width: 44.8px;height: 100%;background: background:rgba(255,255,255,0.8); float: right;">
+      <button id="btn"
+        style="background-image:url('img/按钮-花.png') ;background-repeat: no-repeat; background-position:center;border-style: none;outline:none;width: 75px;height: 160px;z-index: 20000;position: absolute;margin-left: -32px;"></button>
+    </div>
+  </aside>
+  <!-- 右边的按钮组 -->
+  <div id="maindiv">
+    <div style="width: 100px;height: 350px;position: fixed;margin-left: 93.97083333%;margin-top: 30px;z-index: 200000">
+      <div class="btn-group-vertical" role="group" id="anniu"
+        style="box-shadow:2px 3px 5px 0px rgba(51,51,51,0.18);border-radius:5px;width: 45px;margin-left: 55px;">
+        <button type="button" class="btn btn-default"
+          style="background-image:url('img/全图.png') ;background-repeat: no-repeat; background-position:center;border-style: none;outline:none;"
+          onclick="Fullwidth()" data-toggle="tooltip" data-placement="left" title="全幅显示">
+        </button>
+        <button type="button" class="btn btn-default"
+          style="background-image:url('img/放大.png') ;background-repeat: no-repeat; background-position:center;border-style: none;outline:none;"
+          onclick="enlarge()" data-toggle="tooltip" data-placement="left" title="放大">
+        </button>
+        <button type="button" class="btn btn-default"
+          style="background-image:url('img/缩小.png') ;background-repeat: no-repeat; background-position:center;border-style: none;outline:none;"
+          onclick="narrow()" data-toggle="tooltip" data-placement="left" title="缩小">
+        </button>
+        <button type="button" class="btn btn-default"
+          style="background-image:url('img/平移.png') ;background-repeat: no-repeat; background-position:center;border-style: none;outline:none;"
+          onclick="translation()" data-toggle="tooltip" data-placement="left" title="平移">
+        </button>
+        <button type="button" onclick="distance()" class="btn btn-default"
+          style="background-image:url('img/距离.png') ;background-repeat: no-repeat; background-position:center;border-style: none;outline:none;"
+          data-toggle="tooltip" data-placement="left" title="距离量算">
+        </button>
+        <button type="button" onclick="measure()" class="btn btn-default"
+          style="background-image:url('img/面积.png') ;background-repeat: no-repeat; background-position:center;border-style: none;outline:none;"
+          data-toggle="tooltip" data-placement="left" title="面积量算">
+        </button>
+        <button type="button" class="btn btn-default"
+          style="background-image:url('img/清除.png') ;background-repeat: no-repeat; background-position:center;border-style: none;outline:none;"
+          onclick="clearr()" data-toggle="tooltip" data-placement="left" title="清除">
+        </button>
+      </div>
+    </div>
+    <div style="background: #f8f8f8;width: 81%;height: 100%;position:sticky;top: 0px;min-height: 664px;" id="map">
+      <div id="light"
+        style="width:450px;height: 300px;position: absolute;margin-top:472px;z-index: 200000;display: none; margin-left: 20px;">
+      </div>
+    </div>
+  </div>
+  <div style="background: #f8f8f8;width:100%;height: 3.5%;min-width: 1770px;">
+    <span style="padding-top: 10px;display: block;text-align: center;">Copyright &copy; 2012-2020 SuperMap</span>
+  </div>
+</body>
+<script src="js/start.js"></script>
+<script src="js/first.js"></script>
+<script src="js/ldgl.js"></script>
+<script src="js/nhjk.js"></script>
+<script src="js/lhzt.js"></script>
+<script src="js/xygl.js"></script>
+<script src="js/buffer.js"></script>
+
+</html>

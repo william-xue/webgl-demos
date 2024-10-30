@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js"></script>
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+</head>
+<body>
+    
+</body>
+<script>
+    // 根据feature 生成png图片下载链接
+
+    // https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v12/static/[121.125006960729536,29.670067000517562,121.398302479799966,29.840627647709844]/1200x800?access_token=pk.eyJ1Ijoiemhlbmd5dWFuMDEiLCJhIjoiY2tweHJuaWMyMDd4aDJ2cGR4azJpMHA3ZyJ9.2uE3aEVVqriGOKNU11xEnw
+    // https://api.mapbox.com/styles/v1/mapbox/satellite-streets-v12/static/[121.085363323175031,29.64689713177593,121.409879825280484,29.867099393149712]/1200x800?access_token=pk.eyJ1Ijoiemhlbmd5dWFuMDEiLCJhIjoiY2tweHJuaWMyMDd4aDJ2cGR4azJpMHA3ZyJ9.2uE3aEVVqriGOKNU11xEnw
+
+   let datas =  [
+    {
+        "number": "Act 1, Scene 1",
+        "title": "Verona. A public place",
+        "people": "Sampson; Gregory; Abram; Balthasar; Benvolio; Tybalt; Citizens; Capulet; Lady Capulet; Montague; Lady Montague; Prince Escalus; Romeo"
+    },
+    {
+        "number": "Act 1, Scene 2",
+        "title": "Verona. A street",
+        "people": "Capulet; County Paris; Second Servingman; Benvolio; Romeo"
+    },
+    {
+        "number": "Act 1, Scene 3",
+        "title": "Verona. A room in Capulet’s house.",
+        "people": "Lady Capulet; Nurse; Juliet; First Servingman"
+    },
+    {
+        "number": "Act 1, Scene 4",
+        "title": "Verona. A street.",
+        "people": "Romeo; Mercutio; Benvolio; Maskers; Torch-Bearers"
+    },
+    {
+        "number": "Act 1, Scene 5",
+        "title": "Verona. A hall in Capulet’s house.",
+        "people": "Anthony; Potpan; Capulet; Lady Capulet; Old Capulet; Juliet; Tybalt; Nurse; First Servingman; Second Servingman; Third Servingman; Guests; Gentlewomen; Maskers; Romeo; Mercutio; Benvolio"
+    },
+    {
+        "number": "Act 2, Scene 1",
+        "title": "A lane by the wall of Capulet’s orchard.",
+        "people": "Romeo; Benvolio; Mercutio"
+    },
+    {
+        "number": "Act 2, Scene 2",
+        "title": "Capulet’s orchard.",
+        "people": "Romeo; Juliet; Nurse"
+    },
+    {
+        "number": "Act 2, Scene 3",
+        "title": "Friar Lawrence’s cell.",
+        "people": "Friar Lawrence; Romeo"
+    },
+    {
+        "number": "Act 2, Scene 4",
+        "title": "Verona. A street.",
+        "people": "Benvolio; Mercutio; Romeo; Nurse; Peter"
+    },
+    {
+        "number": "Act 2, Scene 5",
+        "title": "Capulet’s orchard.",
+        "people": "Juliet; Nurse; Peter"
+    },
+    {
+        "number": "Act 2, Scene 6",
+        "title": "Friar Lawrence’s cell.",
+        "people": "Friar Lawrence; Romeo; Juliet"
+    },
+    {
+        "number": "Act 3, Scene 1",
+        "title": "Verona. A street.",
+        "people": "Mercutio; Benvolio; Mercutio’s Page; Men; Tybalt; Petruchio; Romeo; Citizens; Prince Escalus; Montague; Capulet; Lady Capulet; Lady Montague"
+    },
+    {
+        "number": "Act 3, Scene 2",
+        "title": "Capulet’s orchard.",
+        "people": "Juliet; Nurse"
+    },
+    {
+        "number": "Act 3, Scene 3",
+        "title": "Friar Lawrence’s cell.",
+        "people": "Friar Lawrence; Romeo; Nurse"
+    },
+    {
+        "number": "Act 3, Scene 4",
+        "title": "A room in Capulet’s house.",
+        "people": "Capulet; Lady Capulet; Paris"
+    },
+    {
+        "number": "Act 3, Scene 5",
+        "title": "Capulet’s orchard and Juliet’s chamber",
+        "people": "Romeo; Juliet; Nurse; Lady Capulet; Capulet"
+    },
+    {
+        "number": "Act 4, Scene 1",
+        "title": "Friar Lawrence’s cell.",
+        "people": "Friar Lawrence; County Paris; Juliet"
+    },
+    {
+        "number": "Act 4, Scene 2",
+        "title": "A hall in Capulet’s house.",
+        "people": "Capulet; Lady Capulet; Nurse; First Servingman; Second Servingman; Juliet"
+    },
+    {
+        "number": "Act 4, Scene 3",
+        "title": "Juliet’s chamber.",
+        "people": "Juliet; Nurse; Lady Capulet"
+    },
+    {
+        "number": "Act 4, Scene 4",
+        "title": "A hall in Capulet’s house.",
+        "people": "Lady Capulet; Nurse; Capulet; First Servingman; Second Servingman"
+    },
+    {
+        "number": "Act 4, Scene 5",
+        "title": "Juliet’s chamber.",
+        "people": "Nurse; Juliet; Lady Capulet; Capulet; Friar Lawrence; County Paris; First Musician; Second Musician; Third Musician; Peter"
+    },
+    {
+        "number": "Act 5, Scene 1",
+        "title": "Mantua. A street.",
+        "people": "Romeo; Balthasar; Apothecary"
+    },
+    {
+        "number": "Act 5, Scene 2",
+        "title": "Friar Lawrence’s cell.",
+        "people": "Friar John; Friar Lawrence"
+    },
+    {
+        "number": "Act 5, Scene 3",
+        "title": "A churchyard; before a tomb belonging to the Capulets.",
+        "people": "Paris; Page; Romeo; Balthasar; Friar Lawrence; Juliet; First Watchman; Second Watchman; Third Watchman; Prince Escalus; Attendants; Montague"
+    }
+]
+
+let cypherStr = ``;
+
+datas.forEach(item=>{
+    const { number, title, people} = item
+    let peoples = people.split(';').map(it => {
+        let str =  it.replace(/\s*/g,"")
+        str = str.replace(str[0],str[0].toLowerCase())
+        return str;
+    })
+
+    let num = number[4] + ''+ number[13]
+
+    peoples.forEach(im=>{
+        cypherStr += `create (${im})-[:APPEARS_IN]->(scene${num})`
+        cypherStr += '\n'
+    })
+    console.log(peoples)
+})
+console.log(cypherStr)
+
+
+
+</script>
+</html>

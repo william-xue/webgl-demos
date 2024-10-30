@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        color: #fff;
+      }
+      div {
+        box-sizing: border-box;
+      }
+      .container {
+        width: 100vw;
+        height: 100vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 1);
+      }
+      .title {
+        font-size: 4.53vw;
+        margin: 4.13vw 0 1.13vw 0;
+      }
+      .introduction {
+        font-size: 0.75vw;
+      }
+      .content {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: space-evenly;
+        align-items: flex-start;
+        margin-top: 3vw;
+        margin-bottom: 2vw;
+      }
+      .content-img {
+        width: 35%;
+        margin-right: 5.13vw;
+      }
+      .text {
+        font-size: 2.83vw;
+        display: flex;
+        height: 100%;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-start;
+      }
+      .text .next {
+        background-color: rgb(198, 225, 230);
+        display: block;
+        width: 200px;
+        height: 60px;
+        border: 1px solid #ccc;
+        border-radius: 21px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 0.83vw;
+        cursor: pointer;
+        color:black;
+        text-decoration: none;
+      }
+      .text .next:hover {
+        transform: scale(1.1);
+        transition: all 0.3s;
+        color: red;
+      }
+      .info {
+        width: 65%;
+        text-align: left;
+        font-size: 0.73vw;
+      }
+      .content .left{
+        width: 40%;
+        height: 100%;
+      }
+      .content .left .top{
+        height: 620px;
+      }
+      .content .left .bottom{
+        height: 500px;
+      }
+      .content .right{
+        width: 50%;
+        height: 100%;
+      }
+      .content .right{
+        width: 50%;
+        height: 620px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="title">Friends in Data Visualization</h1>
+      <p class="introduction">In this project, I'm talking about the TV series Friends. Friends is one of the best successful TV series in Americal even all over the world. I think all people know Friends.</p>
+      <p class="introduction">We are going to talking about three questions. Who is the most talktive character in Friends. Which couple has the most two people shot and the number of times of each character cared about others in their lines.</p>
+      <p class="introduction">The follow four pages are mainly using Data Visualization to analysis these questions.</p>
+      <div class="content">
+        <div class="left">
+          <div class="top">
+            <iframe name="my-iframe" src="./xian3.html" width="100%" height="100%" style="" frameborder="0" scrolling="no"></iframe>
+          </div>
+          <div class="bottom">
+            <!-- <iframe name="my-iframe" src="./xian.html" width="100%" height="100%" style="" frameborder="0" scrolling="no"></iframe> -->
+          </div>
+        </div>
+        <div class="right">
+          <iframe name="my-iframe" src="./sandian.html" width="100%" height="100%" style="" frameborder="0" scrolling="no"></iframe>
+        </div>
+      </div>
+      
+    </div>
+  </body>
+</html>

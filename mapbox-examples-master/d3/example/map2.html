@@ -1,0 +1,83 @@
+<html>  
+    <head>  
+        <meta charset="utf-8">  
+        <title>中国数据地图</title>  
+    <style>
+      /* .tooltip {
+    position: absolute;
+    pointer-events: none;
+    font-size: 8px;
+    opacity: 1;
+}
+      .southchinasea {
+        stroke: black;
+        stroke-width: 1px;
+        fill: red;
+      }
+      img{
+        border: 0.3px solid black;
+      } */
+    </style>
+    <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script> 
+    </head> 
+<body>
+  <svg width="1000" height="1000"></svg>
+  <script>
+    var marge = {top:60,bottom:60,left:60,right:60}
+    var svg = d3.select("svg")
+    var width = svg.attr("width")
+    var height = svg.attr("height")
+    var g = svg.append("g").attr("transform","translate("+marge.top+","+marge.left+")");
+    //投影函数
+    var projection = d3.geoMercator()
+    .center([107, 31])
+    .scale(800)
+    .translate([width/2, height/2]);
+    //路径
+    var path = d3.geoPath(projection);
+    var color = d3.schemeCategory10;
+
+    d3.json("./china.json").then(function(data){
+      console.log(data)
+      svg.selectAll("g")
+          .data(data.features)
+          .enter()
+          .append("g")
+          .append("path")
+          .attr('d',path)//使用地理路径生成器
+          .attr("stroke","#000")
+          .attr("stroke-width",1)
+          .attr("fill", function(d,i){
+              return color[i%10];
+          })
+          .on("mouseover",function(d,i){
+              d3.select(this).attr('opacity', 0.5);
+          })
+          .on("mouseout",function(d,i){
+              d3.select(this).attr('opacity', 1);
+          });
+    //添加坐标
+    svg.selectAll("g")
+       .append('text')
+       .attr('font-size', 12)
+       .attr('text-anchor', 'middle')
+       .attr('x', d => {
+        var position = projection(d.properties.centroid || [0, 0]);
+        return position[0];
+       })
+       .attr('y', d => {
+        var position = projection(d.properties.centroid || [0, 0]);
+        return position[1];
+      })
+      .attr('dy', d => {
+      //这里为什么这么写呢，因为澳门和香港重合了，挤到一起了。
+        if (d.properties.name === '澳门') {
+          return 15;
+        }
+      })
+      .text(d => d.properties.name);
+        
+    })
+  </script>
+</body>
+</html>  

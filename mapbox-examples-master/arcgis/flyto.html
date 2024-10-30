@@ -1,0 +1,259 @@
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+<title>绘制折线并模拟飞行</title>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.15/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.15/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/views/draw/Draw",
+        "esri/Graphic",
+        "esri/geometry/geometryEngine",
+        "esri/widgets/CoordinateConversion",
+        "esri/geometry/support/webMercatorUtils"
+      ], function(Map, MapView, Draw, Graphic, geometryEngine, CoordinateConversion, webMercatorUtils) {
+        const map = new Map({
+          basemap: "gray"
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          map: map,
+          zoom: 13,
+          center: [114.91, 30.03]
+        });
+
+        // 把绘制直线的按钮添加到页面上 
+        view.ui.add("line-button", "top-right");
+        // 把飞行按钮添加到页面上
+        view.ui.add("fly-button", "top-right");
+
+       // Draw是一个有强大功能的绘图工具，比如绘制不相交的折线
+       const draw = new Draw({
+          view: view
+        });
+
+        // 绘制折线按钮点击事件
+        document.getElementById("line-button").onclick = function() {
+          view.graphics.removeAll();// 移除上一条折线
+
+          // 动作变量
+          const action = draw.create("polyline");
+
+          // 激活键盘快捷键
+          view.focus();
+
+          // 监听绘图动作，实现实时交互
+          action.on([
+            "vertex-add",
+            "vertex-remove",
+            "cursor-update",
+            "redo",
+            "undo",
+            "draw-complete"
+          ], updateVertices);
+        }
+
+        let coords = null;
+        // 更新顶点
+        function updateVertices(event) {
+          // 绘制完成则弹窗提示
+          if (event.type == 'draw-complete') {
+            coords = event.vertices;// 保存折线的那些坐标
+            /*for (let i = 0; i < event.vertices.length; i++) {
+              console.log("第" + (i + 1) + "个坐标：" + event.vertices[i]);
+            }*/
+          }
+
+          // 根据用户选的顶点绘制折线
+          if (event.vertices.length > 1) {
+            const result = createGraphic(event);
+
+            // 如果发现相交，则阻止
+            if (result.selfIntersects) {
+              event.preventDefault();
+            }
+          }
+        }
+
+        // 绘制折线
+        function createGraphic(event) {
+          const vertices = event.vertices;
+          view.graphics.removeAll();// 移除上一条折线
+
+          // 新建折线图层
+          const graphic = new Graphic({
+            geometry: {
+              type: "polyline",
+              paths: vertices,
+              spatialReference: view.spatialReference
+            },
+            symbol: {
+              type: "simple-line",
+              color: [131, 175, 155],
+              width: 4,
+              cap: "round",
+              join: "round"
+            }
+          });
+
+          // 检查是否相交
+          const intersectingSegment = getIntersectingSegment(graphic.geometry);
+
+          // 相交的时候改变样式以示区分
+          if (intersectingSegment) {
+            view.graphics.addMany([graphic, intersectingSegment]);
+          }
+          else {
+            view.graphics.add(graphic);
+          }
+
+          // 返回相交的片段
+          return {
+            selfIntersects: intersectingSegment
+          };
+        }
+
+        // 检查折线自身是否相交
+        function isSelfIntersecting(polyline) {
+          if (polyline.paths[0].length < 3) {
+            return false;
+          }
+          const line = polyline.clone();
+
+          // 获取折线的最后一段
+          const lastSegment = getLastSegment(polyline);
+          line.removePoint(0, line.paths[0].length - 1);
+
+          // 调用geometryEngine提供的方法判断
+          return geometryEngine.crosses(lastSegment, line);
+        }
+
+        // 检查是否相交并且反馈给用户
+        function getIntersectingSegment(polyline) {
+          if (isSelfIntersecting(polyline)) {
+            return new Graphic({
+              geometry: getLastSegment(polyline),
+              symbol: {
+                type: "simple-line", // autocasts as new SimpleLineSymbol
+                style: "short-dot",
+                width: 3.5,
+                color: "yellow"
+              }
+            });
+          }
+          return null;
+        }
+
+        // 获取折线的最后一段
+        function getLastSegment(polyline) {
+          const line = polyline.clone();
+          const lastXYPoint = line.removePoint(0, line.paths[0].length - 1);
+          const existingLineFinalPoint = line.getPoint(
+            0,
+            line.paths[0].length - 1
+          );
+
+          return {
+            type: "polyline",
+            spatialReference: view.spatialReference,
+            hasZ: false,
+            paths: [
+              [
+                [existingLineFinalPoint.x, existingLineFinalPoint.y],
+                [lastXYPoint.x, lastXYPoint.y]
+              ]
+            ]
+          };
+        }
+
+        // 飞行按钮点击事件-实现飞行效果
+        document.getElementById("fly-button").onclick = function() {
+          flyToNextPosi(coords, 0);
+          // “飞到”下一个点
+          function flyToNextPosi(coords, i) {
+            if (i < coords.length || i < 8) {
+              var lonlat = mercatorToLoca(coords[i]);
+              var target = [lonlat.x, lonlat.y];
+              console.log(target);
+              // goTo()这里需要异步处理
+              view.goTo(target).then(
+                () => {
+                  console.log(i);
+                  sleep(650);// 休息一秒
+                  flyToNextPosi(coords, ++i);// 递归调用
+                }
+              );
+            }
+          }
+
+          // 休眠函数，单位为毫秒
+          function sleep(n) {
+            var start = new Date().getTime();
+            while (true) {
+              if (new Date().getTime() - start > n)
+                break;
+            }
+          }
+        } 
+
+        // 墨卡托转经纬度坐标
+        function mercatorToLoca(mercator) {
+            var lonlat = { x: 0, y: 0 };
+            var x = mercator[0] / 20037508.34 * 180;
+            var y = mercator[1] / 20037508.34 * 180;
+            y = 180 / Math.PI * (2 * Math.atan(Math.exp(y * 
+              Math.PI / 180)) - Math.PI / 2);
+            lonlat.x = x;
+            lonlat.y = y;
+            return lonlat;
+        }
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv">
+      <!-- 画线按钮 -->
+      <div
+        id="line-button"
+        class="esri-widget esri-widget--button
+        esri-interactive"
+        title="Draw polyline"
+      >
+        <span class="esri-icon-polyline"></span>
+      </div>
+      <!-- 飞行按钮 -->
+      <div
+        id="fly-button"
+        class="esri-widget esri-widget--button
+        esri-interactive"
+        title="飞行"
+      >
+        <span class="esri-icon-tracking"></span>
+      </div>
+    </div>
+  </body>
+</html>

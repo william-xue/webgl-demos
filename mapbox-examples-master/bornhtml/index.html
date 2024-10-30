@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="panel"></div>
+    <button id="update">确定更新</button>
+    <textarea id="result" style="height: 463px; width: 400px;"></textarea>
+</body>
+<script>
+    let json = {
+        "Content_Type": "json",
+        "Schema_Integer_1": {
+            "key": "json to html",
+            "Format": "int32",
+            "Description": "azer",
+            "Min": "60",
+            "Max": "20",
+            "Resolution": "hsjd",
+            "Unit": "C"
+        },
+        "Object_2": {
+            "key": "htkk",
+            "Description": "tktk",
+            "Schema_String_1": {
+                "key": "tto",
+                "Format": "date",
+                "Description": "titi"
+            }
+        }
+    }
+
+
+    function repeat(str, num) {
+        var newStr = "";
+        if (num < 0) {
+            newStr = "";
+        } else {
+            for (var i = 0; i < num; i++) {
+                newStr += str;
+            }
+        }
+        return newStr;
+    }
+
+    let html = ``, n = -1;
+    function bornHtml(source) {
+        if (!(Object.prototype.toString.call(source) === '[object Object]')) return;
+        n++;
+        Object.keys(source).forEach(key => {
+            let value = source[key]
+            if (Object.prototype.toString.call(value) === '[object String]') {
+                html += `<div>${repeat('&nbsp;', n * 4)}<label>${key}: </label> <input value='${value}' onchange='updateSource("${key}","${value}",this.value);'/></div>`
+            } else if (Object.prototype.toString.call(value) === '[object Object]') {
+                html += `<div>${repeat('&nbsp;', n * 4)}<label>${key}: </label></div>`
+                bornHtml(value)
+                n--;
+            }
+        })
+    }
+
+    bornHtml(json)
+    console.log(html)
+    document.getElementById('panel').innerHTML = html;
+
+    document.getElementById('update').onclick = function () {
+        document.getElementById('result').textContent = JSON.stringify(json, null, "\t")
+    }
+
+    // 嵌套json 根据key 改变 value
+    function updateSource(key, oldValue, value) {
+        console.log(key, oldValue, value)
+        let returnJson = updateJson(json, key, oldValue, value)
+        json = deepCopy(returnJson)
+    }
+
+    function updateJson(source, key_, oldValue, value) {
+        for (var key in source) {
+            if (key == key_ && source[key] == oldValue) {
+                source[key] = value
+            }
+            if (typeof source[key] == "object") {
+                updateJson(source[key], key_, oldValue, value)
+            }
+        }
+        return deepCopy(source)
+    }
+
+    // 深拷贝
+    function isIteration(obj) {
+        const objType = Object.prototype.toString.call(obj);
+        return objType === '[object Object]' || objType === '[object Array]';
+    }
+    function deepCopy(obj) {
+        if (!isIteration(obj)) {
+            throw new Error('error arguments');
+        }
+        // const targetObj = obj.constructor === Array ? [] : {};
+        const targetObj = Array.isArray(obj) ? [] : {};
+        for (const key in obj) {
+            // 只对对象自有属性进行拷贝
+            if (obj.hasOwnProperty(key)) {
+                if (isIteration(obj[key])) {
+                    targetObj[key] = deepCopy(obj[key]);
+                } else {
+                    targetObj[key] = obj[key];
+                }
+            }
+        }
+        return targetObj;
+    }
+</script>
+
+</html>

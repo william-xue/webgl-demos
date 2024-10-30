@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+
+  <script src="../../libs/jquery-2.1.4.min.js"></script>
+
+  <!-- <script src="https://unpkg.com/three@0.106.2/build/three.js"></script> -->
+  <!-- <script src="./OBJLoader.js"></script> -->
+  <script src="./threebox.js"></script>
+  <script src="https://unpkg.com/three@0.106.2/examples/js/loaders/GLTFLoader.js"></script>
+  <script src="https://unpkg.com/three@0.106.2/examples/js/controls/TransformControls.js"></script>
+  <script src="https://unpkg.com/three@0.106.2/examples/js/controls/DragControls.js"></script>
+
+  <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.0/mapbox-gl.js"></script>
+  <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.6.0/mapbox-gl.css" rel="stylesheet" />
+  <style>
+    .coordinates {
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      padding: 5px 10px;
+      margin: 0;
+      font-size: 11px;
+      line-height: 18px;
+      border-radius: 3px;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map" style="width: 1920px; height: 1080px"></div>
+</body>
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1IjoiYmtobzIiLCJhIjoiY2syNWZiOXM3MGh3eDNnbnV1bmN0NTBwMyJ9.uigMIX5bGaHKQ4HetqN8IA';
+  var map = new mapboxgl.Map({
+    container: "map",
+    style: 'mapbox://styles/mapbox/light-v10',
+    pitch: 45,
+    center: [112, 23],
+    zoom: 18,
+    bearing: 0,
+    antialias: true,
+    // localIdeographFontFamily: "'Noto Sans', 'Noto Sans CJK SC', sans-serif"
+  });
+
+  var splineHelperObjects = [];
+  map.on('style.load', function () {
+    var labelLayerId;
+    var layers = map.getStyle().layers;
+    const labelList = layers.filter(layer => {
+      return /-label/.test(layer.id);
+    });
+    for (let labelLayer of labelList) {
+      map.setLayoutProperty(labelLayer.id, 'text-field', ['coalesce', ['get', 'name_' + "ko"], ['get', 'name']]);
+    }
+    for (var i = 0; i < layers.length; i++) {
+      if (layers[i].type === "symbol") {
+        labelLayerId = layers[i].id;
+        break;
+      }
+    }
+    
+    var modelOrigin = [112, 23];
+    var modelAltitude = 0;
+    var modelRotate = [Math.PI / 2, 0, 0];
+
+    var customLayer = {
+      id: '3d-model',
+      type: 'custom',
+      renderingMode: '3d',
+      onAdd: function (map, gl) {
+        createThreeBox(map, gl);
+        // 辅助坐标系  参数250表示坐标系大小，可以根据场景大小去设置
+        var axisHelper = new THREE.AxesHelper(25000000);
+        tb.scene.add(axisHelper);
+
+        var geometry = new THREE.BoxGeometry(100, 100, 100);
+
+        var redMaterial = new THREE.MeshPhongMaterial( {
+            color: 0x009900, 
+            side: THREE.DoubleSide
+        });
+
+        var cube = new THREE.Mesh(geometry, redMaterial);
+
+        var planeGeometry = new THREE.PlaneBufferGeometry( 2000, 2000 );
+        planeGeometry.rotateX( - Math.PI / 2 );
+        var planeMaterial = new THREE.ShadowMaterial( { opacity: 1 } );
+
+        var plane = new THREE.Mesh( planeGeometry, planeMaterial );
+        plane.position.y = - 200;
+        plane.receiveShadow = true;
+
+        tb.add( plane );
+                
+        splineHelperObjects.push(cube);
+
+        transformControl = new THREE.TransformControls( tb.camera, tb.renderer.domElement );
+        transformControl.addEventListener( 'change', this.render );
+        tb.add(transformControl);
+        
+        
+        var dragcontrols = new THREE.DragControls( splineHelperObjects, tb.camera, tb.renderer.domElement ); //
+        dragcontrols.enabled = true;
+        
+        cube = tb.Object3D({
+          obj: cube,
+          units : 'meters'
+        })
+        .setCoords(modelOrigin.concat(50))
+        
+        tb.add(cube);
+        
+        transformControl.attach( cube );
+      },
+      render: function (gl, matrix) {
+        if(window.tb){
+          tb.update();
+        }
+      }
+    };
+    map.addLayer(customLayer, "waterway-label");
+
+    function _3dBuilding(){
+      return {
+        id: "3d-buildings",
+        source: "composite",
+        "source-layer": "building",
+        filter: ["==", "extrude", "true"],
+        type: "fill-extrusion",
+        minzoom: 16,
+        paint: {
+          "fill-extrusion-color": "#aaa",
+
+          // use an 'interpolate' expression to add a smooth transition effect to the
+          // buildings as the user zooms in
+          "fill-extrusion-height": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            16.5,
+            0,
+            16.8,
+            ["get", "height"]
+          ],
+          "fill-extrusion-base": [
+            "interpolate",
+            ["linear"],
+            ["zoom"],
+            16.5,
+            0,
+            16.8,
+            ["get", "min_height"]
+          ],
+          "fill-extrusion-opacity": 0.6
+        } 
+      }
+    }
+  });
+
+  function createThreeBox(map, gl){
+    if(!window.tb){
+      window.tb = new Threebox(
+        map, 
+        gl,
+        {defaultLights: true}
+      );   
+    }
+  }
+</script>
+
+</html>

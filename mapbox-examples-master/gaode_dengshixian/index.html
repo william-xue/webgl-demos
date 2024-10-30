@@ -1,0 +1,209 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <style>
+        html,
+        body,
+        #container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .toolbar {
+            position: fixed;
+            top: 100px;
+        }
+    </style>
+    <title>高德等实线</title>
+    <script
+        src="https://webapi.amap.com/maps?v=2.0&key=cdae73a0e7bbccc46c824f861ff1e2a5&plugin=AMap.MouseTool,AMap.GeoJSON"></script>
+    <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
+    <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+    <script src="../libs/jquery-2.1.4.min.js"></script>
+
+</head>
+
+<body>
+    <div id="container"></div>
+    <div class="toolbar">
+        <button onclick="setA()">设置A类点</button>
+
+        <button onclick="setB()">设置B类点</button>
+        <button onclick="clear()">清除所有</button>
+        <br />
+        <label>设置A等时线</label><input id="A_input" value="30" />
+        <br />
+        <label>设置B等时线</label><input id="B_input" value="20" />
+        <br />
+        <button onclick="handle()">确定</button>
+    </div>
+</body>
+<script>
+    var map = map = new AMap.Map('container', {
+        zoom: 16,
+    });
+
+    //监听draw事件可获取画好的覆盖物
+    var overlaysA = [], overlaysB = [];
+
+    var mouseTool = new AMap.MouseTool(map);
+    let defaultPush = 'A'
+    mouseTool.on('draw', function (e) {
+        if (defaultPush === 'A') {
+            overlaysA.push(e.obj);
+        } else if (defaultPush === 'B') {
+            overlaysB.push(e.obj);
+        }
+    })
+
+
+    map.on("complete", function () {
+        log.success("地图加载完成！");
+    });
+
+    // 变量
+
+
+    function setA() {
+        defaultPush = 'A'
+        mouseTool.marker({
+            //同Marker的Option设置
+            icon: 'https://a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png',
+            anchor: 'bottom-center',
+        });
+    }
+
+    function setB() {
+        defaultPush = 'B'
+        mouseTool.marker({
+            //同Marker的Option设置
+        });
+    }
+
+    function handle() {
+        // console.log(overlaysA)
+        // console.log(overlaysB)
+        let time_A = document.getElementById('A_input').value
+        let time_B = document.getElementById('B_input').value
+
+        for (let i = 0; i < overlaysA.length; i++) {
+            let marker = overlaysA[i];
+            let position = marker.getPosition();
+            console.log(position)
+            dengshixian([position.lng, position.lat])
+        }
+
+    }
+
+    let arr = []
+
+    function dengshixian(start) {
+        var point = turf.point(start);
+
+        var buffered = turf.buffer(point, 50, { units: 'kilometers' });
+
+        var points = turf.randomPoint(5, { bbox: turf.bbox(buffered) })
+        console.log(points)
+
+        // 将点画在图上
+        var geojson = new AMap.GeoJSON({
+            geoJSON: points,
+            // 还可以自定义getMarker和getPolyline
+            // getPolygon: function (geojson, lnglats) {
+            //     // 计算面积
+            //     var area = AMap.GeometryUtil.ringArea(lnglats[0])
+
+            //     return new AMap.Polygon({
+            //         path: lnglats,
+            //         fillOpacity: 1 - Math.sqrt(area / 8000000000),// 面积越大透明度越高
+            //         strokeColor: 'white',
+            //         fillColor: 'red'
+            //     });
+            // }
+        });
+        map.add(geojson);
+
+        points.features.forEach(element => {
+            let end = element.geometry.coordinates
+            getTime(start, [end[0].toFixed(6), end[1].toFixed(6)])
+        });
+
+        let count = 0;
+        let handler = setInterval(() => {
+            if(count === point.features.length-1) window.clearInterval(handler)
+            let end = points.features[count++].geometry.coordinates
+            // getTime(start, [end[0].toFixed(6), end[1].toFixed(6)])
+            let end2 = [end[0].toFixed(6), end[1].toFixed(6)]
+            $.ajax({
+                url: "https://restapi.amap.com/v5/direction/driving",
+                type: "GET",
+                dataType: "json",
+                timeout: "5000",
+                async: false,
+                contentType: "application/json;utf-8",
+                data: {
+                    "output": "json",
+                    "key": "722f1ba75579a57fa304429d35e3738f",
+                    "origin": start.join(','),
+                    "destination": end2.join(','),
+                    "show_fields": "duration"
+                },
+                success: function (json) {
+                    console.log(json,count);
+                    const { info, infocode, status } = json;
+                    if (status === 1) {
+                        arr.push(json)
+                    }
+                },
+                error: function (data) { }
+            });
+        }, 2000)
+
+        console.log(arr)
+    }
+
+    function clear() {
+        mouseTool.clear();
+    }
+
+    function getTime(start, end) {
+        $.ajax({
+            url: "https://restapi.amap.com/v5/direction/driving",
+            type: "GET",
+            dataType: "json",
+            timeout: "5000",
+            async: false,
+            contentType: "application/json;utf-8",
+            data: {
+                "output": "json",
+                "key": "722f1ba75579a57fa304429d35e3738f",
+                "origin": "" + start[0] + "," + start[1],
+                "destination": end.join(','),
+                "show_fields": "duration"
+            },
+            success: function (json) {
+                console.log(json);
+                const { info, infocode, status } = json;
+                if (status === 1) {
+                    arr.push(json)
+                }
+                // 由于线涉及坐标较多 此处返回的坐标 未转为wgs84
+                // var data = "";
+                // if (!json || !json.route || !json.route.paths) {
+                //     data = "";
+                // } else {
+                //     data = json.route.paths;
+                // }
+                // opt.callback(data);
+            },
+            error: function (data) { }
+        });
+    }
+</script>
+
+</html>

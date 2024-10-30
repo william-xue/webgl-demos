@@ -1,0 +1,438 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Network | xxxx</title>
+
+  <style type="text/css">
+    html,body{
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #mynetwork {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      /* border: 1px solid lightgray; */
+    }
+
+    table.legend_table {
+      font-size: 11px;
+      border-width: 1px;
+      border-color: #d3d3d3;
+      border-style: solid;
+    }
+
+    table.legend_table,
+    td {
+      border-width: 1px;
+      border-color: #d3d3d3;
+      border-style: solid;
+      padding: 2px;
+    }
+
+    div.table_content {
+      width: 80px;
+      text-align: center;
+    }
+
+    div.table_description {
+      width: 100px;
+    }
+
+    #operation {
+      font-size: 28px;
+    }
+
+    #network-popUp {
+      display: none;
+      position: absolute;
+      top: 350px;
+      left: 170px;
+      z-index: 299;
+      width: 250px;
+      background-color: #f9f9f9;
+      border-style: solid;
+      border-width: 3px;
+      border-color: #5394ed;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .vis-edit-mode {
+      width: 50px;
+    }
+  </style>
+
+  <!-- <script type="text/javascript" src="../exampleUtil.js"></script> -->
+  <script type="text/javascript" src="./lib/vis/jquery-2.1.4.min.js"></script>
+  <script type="text/javascript" src="./lib/vis/vis.js"></script>
+  <link href="./lib/vis/vis.css" rel="stylesheet" type="text/css" />
+  <link href="./lib/vis/vis-network.min.css" rel="stylesheet" type="text/css" />
+
+  <script type="text/javascript">
+    var _nodes, _edges, network = null, operateFlag = 'add-node';
+    // randomly create some nodes and edges
+    // var data = getScaleFreeNetwork(25);
+
+    let NodeConfig = [
+      {
+        type: 'Subject', // 节点类型
+        color: '#7BE141', // 节点颜色
+        properties: ['label', 'mm', 'zz']
+      },
+      {
+        type: 'Major',
+        color: 'rgb(255,168,7)',
+        properties: ['label', 'pp']
+      },
+      {
+        type: 'Knowledge',
+        color: 'rgba(97,195,238,0.5)',
+        properties: ['label']
+      }
+    ]
+    let EdgeConfig = [
+      {
+        from:'Subject',
+        to:'Major',
+        label:'belongTo', // 关系label名
+        title:'你好',         // 关系名 ,可有可无
+      },
+      {
+        from:'Knowledge',
+        to:'Major',
+        label:'contain',
+        title:'',
+      },
+    ]
+
+    // let color_Subject = '#7BE141', color_Major = 'rgb(255,168,7)', color_Knowledge = 'rgba(97,195,238,0.5)';
+
+    function destroy() {
+      if (network !== null) {
+        network.destroy();
+        network = null;
+      }
+    }
+
+    function draw(nodes = [], edges = []) {
+      destroy();
+      _nodes = new vis.DataSet(nodes);
+      _edges = new vis.DataSet(edges);
+      var data = {
+        nodes: _nodes,
+        edges: _edges
+      }
+      // create a network
+      var container = document.getElementById('mynetwork');
+      var options = {
+        layout: { randomSeed: 2 }, // just to make sure the layout is the same when the locale is changed
+        height: '100%',
+        width: '100%',
+        locale: 'cn',
+        manipulation: {
+          addNode: function (data, callback) {
+            // filling in the popup DOM elements
+            console.log('data-add===>>',data)
+            operateFlag = 'add-node'
+            document.getElementById('operation').innerHTML = "Add Node";
+            document.getElementById('node-id').value = data.id;
+            document.getElementById('saveButton').onclick = saveData.bind(this, data, callback);
+            document.getElementById('cancelButton').onclick = clearPopUp.bind();
+            document.getElementById('node-type').style.display = 'block';
+            document.getElementById('network-popUp').style.display = 'block';
+          },
+          editNode: function (data, callback) {
+            // filling in the popup DOM elements
+            console.log('data-edit===>>', data)
+            operateFlag = 'edit-node'
+            document.getElementById('operation').innerHTML = "Edit Node";
+            document.getElementById('node-id').value = data.id;
+            document.getElementById('node-type').value = data.type
+            document.getElementById('node-type').style.display = 'none';
+            
+            // 属性赋值到表单
+            let item = NodeConfig.find(item=>item.type === data.type)
+            let singleNodeProperties = '';
+            item.properties.forEach(item => (
+            singleNodeProperties += `
+              <tr class='network-properties'>
+                <td>${item}</td>
+                <td><input id="node-label" value="${data[item]}" /></td>
+              </tr>`
+            ))
+            $('.network-properties').remove()
+            $('#network-table').append(singleNodeProperties)
+
+            document.getElementById('saveButton').onclick = saveData.bind(this, data, callback);
+            document.getElementById('cancelButton').onclick = cancelEdit.bind(this, callback);
+            document.getElementById('network-popUp').style.display = 'block';
+          },
+          deleteNode: function (data, callback) {
+            deleteNodeHandler(data, callback)
+          },
+          addEdge: function (data, callback) {
+            operateFlag = 'add-edge'
+            if (data.from == data.to) {
+              var r = confirm("Do you want to connect the node to itself?");
+              if (r == true) {
+                return;
+                callback(data);
+              }
+            }
+            else {
+              // callback(data);
+              addEdgeHandler(data, callback)
+            }
+          },
+          editEdge: function (data, callback) {
+            // 编辑线不操作
+            return;
+          },
+          deleteEdge: function (data, callback) {
+            deleteEdgeHandler(data, callback)
+          },
+
+        }
+      };
+      network = new vis.Network(container, data, options);
+      network.setOptions({ nodes: { shadow: true }, edges: { shadow: true } });
+    }
+
+    function clearPopUp() {
+      document.getElementById('saveButton').onclick = null;
+      document.getElementById('cancelButton').onclick = null;
+      document.getElementById('network-popUp').style.display = 'none';
+    }
+
+    function cancelEdit(callback) {
+      clearPopUp();
+      callback(null);
+    }
+
+    function saveData(data, callback) {
+      data.id = document.getElementById('node-id').value;
+      // 处理不同类型的label
+      let type = document.getElementById('node-type').value
+      $('.network-properties').each(function(item){
+        let key =  $($(this).find('td')[0]).text()
+        let value =  $($(this).find('input')[0]).val()
+        data[key] = value;
+      })
+      let item = NodeConfig.find(item => item.type === type);
+      data = { 
+        ...data,
+        ...item,
+      }
+      delete data.properties
+      console.log('data===',data)
+
+      if (operateFlag === 'add-node') {
+        let p = Object.keys(data).map(key=>(
+          `${key}:'${data[key]}'`
+        ))
+        let cypher = `create (:${type}{${p}})`
+        console.log(cypher, data)
+        excuteCypher(cypher).then((res) => {
+          console.log(res)
+        })
+      } else if (operateFlag === 'edit-node') {
+        let item = NodeConfig.find(item=>item.type === data.type)
+
+        let p = item.properties.map(key=>{
+            return `n.${key} = '${data[key]}'`
+        })
+        let cypher = `match (n:${type}{id:'${data.id}'}) set ${p}`
+        console.log(cypher)
+        excuteCypher(cypher).then((res) => {
+          console.log(res)
+        })
+      }
+
+      console.log('添加的label ==>>', data)
+      clearPopUp();
+      callback(data);
+    }
+
+    // 删除节点，及其关系 , 注意：先删关系，再删节点
+    function deleteNodeHandler(data, callback) {
+      console.log('deleteNode===>>>', data)
+      let element = data.nodes[0]
+      let node = _nodes.get(element)
+      excuteCypher(`MATCH (n:${node.type}{id:'${node.id}'})<-[r]->() delete r`).then(res => {
+
+        excuteCypher(`MATCH (n:${node.type}{id:'${node.id}'}) delete n`).then(res => {
+          // if 
+          callback(data)
+        })
+      })
+    }
+
+    // 删除边
+    function deleteEdgeHandler(data, callback) {
+      console.log('deleteEdge===>>>', data)
+      let element = data.edges[0]
+      let item = _edges.get(element.id)[0]
+      let from = _nodes.get(item.from)
+      let to = _nodes.get(item.to)
+      console.log()
+      excuteCypher(`MATCH (:${from.type}{id:'${from.id}'})<-[r]->(:${to.type}{id:'${to.id}'}) delete r`).then(res => {
+
+        callback(data)
+      })
+    }
+
+    function addEdgeHandler(data, callback) {
+      console.log(data)
+      // let  = network.getConnectedNodes('2')
+      if (!(_edges && _nodes)) return;
+      let from = _nodes.get(data.from)
+      let to = _nodes.get(data.to)
+      // 随机生成一个边的标识
+      let flag = new Date().getTime()
+      // 找到两者的关系
+      let configItem = EdgeConfig.find(config => config['from'] === from.type && config['to'] === to.type)
+      let cql = '';
+      if(configItem){
+        if (configItem.title){
+          cql = `match (f:${from.type}{id:'${from.id}'}),(t:${to.type}{id:'${to.id}'}) create (f)-[:${configItem.label}{title:'${configItem.title}',rel_flag:'${flag}'}]->(t)`
+        }else{
+          cql = `match (f:${from.type}{id:'${from.id}'}),(t:${to.type}{id:'${to.id}'}) create (f)-[:${configItem.label}{rel_flag:'${flag}'}]->(t)`
+        }
+      }else{
+        cql = `match (f:${from.type}{id:'${from.id}'}),(t:${to.type}{id:'${to.id}'}) create (f)-[:'REL'}{title:'${configItem.title}',rel_flag:'${flag}'}]->(t)`
+      }
+      excuteCypher(cql).then(r => { })
+
+      callback({ ...data, arrows: 'to', label:configItem?configItem.label:'' })
+    }
+
+    function init() {
+      let singleNode_cql = '', edge_cql = '';
+      NodeConfig.forEach(node=>{
+        singleNode_cql += `n:${node.type} or `;
+        edge_cql += `f:${node.type} or t:${node.type} or `;
+      })
+      singleNode_cql = singleNode_cql.substr(0, singleNode_cql.length - 3)
+      edge_cql = edge_cql.substr(0, edge_cql.length - 3)
+      const promise1 = excuteCypher(`match (n) where ${singleNode_cql} return n`) // 查询单个孤立节点
+      const promise2 = excuteCypher(`match (f)-[r]->(t) where ${edge_cql} return f,t, type(r) as type, r.title as title`) // 查询有关系的节点
+
+      let nodes = [], edges = [];
+
+      Promise.all([promise1, promise2]).then(res => {
+        console.log(res)
+        let sigleNodes = res[0].data.map(d => d['n'])
+        nodes = nodes.concat(sigleNodes)
+        console.log(nodes)
+        let rels = res[1].data.map(d => ({ 'from': d['f']['id'], 'to': d['t']['id'], 'arrows': 'to' ,label:d['type'] ,title: d['title']}))
+        edges = edges.concat(rels)
+        console.log(edges)
+        draw(nodes, edges);
+      })
+    }
+
+    function excuteCypher(cql, callback) {
+      return new Promise((resovle, reject) => {
+        fetch('/flask/excuteCql', {
+          method: 'post',
+          body: JSON.stringify({
+            cql
+          }),
+          headers: {
+            contentType: "application/json", //必须这样写
+          }
+        }).then(res => res.json()).then(res => {
+          // console.log('res===>>>',res)
+          resovle(res)
+        })
+      })
+    }
+
+    // NodeConfig.map
+
+    $(function () {
+      let labels = '',singleNodeProperties='';
+      NodeConfig.forEach(item => (
+        labels += `<option value=${item.type}>${item.type}</option>`
+      ))
+      NodeConfig[0].properties.forEach(item => (
+        singleNodeProperties += `
+          <tr class='network-properties'>
+            <td>${item}</td>
+            <td><input id="node-label" value="" /></td>
+          </tr>`
+      ))
+      $('#network-table').html(`
+        <tr style="display: none;">
+          <td>id</td>
+          <td><input id="node-id" value="new value" /></td>
+        </tr>
+        <tr>
+          <td>type</td>
+          <td>
+            <select id="node-type" >
+              ${labels}
+            </select>
+          </td>
+        </tr>
+        ${singleNodeProperties}
+      `)
+
+      $("#node-type").change((e)=>{
+        let item = NodeConfig.find(item=>item.type === e.target.value)
+        console.log(item)
+        let singleNodeProperties = '';
+        item.properties.forEach(item => (
+        singleNodeProperties += `
+          <tr class='network-properties'>
+            <td>${item}</td>
+            <td><input id="node-label" value="" /></td>
+          </tr>`
+        ))
+        $('.network-properties').remove()
+        $('#network-table').append(singleNodeProperties)
+      })
+    })
+
+  </script>
+</head>
+
+<body onload="init();">
+
+  <div id="network-popUp">
+    <span id="operation">node</span> <br>
+    <table id="network-table" style="margin:auto;">
+      <!-- <tr style="display: none;">
+        <td>id</td>
+        <td><input id="node-id" value="new value" /></td>
+      </tr>
+      <tr>
+        <td>type</td>
+        <td>
+          <select id="node-type">
+            <option value="Subject">Subject</option>
+            <option value="Major" selected>Major</option>
+            <option value="Knowledge">Knowledge</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>label</td>
+        <td><input id="node-label" value="new value" /></td>
+      </tr> -->
+    </table>
+    <input type="button" value="save" id="saveButton" />
+    <input type="button" value="cancel" id="cancelButton" />
+  </div>
+
+  <div id="mynetwork"></div>
+
+</body>
+
+</html>

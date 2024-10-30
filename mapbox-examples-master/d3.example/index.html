@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>读取csv文件，并可视化</title>
+    <!-- 引入d3 -->
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #chart {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chart"></div>
+</body>
+<script>
+    Array.prototype.remove = function(val) { 
+        var index = this.indexOf(val); 
+        if (index > -1) { 
+            this.splice(index, 1); 
+        } 
+    };
+    d3.csv("Movies.csv", function (error, csvdata) {
+        if (error) {
+            console.log(error)
+        }
+        console.log('打印所有表数据');
+        console.log(csvdata)
+
+        console.log('打印表头');
+        console.log(csvdata['columns'])
+
+        // csvdata.remove('columns');
+        let result2 = csvdata.map(item=>({ ...item, 'Budget': item['Budget'].trim().startsWith('$') ? item['Budget'].trim().slice(1):item['Budget'].trim()}))
+        console.log(result2);
+        let Budgets = [];
+        let Budgets_removeQFW = []
+        let MovieTitles = [];
+        for(line of csvdata){
+            // 打印每行数据
+            console.log(line)
+            // 打印表头
+            let item = line['Budget'].trim().startsWith('$') ? line['Budget'].trim().slice(1) : line['Budget'].trim()
+            Budgets.push(item)
+            Budgets_removeQFW.push(Number(item.split(',').join('')))
+            MovieTitles.push(line['Movie Title'])
+        }
+        console.log('Budget 去掉$ 和 空格的数组')
+        console.log(Budgets)
+
+        
+        // 以下参考
+
+        var dataAll = Budgets_removeQFW; // [100,200,152,50,135,536];
+            var rectWidth = 50;
+            var xAxisWidth = 600;
+            var yAxisHeight = 600;
+            var svg = d3.select('#chart')
+                    .append("svg")
+                    .attr("width",xAxisWidth)
+                    .attr("height",yAxisHeight);
+            
+            var padding = {top: 30,right: 30,left: 100, bottom: 30};
+
+            var xScale = d3.scaleBand()
+                        .domain(d3.range(dataAll.length+1))
+                        .range([0,xAxisWidth]);
+            
+            var yScale = d3.scaleLinear()
+                        .domain([0,d3.max(dataAll)+50])
+                        .range([0,yAxisHeight]);
+            
+            function draw_updateCharts(){
+                var updateCharts = svg.selectAll("rect")
+                                    .data(dataAll);
+
+                var enterCharts = updateCharts.enter();
+                var exitCharts = updateCharts.exit();
+
+                updateCharts.attr("x",function(d,i){
+                                return padding.left + rectWidth/2 + xScale(i);
+                            })
+                            .attr("y",function(d,i){
+                                return yAxisHeight - padding.bottom - yScale(d);
+                            })
+                            .attr("width",function(d,i){
+                                return rectWidth;
+                            })
+                            .attr("height",function(d,i){
+                                console.log(yScale(d));
+                                return yScale(d);
+                            });
+
+                enterCharts.append("rect")
+                            .attr("fill","steelblue")
+                            .attr("x",function(d,i){
+                                return padding.left + rectWidth/2 + xScale(i);
+                            })
+                            .attr("y",function(d,i){
+                                return yAxisHeight - padding.bottom - yScale(d);
+                            })
+                            .attr("width",function(d,i){
+                                return rectWidth;
+                            })
+                            .attr("height",function(d,i){
+                                console.log(yScale(d));
+                                return yScale(d);
+                            });
+                
+                exitCharts.remove();
+            }
+            
+            function draw_updateChartsText(){
+                var updateChartsText = svg.selectAll("text")
+                                        .data(dataAll);
+
+                var enterChartsText = updateChartsText.enter();
+                var exitChartsText = updateChartsText.exit();
+
+                enterChartsText.append("text")
+                            .attr("fill",d3.rgb(255,0,0))
+                            .attr("font-size","14px")
+                            .attr("text-anchor","middle")
+                            .attr("x",function(d,i){
+                                return padding.left + rectWidth/2 + xScale(i);
+                            })
+                            .attr("y",function(d,i){
+                                return yAxisHeight - padding.bottom - yScale(d);
+                            })
+                            .attr("dx",rectWidth/2)
+                            .attr("dy",14)
+                            .text(function(d,i){
+                                return dataAll[i];
+                            });
+                
+                exitChartsText.remove();
+            }
+
+            function draw_axis(){
+                var xAxis = d3.axisBottom()
+                            .scale(xScale);
+                
+                yScale.range([yAxisHeight,0]);
+                var yAxis = d3.axisLeft()
+                            .scale(yScale);
+                
+                svg.append("g")
+                    .attr("class","axis")
+                    .attr("transform","translate(" + padding.left + "," + (yAxisHeight - padding.bottom) + ")")
+                    .call(xAxis);
+                
+                svg.append("g")
+                    .attr("class","axis")
+                    .attr("transform","translate(" + padding.left + "," + -1*padding.bottom + ")")
+                    .call(yAxis);
+            }
+            
+            draw_updateCharts();
+            draw_updateChartsText();
+            draw_axis();
+
+    });
+</script>
+
+</html>

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>上海 - poi管理系统</title>
+  <link rel="icon" href="favicon.ico" type="image/ico">
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="css/style.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="./js/leaflet.css" crossorigin="" />
+  <style>
+    .panel {
+      position: fixed;
+      width: 100px;
+      height: 430px;
+      box-shadow: 10px 10px 0 0 #86c2c0;
+      top: 130px;
+      right: 70px;
+      background: #528abb;
+      z-index: 10000;
+    }
+
+    .nav .selected {
+      color: #33cabb;
+    }
+  </style>
+  <style type="text/css">
+    .img {width: 20px;height: 20px;opacity: 1;position: absolute;z-index: 100000;transition: 2s;}
+.left,.right {width: 10px;height: 10px;border-radius: 100%;position: absolute;}
+.right {right: 0;}
+.under {width: 10px;height: 10px;position: absolute;top: 5px;left: 5px;transform: rotate(45deg)}
+.text {width: 50px;font-size: 10px;line-height: 1;position: absolute;top: -1em;left: -15px;text-align: center;}
+    #viz,#viz1 {
+        width: 100%;
+        height: 600px;
+        border: 1px solid lightgray;
+        font: 22pt arial;
+        margin: 0 auto;
+    }
+    html,body{
+        width: 100%;
+        height: 100%;
+    }
+    html,body,div{
+        margin: 0;
+        padding: 0;
+    }
+    .title{
+        height: 120px;
+        font-size: 25px;
+
+    }
+    .title>:nth-child(1){
+        height: 70px;
+        line-height: 110px;
+        padding-left: 150px;
+    }
+    .title>:nth-child(1)>span:nth-child(1){
+        font-weight: bold;
+        color: #2b9beb;
+    }
+    .title>:nth-child(2){
+        height: 10px;
+        padding-left: 200px;
+        font-size: 15px;
+        font-style:italic
+    }
+    .container1{
+        height: 100%;
+    }
+    .container1 .search{
+        width: 600px;
+        height: 50px;
+        background: aliceblue;
+        position: fixed;
+        right: 5%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 3px 3px 5px 5px #ccc;
+        top: 170px;
+        z-index: 1;
+    }
+    .container1 .search input{
+        width: 500px;
+    }
+    .neo-container1 {
+        justify-content: center;
+    }
+    .container1 .cypher{
+        width: 90%;
+        margin: 0 auto;
+    }
+</style>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/neovis.js"></script>
+</head>
+
+<body>
+  <div class="lyear-layout-web">
+    <div class="lyear-layout-container1">
+      <!--左侧导航-->
+      <aside class="lyear-layout-sidebar">
+
+        <!-- logo -->
+        <div id="logo" class="sidebar-header">
+          <a href="index.html" style="font-size: 28px;
+        text-align: center;">上海-poi 知识系统</a>
+        </div>
+        <div class="lyear-layout-sidebar-scroll">
+
+          <nav class="sidebar-main">
+            <ul class="nav nav-drawer">
+              <li class="nav-item active"> <a href="index.html"><i class="mdi mdi-home"></i> 首页</a> </li>
+              <li class="nav-item nav-item-has-subnav">
+                <a href="gis.html"><i class="mdi mdi-format-align-justify"></i> POIS</a>
+                <ul id="pois" class="nav nav-subnav">
+                  <li name="Chongdianzhuang" class="selected"> <a href="#">充电桩</a> </li>
+                  <li name="Jiayouzhan"> <a href="#">加油站</a> </li>
+                  <li name="xxx"> <a href="#">xxx</a> </li>
+                </ul>
+              </li>
+              <li class="nav-item nav-item-has-subnav open">
+                <a href="#"><i class="mdi mdi-palette"></i>neovis</a>
+                <ul class="nav nav-subnav">
+              </li>
+            </ul>
+          </nav>
+        </div>
+
+      </aside>
+      <!--End 左侧导航-->
+
+      <!--头部信息-->
+      <header class="lyear-layout-header">
+
+        <nav class="navbar navbar-default">
+          <div class="topbar">
+
+            <div class="topbar-left">
+              <div class="lyear-aside-toggler">
+                <span class="lyear-toggler-bar"></span>
+                <span class="lyear-toggler-bar"></span>
+                <span class="lyear-toggler-bar"></span>
+              </div>
+              <span class="navbar-page-title"> </span>
+            </div>
+
+            <ul class="topbar-right">
+              <li class="dropdown dropdown-profile">
+                <a href="javascript:void(0)" data-toggle="dropdown">
+                  <img class="img-avatar img-avatar-48 m-r-10" src="images/users/avatar.jpg" alt="光年" />
+                  <span> <span class="caret"></span></span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-right">
+                  <li> <a href="lyear_pages_profile.html"><i class="mdi mdi-account"></i> 个人信息</a> </li>
+                  <li> <a href="lyear_pages_edit_pwd.html"><i class="mdi mdi-lock-outline"></i> 修改密码</a> </li>
+                  <li> <a href="javascript:void(0)"><i class="mdi mdi-delete"></i> 清空缓存</a></li>
+                  <li class="divider"></li>
+                  <li> <a href="lyear_pages_login.html"><i class="mdi mdi-logout-variant"></i> 退出登录</a> </li>
+                </ul>
+              </li>
+              <!--切换主题配色-->
+              <li class="dropdown dropdown-skin">
+                <span data-toggle="dropdown" class="icon-palette"><i class="mdi mdi-palette"></i></span>
+                <ul class="dropdown-menu dropdown-menu-right" data-stopPropagation="true">
+                  <li class="drop-title">
+                    <p>主题</p>
+                  </li>
+                  <li class="drop-skin-li clearfix">
+                    <span class="inverse">
+                      <input type="radio" name="site_theme" value="default" id="site_theme_1" checked>
+                      <label for="site_theme_1"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="site_theme" value="dark" id="site_theme_2">
+                      <label for="site_theme_2"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="site_theme" value="translucent" id="site_theme_3">
+                      <label for="site_theme_3"></label>
+                    </span>
+                  </li>
+                  <li class="drop-title">
+                    <p>LOGO</p>
+                  </li>
+                  <li class="drop-skin-li clearfix">
+                    <span class="inverse">
+                      <input type="radio" name="logo_bg" value="default" id="logo_bg_1" checked>
+                      <label for="logo_bg_1"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_2" id="logo_bg_2">
+                      <label for="logo_bg_2"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_3" id="logo_bg_3">
+                      <label for="logo_bg_3"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_4" id="logo_bg_4">
+                      <label for="logo_bg_4"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_5" id="logo_bg_5">
+                      <label for="logo_bg_5"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_6" id="logo_bg_6">
+                      <label for="logo_bg_6"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_7" id="logo_bg_7">
+                      <label for="logo_bg_7"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="logo_bg" value="color_8" id="logo_bg_8">
+                      <label for="logo_bg_8"></label>
+                    </span>
+                  </li>
+                  <li class="drop-title">
+                    <p>头部</p>
+                  </li>
+                  <li class="drop-skin-li clearfix">
+                    <span class="inverse">
+                      <input type="radio" name="header_bg" value="default" id="header_bg_1" checked>
+                      <label for="header_bg_1"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_2" id="header_bg_2">
+                      <label for="header_bg_2"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_3" id="header_bg_3">
+                      <label for="header_bg_3"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_4" id="header_bg_4">
+                      <label for="header_bg_4"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_5" id="header_bg_5">
+                      <label for="header_bg_5"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_6" id="header_bg_6">
+                      <label for="header_bg_6"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_7" id="header_bg_7">
+                      <label for="header_bg_7"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="header_bg" value="color_8" id="header_bg_8">
+                      <label for="header_bg_8"></label>
+                    </span>
+                  </li>
+                  <li class="drop-title">
+                    <p>侧边栏</p>
+                  </li>
+                  <li class="drop-skin-li clearfix">
+                    <span class="inverse">
+                      <input type="radio" name="sidebar_bg" value="default" id="sidebar_bg_1" checked>
+                      <label for="sidebar_bg_1"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_2" id="sidebar_bg_2">
+                      <label for="sidebar_bg_2"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_3" id="sidebar_bg_3">
+                      <label for="sidebar_bg_3"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_4" id="sidebar_bg_4">
+                      <label for="sidebar_bg_4"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_5" id="sidebar_bg_5">
+                      <label for="sidebar_bg_5"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_6" id="sidebar_bg_6">
+                      <label for="sidebar_bg_6"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_7" id="sidebar_bg_7">
+                      <label for="sidebar_bg_7"></label>
+                    </span>
+                    <span>
+                      <input type="radio" name="sidebar_bg" value="color_8" id="sidebar_bg_8">
+                      <label for="sidebar_bg_8"></label>
+                    </span>
+                  </li>
+                </ul>
+              </li>
+              <!--切换主题配色-->
+            </ul>
+
+          </div>
+        </nav>
+
+      </header>
+      <!--End 头部信息-->
+
+      <!--页面主要内容-->
+      <main class="lyear-layout-content">
+
+        <div class="container1-fluid">
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card">
+                <div class="card-body">
+
+                  <ul class="nav nav-tabs nav-justified">
+                    <li class="active">
+                      <a data-toggle="tab" href="#home-basic">全景知识图谱</a>
+                    </li>
+                    <li class="nav-item">
+                      <a data-toggle="tab" href="#profile-basic">cypher语句搜索</a>
+                    </li>
+                    <!-- <li class="nav-item">
+                      <a data-toggle="tab" href="#messages-basic">推荐</a>
+                    </li>
+                    <li class="nav-item">
+                      <a data-toggle="tab" href="#settings-basic">陈青云</a>
+                    </li> -->
+                  </ul>
+                  <div class="tab-content">
+                    <div class="tab-pane fade active in" id="home-basic">
+                      <div id="tab1">
+                        <!-- <div class="title">
+                          <div><span>NEO4J - </span>&nbsp;&nbsp;<span>POIS</span></div>
+                          <div>上海市区加油站、充电桩poi数据知识图谱图形化展示</div>
+                        </div> -->
+                        <div class="container1">
+                          <div id="viz"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tab-pane fade" id="profile-basic">
+                      <div id="tab2">
+                        <div class="container1">
+                          <div class="search">
+                            <input class="query_by_cql" type="text"
+                              placeholder="请输入cypher语句进行查询，例如：MATCH p = (n)-[r:Belongto]->(m) RETURN p limit 10">&nbsp;&nbsp;
+                            <button id="btn_submit">搜索</button>
+                          </div>
+                          <div id="viz1"></div>
+                          <div class="cypher">
+                            <h4>常用查询语句</h4>
+                            <ul>
+                              <li><span>查询上海市和行政区：</span>MATCH p = (:Qu)-[:Belongto]->(:Shi) RETURN p</li>
+                              <li><span>查询浦东新区下的300个poi：</span>MATCH p = (n)-[:Belongto]->(:Qu{name:"浦东新区"}) RETURN p
+                                limit 300</li>
+                              <li><span>查询特斯拉充电桩：</span>MATCH (c:Chongdianzhuang) where c.name =~ '.*特斯拉.*' RETURN c
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="tab-pane fade" id="messages-basic">
+                      <p>原名陈文统。</p>
+                    </div>
+                    <div class="tab-pane fade" id="settings-basic">
+                      <p>武侠小说家</p>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <!--End 页面主要内容-->
+    </div>
+  </div>
+
+  <script type="text/javascript" src="js/jquery.min.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="js/perfect-scrollbar.min.js"></script>
+  <script type="text/javascript" src="js/main.min.js"></script>
+
+  <!--图表插件-->
+  <script type="text/javascript" src="js/Chart.js"></script>
+
+  <script>
+    $(function () {
+      var viz;
+      var config = {
+        container_id: "viz",
+        server_url: "bolt://localhost:7687",
+        server_user: "neo4j",
+        server_password: "123",
+        arrows: false,
+        labels: {
+          "Shi": {
+            "caption": "name",
+            "size": 20,
+            "community": "name",
+            // "image": 'https://visjs.org/images/visjs_logo.png',
+            "font": {
+              "size": 26,
+              "color": "#000000"
+            },
+            // "title_properties": [
+            //     "name"
+            // ],
+          },
+          "Qu": {
+            "caption": "name",
+            "size": 18,
+            "community": "name",
+            "font": {
+              "size": 24,
+              "color": "#000000"
+            },
+            // "title_properties": [
+            //     "name"
+            // ],
+          },
+          "Jiayouzhan": {
+            "caption": "name",
+            "size": 16,
+            "community": "name",
+            "font": {
+              "size": 20,
+              "color": "#000000"
+            },
+          },
+          "Chongdianzhuang": {
+            "caption": "name",
+            "size": 16,
+            "community": "name",
+            "font": {
+              "size": 20,
+              "color": "#000000"
+            },
+          },
+        },
+        relationships: {
+          "Belongto": {
+            "thickness": "weight",
+            // "caption": '属于',
+            "caption": false,
+          },
+        },
+        initial_cypher: "MATCH p = (n)-[:Belongto]->(m) RETURN p limit 300"
+      };
+
+      viz = new NeoVis.default(config);
+      viz.render();
+      $("#btn_submit").click(function (e) {
+        e.preventDefault();
+        const cql = $('.query_by_cql').val();
+        console.log(cql)
+        config['initial_cypher'] = ($.trim(cql) === '') ? "MATCH p = (n)-[]->(m) RETURN p limit 50" : cql;
+        try {
+          viz.clearNetwork()
+          viz.reinit(config)
+          viz.render()
+        } catch (err) {
+          alert('cypher语句有误，请检查')
+        }
+      });
+      $(".btn_submit_byname1").click(function (e) {
+        e.preventDefault();
+        const name = $('.query_by_name1').val();
+        console.log(name)
+        config['initial_cypher'] = ($.trim(name) === '') ? "MATCH (n)-[r:R]->(m) RETURN * limit 50" : "match p = (n)-[*1..3]->(m) where m.name =~ '.*" + name + ".*' return p";
+        try {
+          viz.clearNetwork()
+          viz.reinit(config)
+          viz.render()
+        } catch (err) {
+          alert('cypher语句有误，请检查')
+        }
+      });
+      $(".btn_submit_byname2").click(function (e) {
+        e.preventDefault();
+        const name = $('.query_by_name2').val();
+        console.log(name)
+        config['initial_cypher'] = ($.trim(name) === '') ? "MATCH (n)-[r:R]->(m) RETURN * limit 50" : "match p = (n)-[*1..3]->(m) where n.name =~ '.*" + name + ".*' return p";
+        try {
+          viz.clearNetwork()
+          viz.reinit(config)
+          viz.render()
+        } catch (err) {
+          alert('cypher语句有误，请检查')
+        }
+      });
+      $(".btn_close").click(function (e) {
+        e.preventDefault();
+        viz.clearNetwork()
+      });
+
+    })
+  </script>
+   <script>
+    $(function () {
+      var viz;
+      var config = {
+        container_id: "viz1",
+        server_url: "bolt://localhost:7687",
+        server_user: "neo4j",
+        server_password: "123",
+        arrows: false,
+        labels: {
+          "Shi": {
+            "caption": "name",
+            "size": 20,
+            "community": "name",
+            // "image": 'https://visjs.org/images/visjs_logo.png',
+            "font": {
+              "size": 26,
+              "color": "#000000"
+            },
+            // "title_properties": [
+            //     "name"
+            // ],
+          },
+          "Qu": {
+            "caption": "name",
+            "size": 18,
+            "community": "name",
+            "font": {
+              "size": 24,
+              "color": "#000000"
+            },
+            // "title_properties": [
+            //     "name"
+            // ],
+          },
+          "Jiayouzhan": {
+            "caption": "name",
+            "size": 16,
+            "community": "name",
+            "font": {
+              "size": 20,
+              "color": "#000000"
+            },
+          },
+          "Chongdianzhuang": {
+            "caption": "name",
+            "size": 16,
+            "community": "name",
+            "font": {
+              "size": 20,
+              "color": "#000000"
+            },
+          },
+        },
+        relationships: {
+          "Belongto": {
+            "thickness": "weight",
+            // "caption": '属于',
+            "caption": false,
+          },
+        },
+        initial_cypher: "MATCH p = (n)-[:Belongto]->(m) RETURN p limit 300"
+      };
+
+      viz = new NeoVis.default(config);
+      viz.render();
+      $("#btn_submit").click(function (e) {
+        e.preventDefault();
+        const cql = $('.query_by_cql').val();
+        console.log(cql)
+        config['initial_cypher'] = ($.trim(cql) === '') ? "MATCH p = (n)-[]->(m) RETURN p limit 50" : cql;
+        try {
+          viz.clearNetwork()
+          viz.reinit(config)
+          viz.render()
+        } catch (err) {
+          alert('cypher语句有误，请检查')
+        }
+      });
+      $(".btn_submit_byname1").click(function (e) {
+        e.preventDefault();
+        const name = $('.query_by_name1').val();
+        console.log(name)
+        config['initial_cypher'] = ($.trim(name) === '') ? "MATCH (n)-[r:R]->(m) RETURN * limit 50" : "match p = (n)-[*1..3]->(m) where m.name =~ '.*" + name + ".*' return p";
+        try {
+          viz.clearNetwork()
+          viz.reinit(config)
+          viz.render()
+        } catch (err) {
+          alert('cypher语句有误，请检查')
+        }
+      });
+      $(".btn_submit_byname2").click(function (e) {
+        e.preventDefault();
+        const name = $('.query_by_name2').val();
+        console.log(name)
+        config['initial_cypher'] = ($.trim(name) === '') ? "MATCH (n)-[r:R]->(m) RETURN * limit 50" : "match p = (n)-[*1..3]->(m) where n.name =~ '.*" + name + ".*' return p";
+        try {
+          viz.clearNetwork()
+          viz.reinit(config)
+          viz.render()
+        } catch (err) {
+          alert('cypher语句有误，请检查')
+        }
+      });
+      $(".btn_close").click(function (e) {
+        e.preventDefault();
+        viz.clearNetwork()
+      });
+
+    })
+  </script>
+</body>
+<script src="./lib/xingxing.js"></script>
+</html>

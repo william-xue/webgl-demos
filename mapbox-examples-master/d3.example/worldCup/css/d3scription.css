@@ -1,0 +1,45 @@
+.d3scription-tip-container {
+	z-index: 10;
+}
+
+.d3scription-tip {
+	border-collapse: collapse;
+	border-spacing: 0;
+	background-color: #fff;
+	empty-cells: show;
+	opacity: 0.9;
+	-webkit-box-shadow: 7px 7px 12px -9px #777777;
+	-moz-box-shadow: 7px 7px 12px -9px #777777;
+	box-shadow: 7px 7px 12px -9px #777777;
+}
+
+.d3scription-tip tr {
+	border: 1px solid #CCC;
+}
+
+.d3scription-tip th {
+	background-color: #aaa;
+	font-size: 14px;
+	padding: 2px 5px;
+	text-align: left;
+	color: #FFF;
+}
+
+.d3scription-tip td {
+	font-size: 13px;
+	padding: 3px 6px;
+	background-color: #fff;
+	border-left: 1px dotted #999;
+}
+
+.d3scription-tip td>span,
+.d3scription-tip td>svg {
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	margin-right: 6px;
+}
+
+.d3scription-tip td.value {
+	text-align: right;
+}

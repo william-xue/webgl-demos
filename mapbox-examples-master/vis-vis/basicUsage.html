@@ -1,0 +1,262 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Network | Basic usage</title>
+
+  <script type="text/javascript" src="./lib/vis.js"></script>
+  <link href="./lib/vis-network.min.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="./lib/jquery-2.1.4.min.js"></script>
+  <style type="text/css">
+    #mynetwork {
+      width: 1600px;
+      height: 800px;
+      border: 1px solid lightgray;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="position: fixed; top: 200px; left: 100px;">
+    <button>播放 play</button>
+  </div>
+  <div id="mynetwork"></div>
+
+  <script type="text/javascript">
+    let nodesData = [
+      {
+        id: '1',
+        name: '字典扫描',
+
+      },
+      {
+        id: '2',
+        name: '执行',
+        main: true  //判断是不是横向节点
+
+      },
+      {
+        id: '3',
+        name: '爆破SSH',
+
+      },
+      {
+        id: '4',
+        name: '防御绕过',
+        main: true
+
+      },
+      {
+        id: '5',
+        name: '凭据访问',
+        main: true
+
+      },
+      {
+        id: '6',
+        name: '横向移动',
+        main: true
+
+      },
+      {
+        id: '7',
+        name: '安全防御',
+        main: true
+
+      },
+      {
+        id: '8',
+        name: '防御完成',
+        main: true
+
+      },
+      {
+        id: '9',
+        name: 'powershell',
+
+      },
+      {
+        id: '10',
+        name: '192.168.0.1登录',
+
+      },
+      {
+        id: '11',
+        name: '攻击11',
+
+      },
+      {
+        id: '12',
+        name: '攻击12',
+
+      },
+      {
+        id: '13',
+        name: '攻击13',
+
+      }, {
+        id: '14',
+        name: '攻击14',
+
+      }, {
+        id: '15',
+        name: '攻击15',
+
+      }, {
+        id: '16',
+        name: '攻击16',
+
+      }, {
+        id: '17',
+        name: '攻击17',
+
+      }, {
+        id: '18',
+        name: '攻击18',
+
+      }, {
+        id: '19',
+        name: '攻击19',
+
+      }, {
+        id: '20',
+        name: '攻击20',
+      },
+    ];
+    //连线数据
+    let edgesData = [
+      {
+        source: '1',
+        target: '2',
+      },
+      {
+        source: '3',
+        target: '2',
+      },
+
+      {
+        source: '4',
+        target: '5',
+      },
+      {
+        source: '5',
+        target: '6',
+      },
+      {
+        source: '6',
+        target: '7',
+      },
+      {
+        source: '7',
+        target: '8',
+      }, {
+        source: '9',
+        target: '4',
+      }, {
+        source: '10',
+        target: '4',
+      },
+      {
+        source: '2',
+        target: '4',
+      },
+      {
+        source: '11',
+        target: '4',
+      },
+      {
+        source: '12',
+        target: '4',
+      },
+      {
+        source: '13',
+        target: '4',
+      }, {
+        source: '14',
+        target: '4',
+      }, {
+        source: '15',
+        target: '4',
+      }, {
+        source: '16',
+        target: '4',
+      }, {
+        source: '17',
+        target: '4',
+      }, {
+        source: '18',
+        target: '4',
+      }, {
+        source: '19',
+        target: '4',
+      }, {
+        source: '20',
+        target: '4',
+      },
+    ];
+
+
+
+    // create an array with nodes
+    var nodes = new vis.DataSet([]);
+
+    // create an array with edges
+    var edges = new vis.DataSet([]);
+    // var nodes = [] , edges = [];
+
+    let count = 0, gap = 100;
+    nodesData.forEach((f, i) => {
+      const { id, name, main } = f
+      if (main) { // 横向节点
+        nodes.add([{
+          id,
+          label: name,
+          shape: 'box',
+          fixed: {
+            x: true,
+            y: false
+          },
+          color: {
+            border: 'black',
+            background: '#00000000'
+          },
+          x: count * gap,
+          y: 20
+        }])
+        count++;
+      } else {
+        nodes.add([{
+          id,
+          label: name,
+          shape: 'ellipse',
+          color: {
+            background: '#00000000'
+          }
+        }])
+      }
+    })
+
+    edgesData.forEach(f => {
+      const { source, target } = f
+      edges.add({ from: source, to: target })
+    })
+
+    console.log(nodes)
+
+    // create a network
+    var container = document.getElementById('mynetwork');
+    var data = {
+      nodes: nodes,
+      edges: edges
+    };
+    var options = {
+      // shape: 'box',
+    };
+    var network = new vis.Network(container, data, options);
+  </script>
+
+
+</body>
+
+</html>

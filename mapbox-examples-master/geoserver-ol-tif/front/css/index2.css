@@ -1,0 +1,18 @@
+html,body{
+    height: 100%;
+    background-color: #F3F2F3;
+    margin: 0;
+}
+
+header{
+    background-color: #39527B;
+    height: 12%;
+    width: 100%;
+    line-height: 12%;
+    vertical-align: middle;
+}
+
+header #logo{
+    background-color: white;
+    
+}

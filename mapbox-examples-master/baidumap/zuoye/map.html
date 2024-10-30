@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<title>电子地图</title>
+	<script type="text/javascript"
+		src="http://api.map.baidu.com/library/RectangleZoom/1.2/src/RectangleZoom_min.js"></script>
+	<style type="text/css">
+		html,body{
+			width: 100%;
+			height: 100%;
+			padding: 0;
+			margin: 0;
+		}
+		#header {
+			margin: 0px;
+			Border: 0px;
+			background: #076b9d;
+			width: 100%;
+			height: 105px;
+			font-family: "微软雅黑";
+			alignment-adjust: central
+		}
+
+		#allmap {
+			height: 100%;
+			margin: 0;
+			font-family: "微软雅黑";
+			background: #F0F0F0
+		}
+		.tool_td{
+			text-align: start;
+    vertical-align: top;
+		padding: 10px;
+		}
+		#tool {
+			magin: 0px;
+			background: #FFF;
+			align: top;
+			cursor: pointer;
+		}
+
+		#mainbox {
+			background: #FFF;
+			width: 100%;
+			height: calc(100% - 105px);
+			magin-top: 0px;
+		}
+
+		#mainbox table{
+			width: 100%;
+			height: calc(100% - 40px);
+		}
+
+		#r_result {
+			float: right;
+			margin: 0px 0px 2px 0px;
+			panding: 0px 0px 0px 0px;
+			width: 20%;
+			background: #FFF;
+			height: 700px;
+		}
+
+		#footer {
+			clear: both;
+			margin: 0px 0px 0px 0px;
+			padding: 5px 0px 5px 0px;
+			background: #076b9d;
+			width: 100%;
+			height: 30px;
+		}
+
+		.bt {
+			background: #076b9d;
+			color: #FFF;
+			width: 62px;
+			height: auto;
+			alignment-adjust: baseline;
+			border: none;
+		}
+
+		.bt2 {
+			background: #FFF;
+			color: #076b9d;
+			width: 110px;
+			height: auto;
+			align: center;
+			border: none;
+			font-size: 15px;
+		}
+
+		.bt3 {
+			background: #FFF;
+			color: #076b9d;
+			width: 110px;
+			height: auto;
+			align: left;
+			border: none;
+			font-size: 15px;
+		}
+
+		/* .bt4 {
+			background: #076b9d;
+			color: #030303;
+			width: 62px;
+			height: auto;
+			alignment-adjust: baseline;
+			border: none;
+		} */
+		.tdt-control-copyright{
+			display: none !important;
+		}
+		.BMap_cpyCtrl{
+			display: none !important;
+		}
+		.ft {
+			color: #FFF;
+			height: auto;
+			border: none;
+			font-size: 15px
+		}
+
+		.head {
+			color: #FFF;
+			font-size: 30px;
+			font-weight: bold;
+		}
+
+		.hright {
+			color: #FFF;
+			font-size: 15px;
+		}
+
+		.hfoot {
+			color: #fff;
+			font-size: 18px;
+			text-indent: 12em;
+		}
+		.hfoot input{
+			/* color: #fff; */
+			font-size: 18px;
+		}
+		#toolbar>input{
+			cursor: pointer;	
+		}
+		#toolbar>input:hover{
+			text-decoration: underline;
+		}
+		.submenu input{
+			cursor: pointer;
+		}
+		.submenu input:hover{
+			color: #2b00ff;
+		}
+		.hide{
+			display: none;
+		}
+		.show{
+			display: block;
+		}
+	</style>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=piizeP5EcXN1g7MABzD5k1hBQC9BwLb1"></script>
+	<script src="https://webapi.amap.com/maps?v=1.4.10&key=6ffc16d2b31983f4fda63ab8800b104f"></script>
+	<script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
+	<script type="text/javascript"
+		src="http://api.tianditu.gov.cn/api?v=4.0&tk=a62945742fc3ef3d2c3d43d514b1d1fc"></script>
+	<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp&key=IRABZ-MAPRU-WHXVC-4FGQ3-AUH7V-BMFHW"></script>
+	<script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+	<script type="text/javascript" src="http://api.map.baidu.com/library/Heatmap/2.0/src/Heatmap_min.js"></script>
+	<script type="text/javascript"
+		src="http://api.map.baidu.com/library/TrafficControl/1.4/src/TrafficControl_min.js"></script>
+	<!--加载鼠标测距工具-->
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=1.2"></script>
+	<script type="text/javascript"
+		src="http://api.map.baidu.com/library/DistanceTool/1.2/src/DistanceTool_min.js"></script>
+	<!--加载鼠标绘制工具-->
+	<script type="text/javascript"
+		src="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
+	<link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
+	<!--加载检索信息窗口-->
+	<script type="text/javascript"
+		src="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.js"></script>
+	<link rel="stylesheet" href="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.css" />
+
+</head>
+
+<body>
+	<div id="header">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td width="95" height="106">&nbsp;</td>
+				<td width="160">
+					<p align="left" class="head">电子地图&nbsp;</p>
+				</td>
+				<td width="256" align="center">
+					<table width="241" border="0" cellspacing="0" cellpadding="0">
+						<tr>
+							<td width="100%">
+								<p class="hright">地图搜索：(输入城市名进行定位)</p>
+							</td>
+						</tr>
+						<tr>
+							<td width="100%">
+								<input id="cityName" type="text" style="width:100px; margin-right:10px;" />
+								<input type="button" value="搜索" onclick="cityLocation()" />
+							</td>
+						</tr>
+					</table>
+				</td>
+
+				<td width="256" align="center">
+					<table width="230px" border="0" cellspacing="0" cellpadding="0" height="40px">
+						<tr>
+							<td width="100%">
+								<p class="hright">定位与坐标获取：</p>
+							</td>
+						</tr>
+						<tr>
+							<td width="100%">
+								<div class="hright">
+									经度：
+									<input id="longitude" type="text" style="width:100px; margin-right:10px;" />
+									<input type="button" value="获取" onclick="zuobiao()" />
+									<br>
+									纬度：
+									<input id="latitude" type="text" style="width:100px; margin-right:10px;" />
+									<input type="button" value="定位" onclick="theLocation()" />
+								</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td width="475" align="center">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" style="vertical-align:bottom">
+						<tr>
+
+						<tr>
+							<td class="hright" width="300px" id="toolbar">
+								基本工具：&nbsp;&nbsp;<input type="button" value="放大" class="bt1" onclick="fangda()" /> <input type="button"
+									value="缩小" class="bt1" onclick="suoxiao()" /> <input type="button" value="平移" class="bt1"
+									onclick="pingyi()" /> <input type="button" value="添加控件" class="bt1"
+									onclick="add_control()" /><input type="button" value="删除控件" class="bt1"
+									onclick="delete_control()" /> </td>
+						</tr>
+						<tr>
+							<td class="hright" width="300px">
+
+						</tr>
+					</table>
+				</td>
+
+			</tr>
+		</table>
+	</div>
+	<div id="mainbox">
+		<table border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td width="10%" class="tool_td">
+					<div id="tool">
+						<table width="100%" border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<td class="menu"><strong >地图操作</strong>
+									<table class="submenu hide">
+										<tr>
+											<td class="bt2">
+												<p>
+													<input type="button" value="右键功能" class="bt2" onClick="youjian()">
+													<input type="button" value="显示当前范围" class="bt2" onclick="showbound()" />
+													<input type="button" value="点击拾取坐标" class="bt2" onclick="dianji()" />
+
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td class="menu"> 
+									<strong >图层加载</strong>
+									<table class="submenu hide">
+										<tr>
+											<td class="bt3">
+												<p>
+
+													<input type="button" value="添加格网" class="bt3" onclick="add_controlge()" />
+													<input type="button" value="移除格图" class="bt3" onclick="delete_controlge()" />
+
+													<input type="button" value="交通流量图" class="bt3" onclick="gexing()" />
+													<input type="button" value="移除交通图" class="bt3" onclick="yichu()" />
+
+												</p>
+											</td>
+										</tr>
+									</table>
+
+								</td>
+							</tr>
+							<tr>
+								<td class="menu">
+									<strong>地图编辑</strong>
+									<table class="submenu hide">
+										<tr>
+											<td class="bt2">
+												<input type="button" value="绘制点线面" class="bt2" onClick="edit()">
+
+
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td class="menu">
+									<strong >地图服务</strong>
+									<table class="submenu show">
+										<tr>
+											<td class="bt2">
+												输入关键词：<input id="textfield" name="textfield" type="text"
+													style="width:66px;" /><input type="button" style="width:35px;" id="submit" onClick="Search()"
+													value="查询" class="bt2">
+											</td>
+										</tr>
+										<tr>
+											<td class="bt2">
+												A经度：<input id="longitudeA" type="text" style="width:100px; margin-right:10px;" />
+												A纬度：<input id="latitudeA" type="text" style="width:100px; margin-right:10px;" />
+												B经度：<input id="longitudeB" type="text" style="width:100px; margin-right:10px;" />
+												B纬度：<input id="latitudeB" type="text" style="width:100px; margin-right:10px;" />
+												<input style="text-align: right;" type="button" value="量测距离" class="bt2" onclick="juli()" />
+												<input style="text-align: right;" type="button" value="驾车路线" class="bt2" onclick="guihua()" />
+												<input style="text-align: right;" type="button" value="公交换乘" class="bt2" onclick="gongjiao ()" />
+												<input style="text-align: right;" type="button" value="步行路线" class="bt2" onclick="buxing()" />
+												<input style="text-align: right;" type="button" value="地址解析" class="bt2" onClick="dixi()">
+												<input style="text-align: right;" type="button" value="地址逆解析" class="bt2" onClick="nijiexi()">
+												<input style="text-align: right;" type="button" id=" " value="添加信息窗口" class="bt2" onClick="information()">
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</div>
+				</td>
+
+				<td width="75%">
+					<!-- <td width=1000px> -->
+					<div id="allmap"></div>
+				</td>
+				<td width="15%" height="100%" style="vertical-align: top;" rowspan="10">
+					<div id="r-result"></div>
+				</td>
+			</tr>
+		</table>
+		<div id="footer" class="ft">
+			<table cellspacing="0" cellpadding="0" width="100%">
+				<tr>
+					<td class="hfoot" width="495" text-indent="6em">
+						数据源切换：<input type="button" value="高德地图" class="bt4" onclick="togaodemap()" /> <input type="button"
+							value="百度地图" class="bt4" onclick="loadbaidu()" /> <input type="button" value="腾讯地图" class="bt4"
+							onclick="totengxun()" /> <input type="button" value="天地图" class="bt4"
+							onclick="totianditu()" /><input type="button" value="清除地图" class="bt4" onclick="destroyMap()" />
+					</td>
+
+				</tr>
+
+		</div>
+
+</body>
+
+</html>
+<script type="text/javascript">
+	// 加操作
+	$("#tool").on('click','.menu',function(e){
+		console.log($(this).find('.submenu'));
+		$('.submenu').removeClass('show').addClass('hide');
+		$(this).find('.submenu').removeClass('hide').addClass('show')
+	})
+
+
+	// 加载地图
+	var map = new BMap.Map("allmap");
+	var point = new BMap.Point(116.404, 39.915);
+	map.centerAndZoom(point, 12);
+
+	map.disableDragging();  //禁止拖拽
+	map.enableScrollWheelZoom(true);
+
+
+	//地图搜索
+	function cityLocation() {
+		var city = document.getElementById("cityName").value;
+		if (city != "") {
+			map.centerAndZoom(city, 11);
+			map.addEventListener("tilesloaded", function () { alert("地图加载完毕"); });      // 用城市名设置地图中心点
+		}
+	}
+
+	//根据经纬度定位
+	function theLocation() {
+		if (document.getElementById("longitude").value != "" && document.getElementById("latitude").value != "") {
+			map.clearOverlays();
+			var new_point = new BMap.Point(document.getElementById("longitude").value, document.getElementById("latitude").value);
+			var marker = new BMap.Marker(new_point);  // 创建标注
+			map.addOverlay(marker);              // 将标注添加到地图中
+			map.panTo(new_point);
+		}
+	}
+	//其他数据源
+	function loadbaidu() {
+		var map1 = new BMap.Map("allmap");
+		map1.centerAndZoom(new BMap.Point(116.404, 39.915), 8);
+		map1.enableScrollWheelZoom(true);
+
+	}// 初始化地图,设置中心点坐标和地图级别
+
+	function togaodemap() {
+		var map2 = new AMap.Map('allmap', {
+			resizeEnable: true, //是否监控地图容器尺寸变化
+			zoom: 8, //初始化地图层级
+			center: [116.397428, 39.90923] //初始化地图中心点
+
+		})
+
+	}
+
+
+	function totianditu() {
+		var map3;
+		map3 = new T.Map('allmap');
+		map3.centerAndZoom(new T.LngLat(116.40769, 39.89945), 12);
+	}
+
+
+
+	function totengxun() { //定义map变量 调用 qq.maps.Map() 构造函数   获取地图显示容器
+		var map4 = new qq.maps.Map(document.getElementById("allmap"), {
+			center: new qq.maps.LatLng(39.916527, 116.397128),// 地图的中心地理坐标。
+			zoom: 8                 // 地图的中心地理坐标。
+		});
+	}
+
+	function destroyMap() {
+		document.getElementById('allmap').innerHTML = "";
+
+	}
+	//放大
+	function fangda() {
+
+		map.enableScrollWheelZoom(true);
+		map.setZoom(16);
+	};
+	//缩小
+	function suoxiao() {
+		map.setZoom(4);
+	};
+
+	//平移
+	function pingyi() {
+		map.enableDragging();   //开启拖拽
+		map.enableInertialDragging();   //开启惯性拖拽
+	};
+	//添加删除地图控件
+	var top_left_control = new BMap.ScaleControl({ anchor: BMAP_ANCHOR_TOP_LEFT });// 上角，添加比例尺
+	var top_left_navigation = new BMap.NavigationControl();  //左上角，添加默认缩放平移控件
+	var mapType1 = new BMap.MapTypeControl(
+		{
+			mapTypes: [BMAP_NORMAL_MAP, BMAP_HYBRID_MAP, BMAP_PERSPECTIVE_MAP],
+			anchor: BMAP_ANCHOR_TOP_RIGHT
+		}
+	);
+
+	var overView = new BMap.OverviewMapControl();
+	var overViewOpen = new BMap.OverviewMapControl({ isOpen: true, anchor: BMAP_ANCHOR_BOTTOM_RIGHT });
+	//添加
+	function add_control() {
+
+		map.addControl(top_left_control);
+		map.addControl(top_left_navigation);
+		map.addControl(mapType1);          //2D图，混合图
+		map.setCurrentCity("北京");
+		map.addControl(overView);          //添加默认缩略地图控件
+		map.addControl(overViewOpen);      //右下角，打开
+
+
+	}
+	//移除
+	function delete_control() {
+		map.removeControl(top_left_control);
+		map.removeControl(top_left_navigation);
+		map.removeControl(mapType1);   //移除2D图，混合图
+		map.removeControl(overView);
+		map.removeControl(overViewOpen);
+		map.removeControl(stCtrl);//添加全景
+
+	}
+	//
+	function quanjing() {
+		var stCtrl = new BMap.PanoramaControl(); //构造全景控件
+		stCtrl.setOffset(new BMap.Size(20, 20));
+		map.addControl(stCtrl);
+	}
+	//添加全景控件}
+	//显示范围
+	function showbound() {
+		var bs = map.getBounds();   //获取可视区域
+		var bssw = bs.getSouthWest();   //可视区域左下角
+		var bsne = bs.getNorthEast();   //可视区域右上角
+		alert("当前地图可视范围是：" + bssw.lng + "," + bssw.lat + "到" + bsne.lng + "," + bsne.lat);
+	}
+	var traffic = new BMap.TrafficLayer();
+	// 将图层添加到地图上   
+	function gexing() {
+		map.addTileLayer(traffic);
+	}  //移除交通图
+	function yichu() {
+		map.removeTileLayer(traffic);
+	}
+	//获取坐标
+	function zuobiao() {
+		map.addEventListener("click", function (e) {
+			document.getElementById("longitude").value = e.point.lng;
+			document.getElementById("latitude").value = e.point.lat;
+		});
+	}
+	//测距
+	function juli() {
+		var pointA = new BMap.Point(document.getElementById("longitudeA").value, document.getElementById("latitudeA").value);  // 创建点坐标A
+		var pointB = new BMap.Point(document.getElementById("longitudeB").value, document.getElementById("latitudeB").value);  // 创建点坐标B
+		alert('测量的距离是：' + (map.getDistance(pointA, pointB)).toFixed(2) + ' 米。');  //获取两点距离,保留小数点后两位  
+		var polyline = new BMap.Polyline([pointA, pointB], { strokeColor: "blue", strokeWeight: 6, strokeOpacity: 0.5 });  //定义折线
+		map.addOverlay(polyline);     //添加折线到地图上
+	}
+
+	//规划
+	function guihua() {
+		var p1 = new BMap.Point(document.getElementById("longitudeA").value, document.getElementById("latitudeA").value);  // 创建点坐标A
+		var p2 = new BMap.Point(document.getElementById("longitudeB").value, document.getElementById("latitudeB").value);  // 创建点坐标B
+		var driving = new BMap.DrivingRoute(map, { renderOptions: { map: map, autoViewport: true } });
+		driving.search(p1, p2);
+		var driving = new BMap.DrivingRoute(map, { renderOptions: { map: map, autoViewport: true } });
+		driving.search(p1, p2);
+
+	}
+
+	//公交
+	function gongjiao() {
+		var p1 = new BMap.Point(document.getElementById("longitudeA").value, document.getElementById("latitudeA").value);
+		var p2 = new BMap.Point(document.getElementById("longitudeB").value, document.getElementById("latitudeB").value);
+		var transit = new BMap.TransitRoute(map, {
+			renderOptions: { map: map }
+		});
+		transit.search(p1, p2);
+	}
+	function buxing() {
+		var p1 = new BMap.Point(document.getElementById("longitudeA").value, document.getElementById("latitudeA").value);
+		var p2 = new BMap.Point(document.getElementById("longitudeB").value, document.getElementById("latitudeB").value);
+
+		var walking = new BMap.WalkingRoute(map, { renderOptions: { map: map, autoViewport: true } });
+		walking.search(p1, p2);
+	}
+	//关键词查询
+	function Search() {
+		var local = new BMap.LocalSearch(map, {
+			renderOptions: { map: map, panel: "r-result" }
+		});
+		local.search(document.getElementById("textfield").value);
+	}
+
+
+
+	// 创建地址解析器实例
+	function dixi() {
+		var myGeo = new BMap.Geocoder();
+		// 将地址解析结果显示在地图上,并调整地图视野
+		myGeo.getPoint("北京市海淀区上地10街", function (point) {
+			if (point) {
+				map.centerAndZoom(point, 16);
+				map.addOverlay(new BMap.Marker(point));
+			} else {
+				alert("您选择地址没有解析到结果!");
+			}
+		}, "北京市");
+	}
+	//地址逆解析
+	function nijiexi() {
+		var geoc = new BMap.Geocoder();
+		map.addEventListener("click", function (e) {
+			var pt = e.point;
+			geoc.getLocation(pt, function (rs) {
+				var addComp = rs.addressComponents;
+				alert(addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber);
+			});
+		});
+	}
+	//信息窗口
+	function information() {
+
+		var map = new BMap.Map("allmap");
+		var point = new BMap.Point(116.417854, 39.921988);
+		var marker = new BMap.Marker(point);  // 创建标注
+		map.addOverlay(marker);              // 将标注添加到地图中
+		map.centerAndZoom(point, 15);
+		var opts = {
+			width: 200,     // 信息窗口宽度
+			height: 100,     // 信息窗口高度
+			title: "海底捞王府井店", // 信息窗口标题
+			enableMessage: true,//设置允许信息窗发送短息
+			message: "亲耐滴，晚上一起吃个饭吧？戳下面的链接看下地址喔~"
+		}
+		var infoWindow = new BMap.InfoWindow("地址：北京市东城区王府井大街88号乐天银泰百货八层", opts);  // 创建信息窗口对象 
+		marker.addEventListener("click", function () {
+			map.openInfoWindow(infoWindow, point); //开启信息窗口
+		});
+	}
+	//编辑
+	function edit() {
+		var overlays = [];
+		var overlaycomplete = function (e) {
+			overlays.push(e.overlay);
+		};
+		var styleOptions = {
+			strokeColor: "red",    //边线颜色。
+			fillColor: "red",      //填充颜色。当参数为空时，圆形将没有填充效果。
+			strokeWeight: 3,       //边线的宽度，以像素为单位。
+			strokeOpacity: 0.8,	   //边线透明度，取值范围0 - 1。
+			fillOpacity: 0.6,      //填充的透明度，取值范围0 - 1。
+			strokeStyle: 'solid' //边线的样式，solid或dashed。
+		}
+		//实例化鼠标绘制工具
+		var drawingManager = new BMapLib.DrawingManager(map, {
+			isOpen: false, //是否开启绘制模式
+			enableDrawingTool: true, //是否显示工具栏
+			drawingToolOptions: {
+				anchor: BMAP_ANCHOR_TOP_RIGHT, //位置
+				offset: new BMap.Size(5, 5), //偏离值
+			},
+			circleOptions: styleOptions, //圆的样式
+			polylineOptions: styleOptions, //线的样式
+			polygonOptions: styleOptions, //多边形的样式
+			rectangleOptions: styleOptions //矩形的样式
+		});
+
+		drawingManager.add()//添加鼠标绘制工具监听事件，用于获取绘制结果
+		drawingManager.addEventListener('overlaycomplete', overlaycomplete);
+	}
+	//启动编辑
+	function startedit() {
+		polyline.enableEditing();
+		polygon.enableEditing()
+	}
+	//停止编辑
+	function stopedit() {
+
+		polyline.disableEditing();
+		polygon.disableEditing();
+	}
+	//右键
+	function youjian() {
+		var menu = new BMap.ContextMenu();
+		var txtMenuItem = [
+			{
+				text: '放大',
+				callback: function () { map.zoomIn() }
+			},
+			{
+				text: '缩小',
+				callback: function () { map.zoomOut() }
+			}
+		];
+		for (var i = 0; i < txtMenuItem.length; i++) {
+			menu.addItem(new BMap.MenuItem(txtMenuItem[i].text, txtMenuItem[i].callback, 100));
+		}
+		map.addContextMenu(menu);
+	}
+	//点击拾取做标
+	function dianji() {
+		map.addEventListener("click", function (e) {
+			alert(e.point.lng + "," + e.point.lat);
+		});
+	}
+	function quxiaodj() {
+		map.removeEventListener("click", function (e) {
+			alert(e.point.lng + "," + e.point.lat);
+		});
+
+	}
+
+</script>
+
+<script type="text/javascript">
+	//添加格网
+	var tileLayer = new BMap.TileLayer({ isTransparentPng: true });
+	tileLayer.getTilesUrl = function (tileCoord, zoom) {
+		var x = tileCoord.x;
+		var y = tileCoord.y;
+		return "http://lbsyun.baidu.com/jsdemo/img/border.png";
+	}
+
+	function add_controlge() {
+
+		map.addTileLayer(tileLayer);
+	}
+	function delete_controlge() {
+		map.removeTileLayer(tileLayer);
+	}
+
+</script>
+
+<script type="text/javascript">
+
+
+</script>

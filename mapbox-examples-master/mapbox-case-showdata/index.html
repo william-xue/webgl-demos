@@ -1,0 +1,83 @@
+<html>
+
+<head>
+  <meta charset='utf-8' />
+  <title>High-speed railway</title>
+  <!-- <script src='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css' rel='stylesheet' /> -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.js"></script>
+  <link rel="stylesheet" href="./style.css" type="text/css">
+
+  <style>
+    .btn-list {
+        position: fixed;
+        top: 100px;
+        left: 100px;
+      }
+      body{
+        padding: 100px;
+        cursor: url('./Cursors1.png'),default;
+      }
+  </style>
+</head>
+
+<body>
+  <div id='map'></div>
+  <div class='map-overlay' id='features'>
+    <h2> Railway in UK </h2>
+    <h2> xxxx</h2>
+
+
+    <input type="checkbox" id="Railway" >
+    <label for="railway">Railway</label>
+    <input type="checkbox" id="Road">
+    <label for="road">Road</label>
+
+
+    <div class='button-line'>
+      <div class='pure-button-group'>
+        <button class="pure-button" id="button-fly-uk">
+          Zoom to UK
+        </button>
+        <button class="pure-button pure-button-disabled" id="button-fly-scotland">
+          Zoom to Scotland
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- info-box -->
+  <div class="info-box">
+    <h2>2011 and 2019 statistic overview</h2>
+    <div id='pd'>
+      <p>- Hover to see statistic graph.</p>
+    </div>
+  </div>
+
+  <ul class="btn-list">
+    <li onclick="editCursor('default')"><button>default</button></li>
+    <li onclick="editCursor('pointer')"><button>pointer</button></li>
+    <li onclick="editCursor('auto')"><button>auto</button></li>
+    <li onclick="editCursor('crosshair')"><button>crosshair</button></li>
+    <li onclick="editCursor('move')"><button>move</button></li>
+    <li onclick="editCursor('text')"><button>text</button></li>
+    <li onclick="editCursor('help')"><button>help</button></li>
+    <li onclick="editCursor('wait')"><button>wait</button></li>
+    <li onclick="editCursor('')"><button>手</button></li>
+  </ul>
+
+  <!-- <nav id="menu"
+    style="font-size: 13px;background: #3887be;border: none;position: absolute;top: 350px;color: white;padding: 10px;width: 100px;cursor: pointer;"
+    onclick="toggleHeatmap()">Toggle Heatmap</nav>
+  <nav id="menu"
+    style="font-size: 13px;background: #3887be;border: none;position: absolute;top: 400px;color: white;padding: 10px;width: 100px;cursor: pointer;"
+    onclick="openNewMap()">Open Flow Map</nav> -->
+
+  <script type="text/javascript" src="./data.js"></script>
+  <script type="text/javascript" src="./map.js"></script>
+
+</body>
+
+</html>

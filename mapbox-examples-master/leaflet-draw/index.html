@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <link href="../libs/leaflet.css" rel="stylesheet" />
+    <script src="../libs/leaflet.js"></script>
+    <script src="../libs/jquery-2.1.4.min.js"></script>
+    <style>
+        #map
+        {
+            width: 2000px;
+            height: 800px;
+        }
+    </style>
+ 
+</head>
+<body>
+    <div id="map"></div>
+    <input type="button" id="point" value="点 " />
+    <input type="button" id="line" value="线" />
+    <input type="button" id="polygon" value="多边形" />
+    <input type="button" id="circle" value="圆" />
+    <input type="button" id="clear" value="清除所有命令" />
+    <script>
+        var map = L.map('map').setView([51.505, -0.09], 13);
+        var selectValue = null;
+        L.tileLayer('https://api.mapbox.com/styles/v1/limogu/cjjjp59s122412rqrk83bafma/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibGltb2d1IiwiYSI6ImNqampva3g1ZjFtZGQzcXFzb2hxaTJ6bGwifQ.pQ4dC_uJrE2-QhBO972B5A', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+ 
+        L.marker([51.5, -0.09]).addTo(map)
+            .bindPopup('这是一个标注')
+            .openPopup();
+        L.Control
+        //画个圆
+        var circle = L.circle([51.505, -0.14], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.5,
+            radius: 50
+        }).addTo(map);
+        
+        //动态画点
+        $("#point").click(function () {
+            map.off();
+            DrawPoint();
+        });
+        //动态画圆
+        $("#circle").click(function () {
+            map.off();
+            DrawCircle();
+        });
+        //动态绘制线
+        $("#line").click(function () {
+            map.off();// 关闭该事件
+            DrawLine();
+ 
+        });
+        //动态画多边形
+        $("#polygon").click(function () {
+            map.off();// 关闭该事件
+            DrawPolygon();
+        });
+        //清除所有命令
+        $("#clear").click(function () {
+            map.off();
+        });
+        //点绘画
+        function DrawPoint() {
+            map.on('click', function (e) {
+                L.circle(e.latlng, { radius: 100, color: 'red', fillColor: 'red', fillOpacity: 1 }).addTo(map);
+            })
+        }
+        //圆绘画
+        function DrawCircle() {
+            var r = 0
+            var i = null
+            var tempCircle = new L.circle()
+            map.dragging.disable();//将mousemove事件移动地图禁用
+            map.on('mousedown', onmouseDown);
+            map.on('mouseup', onmouseUp);
+            map.on('mousemove', onMove)
+            function onmouseDown(e) {
+                i = e.latlng
+                //确定圆心
+            }
+            function onMove(e) {
+                if (i) {
+                    r = L.latLng(e.latlng).distanceTo(i)
+                    tempCircle.setLatLng(i)
+                    tempCircle.setRadius(r)
+                    tempCircle.setStyle({ color: '#ff0000', fillColor: '#ff0000', fillOpacity: 1 })
+                    map.addLayer(tempCircle)
+ 
+                }
+            }
+ 
+            function onmouseUp(e) {
+                r = L.latLng(e.latlng).distanceTo(i)//计算半径
+                L.circle(i, { radius: r, color: '#ff0000', fillColor: '#ff0000', fillOpacity: 1 }).addTo(map)
+                i = null
+                r = 0
+                map.dragging.enable();
+            }
+        }
+        //线绘画
+        function DrawLine() {
+            var points = []
+            var lines = new L.polyline(points)
+            var tempLines = new L.polyline([])
+            map.on('click', onClick);    //点击地图
+            map.on('dblclick', onDoubleClick);
+ 
+ 
+            
+ 
+            function onClick(e) {
+ 
+                points.push([e.latlng.lat, e.latlng.lng])
+                lines.addLatLng(e.latlng)
+                map.addLayer(lines)
+                map.addLayer(L.circle(e.latlng, { color: '#ff0000', fillColor: 'ff0000', fillOpacity: 1 }))
+                map.on('mousemove', onMove)//双击地图
+ 
+            }
+            function onMove(e) {
+                if (points.length > 0) {
+                    ls = [points[points.length - 1], [e.latlng.lat, e.latlng.lng]]
+                    tempLines.setLatLngs(ls)
+                    map.addLayer(tempLines)
+                }
+            }
+ 
+            function onDoubleClick(e) {
+                L.polyline(points).addTo(map)
+                points = []
+                lines = new L.polyline(points)
+                map.off('mousemove')
+            }
+        }
+        //多边形绘画
+        function DrawPolygon() {
+ 
+            var points = []
+            var lines = new L.polyline([])
+            var tempLines = new L.polygon([])
+            map.on('click', onClick);    //点击地图
+            map.on('dblclick', onDoubleClick);
+            map.on('mousemove', onMove)//双击地图
+            function onClick(e) {
+ 
+                points.push([e.latlng.lat, e.latlng.lng])
+                lines.addLatLng(e.latlng)
+                map.addLayer(lines)
+                map.addLayer(L.circle(e.latlng, { color: '#ff0000', fillColor: 'ff0000', fillOpacity: 1 }))
+ 
+            }
+            function onMove(e) {
+                if (points.length > 0) {
+                    ls = [points[points.length - 1], [e.latlng.lat, e.latlng.lng]]
+                    tempLines.setLatLngs(ls)
+                    map.addLayer(tempLines)
+                }
+            }
+ 
+            function onDoubleClick(e) {
+                L.polygon([points]).addTo(map)
+                points = []
+                lines = new L.polyline([])
+            }
+        }
+    </script>
+</body>
+</html>

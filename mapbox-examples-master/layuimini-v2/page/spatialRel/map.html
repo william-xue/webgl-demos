@@ -1,0 +1,1003 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Network | xxxx</title>
+
+  <style type="text/css">
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #mynetwork {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      /* border: 1px solid lightgray; */
+    }
+
+    table.legend_table {
+      font-size: 11px;
+      border-width: 1px;
+      border-color: #d3d3d3;
+      border-style: solid;
+    }
+
+    table.legend_table,
+    td {
+      border-width: 1px;
+      border-color: #d3d3d3;
+      border-style: solid;
+      padding: 2px;
+    }
+
+    div.table_content {
+      width: 80px;
+      text-align: center;
+    }
+
+    div.table_description {
+      width: 100px;
+    }
+
+    #operation,
+    #edge-operation {
+      font-size: 28px;
+    }
+
+    #network-popUp,
+    #network-popUp-edge,
+    #network-popUp-search {
+      display: none;
+      position: absolute;
+      top: 350px;
+      left: 170px;
+      z-index: 299;
+      width: 250px;
+      background-color: #f9f9f9;
+      border-style: solid;
+      border-width: 3px;
+      border-color: #5394ed;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .vis-edit-mode {
+      width: 50px;
+    }
+
+    /* 搜索 */
+    .vis-search-mode {
+      background-color: #fcfcfc;
+      border: 1px solid #ccc;
+      width: 68px;
+      position: fixed;
+      top: 45px;
+      left: 10px;
+      border-radius: 20px;
+      height: 23px;
+      cursor: pointer;
+      display: flex;
+    }
+
+    .vis-search-mode .vis-search-image {
+      background-image: url('../../lib/vis/img/network/editIcon.png');
+      width: 32px;
+      background-repeat: no-repeat;
+    }
+
+    .vis-search-mode .vis-label {
+      font-size: 12px;
+      height: 25px;
+      line-height: 25px;
+    }
+
+    #node-type {
+      width: 100%;
+    }
+
+    .ques{
+      padding-left: 72px;
+    }
+
+    body {
+      background-color: white !important;
+    }
+
+    #map-container{
+            width: 100%;
+            height: 800px;
+        }
+  </style>
+
+  <!-- <script type="text/javascript" src="../exampleUtil.js"></script> -->
+  <script type="text/javascript" src="../../lib/jquery-3.4.1/jquery-3.4.1.min.js"></script>
+  <script type="text/javascript" src="../../lib/vis/vis.js"></script>
+  <link href="../../lib/vis/vis.css" rel="stylesheet" type="text/css" />
+  <link href="../../lib/vis/vis-network.min.css" rel="stylesheet" type="text/css" />
+
+  <link rel="stylesheet" href="../../lib/layui-v2.6.3/css/layui.css">
+  <link rel="stylesheet" href="../../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+  <script src="../../lib/layui-v2.6.3/layui.js" type="text/javascript" charset="utf-8"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+  
+  <script type="text/javascript">
+    var _nodes, _edges, network = null, operateFlag = 'add-node';
+    // randomly create some nodes and edges
+    // var data = getScaleFreeNetwork(25);
+    let maxSize = 400, requestRoot = 'http://localhost:9990', backendPlatform = 'python'; // 初始可视化最大数量,请求根路径，平台 python 或者 java
+    let NodeConfig = [
+      {
+        type: 'DM',
+        color: '#7BE141',
+        properties: ['title','id'],
+        title: null,
+        id: 'id'
+      },
+      {
+        type: '章名',
+        color: 'rgb(255,168,7)',
+        properties: ['name'],
+        title: null,
+        id: 'name'
+      },
+      {
+        type: '节名',
+        color: 'rgb(25,168,17)',
+        properties: ['name'],
+        title: null,
+        id: 'name'
+      },
+      {
+        type: '节名1',                    // 必须,节点类型
+        color: '#7BE141',                   // 必须,节点颜色
+        properties: ['prop1', 'prop2', 'prop3'],  // 必须,节点属性,默认显示第一个,当为[] 时,显示label即这里的type
+        title: 'name|prop1',                    // 必须,需要展示在title上的属性，键值必须有 1、为空null 则显示全部，2、为''空字符串则显示label，3、| 隔开显示有的属性
+        id: 'prop1'                              // 必须,唯一值字段名称
+      },
+      {
+        type: '知识点',
+        color: 'rgba(97,195,238,0.5)',
+        properties: ['prop1'],
+        title: '',
+        id: 'name'
+      }
+    ]
+    let EdgeConfig = [
+      {
+        from: 'DM',
+        to: 'DM',
+        type: 'RELATION', // 关系label名
+        properties: ['type'], // 属性
+        title: null,
+        id: ''
+      },
+      {
+        from: '章名',
+        to: '节名',
+        type: '节序号', // 关系label名
+        properties: ['name'], // 属性
+        title: 'name',
+        id: 'name'
+      },
+      {
+        from: 'Subject',
+        to: 'Major',
+        type: 'belongTo', // 关系label名
+        properties: ['prop1', 'prop2', 'prop3'], // 属性
+        title: 'prop1',
+        id: 'prop2'
+      },
+      {
+        from: 'Knowledge',
+        to: 'Major',
+        type: 'contain',
+        properties: ['prop4', 'prop5', 'prop6'],
+        title: 'prop1|prop2|prop3',
+        id: 'prop1'
+      },
+      {
+        from: 'Subject',
+        to: 'Subject',
+        type: 'with', // 关系label名
+        properties: ['prop1', 'prop2', 'prop3'], // 属性
+        title: 'prop1',
+        id: 'prop1'
+      },
+    ]
+
+    // let color_Subject = '#7BE141', color_Major = 'rgb(255,168,7)', color_Knowledge = 'rgba(97,195,238,0.5)';
+
+    function destroy() {
+      if (network !== null) {
+        network.destroy();
+        network = null;
+      }
+    }
+
+    function draw(nodes = [], edges = []) {
+      destroy();
+      _nodes = new vis.DataSet(nodes);
+      _edges = new vis.DataSet(edges);
+      var data = {
+        nodes: _nodes,
+        edges: _edges,
+      }
+      // create a network
+      var container = document.getElementById('mynetwork');
+      var options = {
+        layout: { randomSeed: 2 }, // just to make sure the layout is the same when the locale is changed
+        height: '100%',
+        width: '100%',
+        locale: 'cn',
+        layout: {
+                    hierarchical: {
+                        direction: 'UD'
+                    }
+                },
+        manipulation: {
+          addNode: function (data, callback) {
+            // filling in the popup DOM elements
+            clearEdgePopUp()
+            clearSearchPopUp()
+            console.log('data-add===>>', data)
+            operateFlag = 'add-node'
+            document.getElementById('operation').innerHTML = "Add Node";
+            document.getElementById('node-id').value = data.id;
+            document.getElementById('saveButton').onclick = saveData.bind(this, data, callback);
+            document.getElementById('cancelButton').onclick = clearPopUp.bind();
+            // document.getElementById('node-type').style.display = 'block';
+            document.getElementById('node-type').disabled = false
+            document.getElementById('network-popUp').style.display = 'block';
+          },
+          editNode: function (data, callback) {
+            // filling in the popup DOM elements
+            clearEdgePopUp()
+            clearSearchPopUp()
+            console.log('data-edit===>>', data)
+            operateFlag = 'edit-node'
+            document.getElementById('operation').innerHTML = "Edit Node";
+            document.getElementById('node-id').value = data.id;
+            document.getElementById('node-type').value = data.type
+            document.getElementById('node-type').disabled = true
+            // document.getElementById('node-type').style.display = 'none';
+
+            // 属性赋值到表单
+            let item = NodeConfig.find(item => item.type === data.type)
+            let singleNodeProperties = '';
+            item.properties.forEach(it => (
+              singleNodeProperties += `
+                <tr class='network-properties'>
+                  <td>${it}</td>
+                  <td><input value="${data[it]}" ${item.id == it ? 'disabled' : ''} /></td>
+                </tr>`
+            ))
+            $('#network-table .network-properties').remove()
+            $('#network-table').append(singleNodeProperties)
+
+            document.getElementById('saveButton').onclick = saveData.bind(this, data, callback);
+            document.getElementById('cancelButton').onclick = cancelEdit.bind(this, callback);
+            document.getElementById('network-popUp').style.display = 'block';
+          },
+          deleteNode: function (data, callback) {
+            deleteNodeHandler(data, callback)
+          },
+          addEdge: function (data, callback) {
+            operateFlag = 'add-edge'
+            if (data.from == data.to) {
+              var r = confirm("Do you want to connect the node to itself?");
+              if (r == true) {
+                return;
+                callback(data);
+              }
+            }
+            else {
+              // callback(data);
+
+              if (!(_edges && _nodes)) return;
+              let from = _nodes.get(data.from)
+              let to = _nodes.get(data.to)
+              // 随机生成一个边的标识
+              let flag = new Date().getTime()
+              // 找到两者的关系
+              let configItem = EdgeConfig.find(config => config['from'] === from.type && config['to'] === to.type)
+              if (configItem) {
+                operateFlag = 'add-edge'
+                document.getElementById('edge-operation').innerHTML = "Add Edge";
+                document.getElementById('edge-id').value = data.id;
+                document.getElementById('edge-type').value = configItem.type;
+                document.getElementById('saveEdgeButton').onclick = addEdgeHandler.bind(this, data, configItem, callback);
+                document.getElementById('cancelEdgeButton').onclick = clearEdgePopUp.bind();
+                document.getElementById('edge-type').style.display = 'block';
+                document.getElementById('network-popUp-edge').style.display = 'block';
+
+                // 属性赋值到表单
+                let edgeProperties = '';
+                configItem.properties.forEach(it => (
+                  edgeProperties += `
+                  <tr class='network-properties-edge'>
+                    <td>${it}</td>
+                    <td><input value=""} /></td>
+                  </tr>`
+                ))
+                $('#edge-network-table .network-properties-edge').remove()
+                $('#edge-network-table').append(edgeProperties)
+
+              } else {
+                alert('相连节点之间无定义关系！')
+                return;
+              }
+              // addEdgeHandler(data, callback)
+            }
+          },
+          editEdge: function (data, callback) {
+            // 编辑线不操作
+            return;
+          },
+          deleteEdge: function (data, callback) {
+            deleteEdgeHandler(data, callback)
+          },
+        }
+      };
+      delete options.manipulation;   // 删除了manipulation
+      network = new vis.Network(container, data, options);
+      network.setOptions({ nodes: { shadow: true }, edges: { shadow: true } });
+
+      network.on('select', function (params) {
+          const node = _nodes.get(params.nodes[0])
+          console.log(node);
+          drawSelect(node.label)
+     });
+
+      // 实现点击 查找有关系节点,则展开
+      network.on("doubleClick", function (params) {
+        const { nodes, edges } = params;
+        const nodeId = nodes[0]
+        if (!nodeId) return;
+
+        const node = _nodes.get(nodeId)
+        console.log(params, node)
+        if (edges.length > 0) { // 移除边
+          edges.forEach(it => {
+            _edges.remove(it)
+          })
+        } else { // 添加节点和边
+          const configNode = NodeConfig.find(t => t.type == node.type)
+          excuteCypher(`
+            match (f:${node.type}{${configNode['id']}:'${node.id}'}) -[r]->(t) return f, r, t , type(r) as type ,labels(f) as labelF, labels(t) as labelT
+            union all 
+            match (f) -[r]->(t:${node.type}{${configNode['id']}:'${node.id}'}) return f, r, t , type(r) as type ,labels(f) as labelF, labels(t) as labelT
+          `, 'excuteCqlWithEdgeRes').then(response => {
+            console.log(response);
+            inputNodeAndEdge(response.data)
+          })
+        }
+
+      });
+    }
+
+    function inputNodeAndEdge(data) {
+      data.forEach(res => {
+        const { f, r, t, type, labelF, labelT } = res
+        const { id: idF, labelVal: labelValF, titleVal: titleValF, color: colorF } = getLabelValAndTitleVal_Node(f, labelF[0])
+        const { id: idT, labelVal: labelValT, titleVal: titleValT, color: colorT } = getLabelValAndTitleVal_Node(t, labelT[0])
+        if (idF && !_nodes.get(idF)) {
+          _nodes.add({ ...f, color: colorF, label: labelValF, title: titleValF, id: idF, type: labelF, shape: 'circle' })
+        }
+        if (idT && !_nodes.get(idT)) {
+          _nodes.add({ ...t, color: colorT, label: labelValT, title: titleValT, id: idT, type: labelT })
+        }
+
+        const edge = EdgeConfig.find(it => it.type == type)
+        if (edge) {
+          const { labelVal: labelValEdge, titleVal: titleValEdge } = getLabelValAndTitleVal_Edge(r, type)
+          let configFrom = NodeConfig.find(t => t.type == labelF[0])
+          let configTo = NodeConfig.find(n => n.type == labelT[0])
+          _edges.add({ 'from': f[configFrom['id']], 'to': t[configTo['id']], 'arrows': 'to', label: labelValEdge, title: titleValEdge })
+        }
+      })
+    }
+
+    function clearPopUp() {
+      document.getElementById('saveButton').onclick = null;
+      document.getElementById('cancelButton').onclick = null;
+      document.getElementById('network-popUp').style.display = 'none';
+    }
+
+    function clearEdgePopUp() {
+      document.getElementById('saveEdgeButton').onclick = null;
+      document.getElementById('cancelEdgeButton').onclick = null;
+      document.getElementById('network-popUp-edge').style.display = 'none';
+    }
+
+    function clearSearchPopUp() {
+      document.getElementById('searchButton').onclick = null;
+      document.getElementById('cancelSearchButton').onclick = null;
+      document.getElementById('network-popUp-search').style.display = 'none';
+    }
+
+    function cancelEdit(callback) {
+      clearPopUp();
+      callback(null);
+    }
+
+    function cancelEdgeEdit(callback) {
+      clearEdgePopUp();
+      callback(null);
+    }
+
+    function saveData(data, callback) {
+      data.id = document.getElementById('node-id').value;
+      // 处理不同类型的label
+      let type = document.getElementById('node-type').value
+      $('#network-table .network-properties').each(function (item) {
+        let key = $($(this).find('td')[0]).text()
+        let value = $($(this).find('input')[0]).val()
+        data[key] = value;
+      })
+      let item = NodeConfig.find(item => item.type === type);
+      // data = { 
+      //   ...data,
+      //   ...item,
+      // }
+      // delete data.properties
+      console.log('data===', data)
+      data['type'] = type
+      let callbackData = { ...data, label: item.properties && item.properties.length ? data[item.properties[0]] : item.type }
+      delete data.label // 不保存,但是显示
+      delete data.type
+      if (operateFlag === 'add-node') {
+        let p = Object.keys(data).filter(i => (!['x', 'y', 'id'].includes(i))).map(key => (
+          `${key}:'${data[key]}'`
+        ))
+        let cypher = `create (:${type}{${p}})`
+        console.log(cypher, data)
+        excuteCypher(`match (n:${type}) where n.${item.id} = '${data[item.id]}' return n, labels(n) as label`, 'excuteCqlWithSingleNodeRes').then(r => {
+          const { success, data: rData } = r;
+          if (success && rData && rData.length) {
+            alert('数据库中节点的主键已存在！')
+            return;
+          } else {
+            excuteCypher(cypher, '').then((res) => {
+              console.log(res)
+
+              console.log('添加的label ==>>', data)
+              data['type'] = type
+              clearPopUp();
+              callback(callbackData);
+            })
+          }
+        })
+      } else if (operateFlag === 'edit-node') {
+        let p = item.properties.map(key => {
+          return `n.${key} = '${data[key]}'`
+        })
+        let cypher = `match (n:${type}{${item.id}:'${data.id}'}) set ${p}`
+        console.log(cypher)
+        excuteCypher(cypher, '').then((res) => {
+          console.log(res)
+
+          console.log('编辑的label ==>>', data)
+          clearPopUp();
+          callback(callbackData);
+        })
+      }
+    }
+
+    // 删除节点，及其关系 , 注意：先删关系，再删节点
+    function deleteNodeHandler(data, callback) {
+      console.log('deleteNode===>>>', data)
+      let element = data.nodes[0]
+      let node = _nodes.get(element)
+      let configNode = NodeConfig.find(n => n.type == node.type)
+      excuteCypher(`MATCH (n:${node.type}{${configNode.id}:'${node.id}'})<-[r]->() delete r`, '').then(res => {
+
+        excuteCypher(`MATCH (n:${node.type}{${configNode.id}:'${node.id}'}) delete n`, '').then(res => {
+          callback(data)
+        })
+      })
+    }
+
+    // 删除边
+    function deleteEdgeHandler(data, callback) {
+      console.log('deleteEdge===>>>', data)
+      let element = data.edges[0]
+      let item = _edges.get(element.id)[0]
+      let from = _nodes.get(item.from)
+      let to = _nodes.get(item.to)
+      console.log(from, to)
+      let configFrom = NodeConfig.find(n => n.type == from.type)
+      let configTo = NodeConfig.find(n => n.type == to.type)
+      excuteCypher(`MATCH (:${from.type}{${configFrom.id}:'${from.id}'})<-[r]->(:${to.type}{${configTo.id}:'${to.id}'}) delete r`, '').then(res => {
+        // excuteCypher(`MATCH (f:${from.type})-[r]->(t:${to.type}) where f.${} =  and  delete r`).then(res => {
+        callback(data)
+      })
+    }
+
+    function addEdgeHandler(data, configItem, callback) {
+      console.log(data)
+      let from = _nodes.get(data.from)
+      let to = _nodes.get(data.to)
+      // 随机生成一个边的标识
+      let flag = new Date().getTime()
+      let cql = '';
+      let dataInput = {}
+      $('.network-properties-edge').each(function (item) {
+        let key = $($(this).find('td')[0]).text()
+        let value = $($(this).find('input')[0]).val()
+        dataInput[key] = value;
+      })
+
+      let str = ''
+      Object.keys(dataInput).forEach(key => {
+        str += `${key}: '${dataInput[key]}', `
+      })
+      str = str.substr(0, str.length - 2)
+      let configFrom = NodeConfig.find(n => n.type == from.type)
+      let configTo = NodeConfig.find(n => n.type == to.type)
+      cql = `match (f:${from.type}{${configFrom.id}:'${from[configFrom.id]}'}),(t:${to.type}{${configTo.id}:'${to[configTo.id]}'}) create (f)-[:${configItem.type}{ ${str} }]->(t)`
+      console.log(str, cql)
+
+      excuteCypher(cql, '').then(r => { })
+      clearEdgePopUp();
+      callback({ ...data, arrows: 'to', label: configItem ? configItem.type : '' })
+    }
+
+    function init() {
+      let singleNode_cql = '', edge_cql = '';
+      NodeConfig.forEach(node => {
+        singleNode_cql += `n:${node.type} or `;
+        edge_cql += `f:${node.type} or t:${node.type} or `;
+      })
+      singleNode_cql = singleNode_cql.substr(0, singleNode_cql.length - 3)
+      edge_cql = edge_cql.substr(0, edge_cql.length - 3)
+    //   let singleNodeCql = `match (n) where ${singleNode_cql} return n, labels(n) as label limit ${maxSize}`
+    //   let EdgeCql = `match (f)-[r]->(t) where ${edge_cql} return f,t,r, type(r) as type ,labels(f) as labelF, labels(t) as labelT limit ${maxSize}`
+
+      let singleNodeCql = ` match (n:DM{title:'安徽省'})-[r]->(:DM) return n, labels(n) as label 
+                            union
+                            match (:DM{title:'安徽省'})-[r]->(n:DM) return n, labels(n) as label 
+                            limit ${maxSize}`
+      let EdgeCql = `match (f:DM{title:'安徽省'})-[r]->(t:DM) return f,t,r, type(r) as type ,labels(f) as labelF, labels(t) as labelT limit ${maxSize}`
+
+      const promise1 = excuteCypher(singleNodeCql, 'excuteCqlWithSingleNodeRes') // 查询单个孤立节点
+      const promise2 = excuteCypher(EdgeCql, 'excuteCqlWithEdgeRes') // 查询有关系的节点
+
+      let nodes = [], edges = [];
+
+      Promise.all([promise1, promise2]).then(res => {
+        console.log(res)
+        let sigleNodes = res[0].data.map(d => ({ ...d['n'], type: d['label'][0] }))
+        sigleNodes.forEach(item => {
+          const { color, labelVal, titleVal, id } = getLabelValAndTitleVal_Node(item, item.type)
+          if (id !== null) {
+            let copy = { ...item, color, label: labelVal, title: titleVal, id }
+            nodes.push(copy)
+          }
+        })
+        // nodes = nodes.concat(sigleNodes)
+        console.log(nodes)
+        // title 是所有属性的集合
+        res[1].data.forEach(d => {
+          const edge = EdgeConfig.find(it => it.type == d.type)
+          if (edge) {
+            const { labelVal, titleVal } = getLabelValAndTitleVal_Edge(d['r'], d.type)
+            let configFrom = NodeConfig.find(n => n.type == edge.from)
+            let configTo = NodeConfig.find(n => n.type == edge.to)
+            edges.push({ 'from': d['f'][configFrom['id']], 'to': d['t'][configTo['id']], 'arrows': 'to', label: labelVal, title: titleVal })
+          }
+        })
+        console.log(edges)
+        draw(nodes, edges);
+        drawMap()
+      })
+    }
+    function getLabelValAndTitleVal_Node(nodeProperties, type) {
+      const node = NodeConfig.find(it => it.type == type)
+      if (!node) return { color: '', labelVal: '', titleVal: '', id: null }
+
+      let labelVal = '', titleVal = '';
+      if (node.properties && node.properties.length) {
+        labelVal = nodeProperties[node.properties[0]]
+      } else {
+        labelVal = node.type
+      }
+
+      if (node.title === null) {
+        Object.keys(nodeProperties).forEach(it => {
+          if (!['id', 'x', 'y', 'type'].includes(it)) {
+            titleVal += `${it}:${nodeProperties[it] || ''},`
+          }
+        })
+        titleVal = titleVal.substr(0, titleVal.length - 1)
+      } else if (node.title.trim() === '') {
+        titleVal = node.type
+      } else {
+        let titles = node.title.trim().split('|')
+        titles.forEach(it => {
+          titleVal += `${it}:${nodeProperties[it] || ''},`
+        })
+        titleVal = titleVal.substr(0, titleVal.length - 1)
+      }
+      console.log(titleVal)
+      return { color: node.color || '#ffddee', labelVal: labelVal + '', titleVal: titleVal + '', id: nodeProperties[node['id']] }
+    }
+    function getLabelValAndTitleVal_Edge(edgeProperties, type) {
+      const edge = EdgeConfig.find(it => it.type == type)
+
+      let labelVal = '', titleVal = '';
+      if (edge.properties && edge.properties.length) {
+        labelVal = edgeProperties[edge.properties[0]];
+      } else {
+        labelVal = type
+      }
+
+      if (edge.title === null) {
+        Object.keys(edgeProperties).forEach(it => {
+          if (!['id'].includes(it)) {
+            titleVal += `${it}:${edgeProperties[it] || ''},`
+          }
+        })
+        titleVal = titleVal.substr(0, titleVal.length - 1)
+      } else if (edge.title.trim() === '') {
+        titleVal = edge.type
+      } else {
+        let titles = edge.title.trim().split('|')
+        titles.forEach(it => {
+          titleVal += `${it}:${edgeProperties[it] || ''},`
+        })
+        titleVal = titleVal.substr(0, titleVal.length - 1)
+      }
+      console.log(titleVal)
+      return { labelVal: labelVal + '', titleVal: titleVal + '' }
+    }
+
+    function excuteCypher(cql, type, callback) {
+      let url = `${requestRoot}/flask/excuteCql`;
+      if (backendPlatform === 'java') {
+        if (type === 'excuteCqlWithSingleNodeRes') {
+          url = `${requestRoot}/flask/excuteCqlWithSingleNodeRes`
+        } else if (type === 'excuteCqlWithEdgeRes') {
+          url = `${requestRoot}/flask/excuteCqlWithEdgeRes`
+        }
+      }
+      return new Promise((resovle, reject) => {
+        fetch(url, {
+          method: 'post',
+          body: JSON.stringify({
+            cql
+          }),
+          headers: {
+            'Content-Type': "application/json", //必须这样写
+          }
+        }).then(res => res.json()).then(res => {
+          resovle(res)
+        })
+      })
+    }
+
+
+    let province = null;
+    function drawMap(){
+        window.map = L.map('map-container', {
+            crs: L.CRS.EPSG4326,
+        }).setView([32.25584014868546, 117.26806640625], 6)
+
+        const VEC_C = 'http://t1.tianditu.com/vec_c/wmts?layer=vec&style=default&tilematrixset=c&Service=WMTS&Request=GetTile&Version=1.0.0&Format=tiles&TileMatrix={z}&TileCol={x}&TileRow={y}&tk=';
+        const CVA_C = 'http://t1.tianditu.com/cva_c/wmts?layer=cva&style=default&tilematrixset=c&Service=WMTS&Request=GetTile&Version=1.0.0&Format=tiles&TileMatrix={z}&TileCol={x}&TileRow={y}&tk=';
+        const TK_KEY = '0db778f3a181108e2cbb155d495fc774';
+        // L.tileLayer(VEC_C + TK_KEY, {
+        //     maxZoom: 20,
+        //     tileSize: 256,
+        //     zoomOffset: 1,
+        // }).addTo(map);
+        // L.tileLayer(CVA_C + TK_KEY, {
+        //     maxZoom: 20,
+        //     tileSize: 256,
+        //     zoomOffset: 1,
+        // }).addTo(map);
+        map.whenReady(() => {
+            console.log('whenReady....');
+            // layer = L.geoJson('./anhui.json', {})
+            $.get('./anhui.json',(res)=>{
+                console.log(res)
+                province = res;
+                res.features.forEach(f=>{
+                    f.geometry.coordinates.forEach(m => {
+                        var multipolygon = L.polygon( m, {color: 'blue', opacticy: 0.2});
+                        multipolygon.addTo(map);
+                    })
+                    // Adding multi poly-line to map
+                })
+            })
+        });
+        
+    }
+
+    let layers = [];
+    function drawSelect(name) {
+        if (!province) return;
+        if (name ==='安徽省'){
+            province.features.forEach(f=>{
+                f.geometry.coordinates.forEach(m=>{
+                    var multipolygon = L.polygon( m, {color: 'red', opacticy: 0.6});
+                    multipolygon.addTo(map);
+                    layers.push(multipolygon)
+                })
+            })
+        } else {
+            layers.forEach(f=>f.remove())
+            let feature = province.features.find(f=>f.properties.name === name)
+            if(!feature) return;
+            feature.geometry.coordinates.forEach(m=>{
+                var multipolygon = L.polygon( m, {color: 'red', opacticy: 0.6});
+                multipolygon.addTo(map);
+                layers.push(multipolygon)
+            })
+        }
+    }
+
+    $(function () {
+      // 节点
+      let labels = '', singleNodeProperties = '';
+      NodeConfig.forEach(item => (
+        labels += `<option value=${item.type}>${item.type}</option>`
+      ))
+      NodeConfig[0].properties.forEach(item => (
+        singleNodeProperties += `
+          <tr class='network-properties'>
+            <td>${item}</td>
+            <td><input value="" /></td>
+          </tr>`
+      ))
+      $('#network-table').html(`
+        <tr style="display: none;">
+          <td>id</td>
+          <td><input id="node-id" value="new value" /></td>
+        </tr>
+        <tr>
+          <td>type</td>
+          <td>
+            <select id="node-type" >
+              ${labels}
+            </select>
+          </td>
+        </tr>
+        ${singleNodeProperties}
+      `)
+
+      $("#node-type").change((e) => {
+        let item = NodeConfig.find(item => item.type === e.target.value)
+        console.log(item)
+        let singleNodeProperties = '';
+        item.properties.forEach(item => (
+          singleNodeProperties += `
+          <tr class='network-properties'>
+            <td>${item}</td>
+            <td><input value="" /></td>
+          </tr>`
+        ))
+        $('.network-properties').remove()
+        $('#network-table').append(singleNodeProperties)
+      })
+
+      // 边
+      let edges = '', singleEdgeProperties = '';
+      EdgeConfig.forEach(item => (
+        edges += `<option value=${item.type}>${item.type}</option>`
+      ))
+      EdgeConfig[0].properties.forEach(item => (
+        singleEdgeProperties += `
+          <tr class='network-properties-edge'>
+            <td>${item}</td>
+            <td><input id="edge-label" value="" /></td>
+          </tr>`
+      ))
+      $('#edge-network-table').html(`
+        <tr style="display: none;">
+          <td>id</td>
+          <td><input id="edge-id" value="new value" /></td>
+        </tr>
+        <tr>
+          <td>type</td>
+          <td>
+            <input id="edge-type" value="new value" disabled />
+          </td>
+        </tr>
+        ${singleEdgeProperties}
+      `)
+
+      // 搜索
+      let labels_ = '', singleNodeProperties_ = '';
+      NodeConfig.forEach(item => (
+        labels_ += `<option value=${item.type}>${item.type}</option>`
+      ))
+      NodeConfig[0].properties.forEach(item => (
+        singleNodeProperties_ += `
+          <tr class='network-properties'>
+            <td>${item}</td>
+            <td><input value="" /></td>
+          </tr>`
+      ))
+      $('#search-network-table').html(`
+        <tr style="display: none;">
+          <td>id</td>
+          <td><input id="search-node-id" value="new value" /></td>
+        </tr>
+        <tr>
+          <td>type</td>
+          <td>
+            <select id="search-node-type" >
+              ${labels_}
+            </select>
+          </td>
+        </tr>
+        ${singleNodeProperties_}
+      `)
+
+      $("#search-node-type").change((e) => {
+        let item = NodeConfig.find(item => item.type === e.target.value)
+        console.log(item)
+        let singleNodeProperties = '';
+        item.properties.forEach(item => (
+          singleNodeProperties += `
+          <tr class='network-properties'>
+            <td>${item}</td>
+            <td><input value="" /></td>
+          </tr>`
+        ))
+        $('.network-properties').remove()
+        $('#search-network-table').append(singleNodeProperties)
+      })
+
+
+      $('#vis-search-button').click(() => {
+        clearPopUp()
+        clearEdgePopUp()
+
+        operateFlag = 'search-node'
+        document.getElementById('search-operation').innerHTML = "Search Node";
+        document.getElementById('search-node-id').value = ''; //data.id;
+        document.getElementById('searchButton').onclick = searchData.bind();
+        document.getElementById('cancelSearchButton').onclick = clearSearchPopUp.bind();
+        document.getElementById('search-node-type').style.display = 'block';
+        document.getElementById('network-popUp-search').style.display = 'block';
+
+      })
+
+      function searchData() {
+        let type = document.getElementById('search-node-type').value
+
+        let strn = '', strf = '', strt = '';
+        $('.network-properties').each(function (item) {
+          let key = $($(this).find('td')[0]).text()
+          let value = $($(this).find('input')[0]).val()
+          // data[key] = value;
+          if (value.trim() !== '') {
+            strn += `n.${key} =~ '.*${value}.*' and `
+            strf += `f.${key} =~ '.*${value}.*' and `
+            strt += `t.${key} =~ '.*${value}.*' and `
+          }
+        })
+
+        excuteCypher(`match (n:${type}) where ${strn} 1=1 return n, labels(n) as label`, 'excuteCqlWithSingleNodeRes').then(res1 => {
+          // 先清空再填充
+          _nodes.clear()
+          _edges.clear()
+
+          let sigleNodes = res1?.data.map(d => ({ ...d['n'], type: d['label'][0] }))
+          sigleNodes.forEach(item => {
+            const { color, labelVal, titleVal, id } = getLabelValAndTitleVal_Node(item, item.type)
+            if (id != null) {
+              let copy = { ...item, color, label: labelVal, title: titleVal, id }
+              _nodes.add(copy)
+            }
+          })
+
+          excuteCypher(`
+              match (f:${type})-[r]->(t) where ${strf} 1=1 return f, r, t , type(r) as type ,labels(f) as labelF, labels(t) as labelT
+              union all 
+              match (f)-[r]->(t:${type}) where ${strt} 1=1  return f, r, t , type(r) as type ,labels(f) as labelF, labels(t) as labelT
+            `, 'excuteCqlWithEdgeRes').then(res2 => {
+            inputNodeAndEdge(res2?.data)
+          })
+        })
+      }
+
+      // 问答相关
+      $(".ques").on('click', 'a', function () {
+        let words = $(this).text()
+        $('.search_sql').val(words);
+      })
+      $("#btn_submit_search_sql").click(function (e) {
+        e.preventDefault();
+        const quesWord = $('.search_sql').val();
+        excuteQuestion(quesWord)
+      });
+      
+      window.excuteQuestion = function excuteQuestion(quesWord){
+        if (quesWord.trim()==='') {
+          init();
+          return;
+        }
+        let word1 = quesWord.split('的')
+        if (word1.length < 2) {
+          layer.alert('问句有误！')
+          return;
+        }
+        let word2 = word1[1].split('是')
+        if (word2.length < 2) {
+          word2 = word1[1].split('有')
+          if (word2.length < 2) {
+            layer.alert('问句有误！')
+            return;
+          }
+        }
+        console.log(word1, word2);
+        let wordStr1 = word1[0], wordStr2 = word2[0];
+        let labelsCql='' , relCql='';
+        NodeConfig.forEach((it,i)=>{
+          labelsCql += `match (n:${it.type}) where n.name =~ '.*${wordStr1}.*' or n.name =~ '.*${wordStr2}.*' return n, labels(n) as label  ${i!=NodeConfig.length-1?'union all':''} `
+        })
+        EdgeConfig.forEach((it,i)=>{
+          relCql += `match (f:${it.from})-[r:${it.type}]->(t) where f.name =~ '.*${wordStr1}.*' and r.name =~ '.*${wordStr2}.*' return f, r, t , type(r) as type ,labels(f) as labelF, labels(t) as labelT ${i!=NodeConfig.length-1?'union all':''} `;
+        })
+
+        excuteCypher(labelsCql, 'excuteCqlWithSingleNodeRes').then(res1 => {
+          // 先清空再填充
+          _nodes.clear()
+          _edges.clear()
+
+          let sigleNodes = res1?.data.map(d => ({ ...d['n'], type: d['label'][0] }))
+          sigleNodes.forEach(item => {
+            const { color, labelVal, titleVal, id } = getLabelValAndTitleVal_Node(item, item.type)
+            if (id != null) {
+              let copy = { ...item, color, label: labelVal, title: titleVal, id }
+              _nodes.add(copy)
+            }
+          })
+
+          excuteCypher(relCql, 'excuteCqlWithEdgeRes').then(res2 => {
+            inputNodeAndEdge(res2?.data)
+          })
+        })
+      }
+    })
+
+  </script>
+</head>
+
+<body onload="init();">
+  
+  <div class="layuimini-container">
+    <div class="layuimini-main">
+      <div class="layui-row ">
+        <div class="layui-col-md4">
+          <div class="layui-card">
+            <div class="layui-card-header"><i class="fa fa-bullhorn icon icon-tip"></i>图谱</div>
+            <div class="layui-card-body">
+                <div id="mynetwork" style="height:800px;"></div>
+            </div>
+          </div>
+        </div>
+        <div class="layui-col-md8">
+          <div class="layui-card">
+            <div class="layui-card-header"><i class="fa fa-bullhorn icon icon-tip"></i>地图</div>
+            <div class="layui-card-body">
+                <div id="map-container"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>

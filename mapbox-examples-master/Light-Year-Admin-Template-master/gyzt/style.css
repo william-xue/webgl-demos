@@ -1,0 +1,224 @@
+/* html 页面 */
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+*:before,
+*:after {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    overflow: hidden;
+    font-family: "Helvetica Neue", Helvetica, Tahoma, Arial, "Microsoft Yahei", "Hiragino Sans GB", "WenQuanYi Micro Hei", sans-serif;
+    font-size: 14px;
+    /* background:#0d2446 !important; */
+    background: url('./img/bg.webp') no-repeat 100% 100%;
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    position: relative;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+input,
+button,
+select,
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+a {
+    color: #62a8ea;
+    text-decoration: none;
+}
+
+a:hover,
+a:focus {
+    color: #89bceb;
+    text-decoration: underline;
+}
+
+a:focus {
+    outline: thin dotted;
+    outline: 5px auto -webkit-focus-ring-color;
+    outline: none;
+    outline-offset: -2px;
+}
+
+ul,
+li {
+    list-style: none;
+}
+
+.header-wrap{
+    width: 100%;
+    height: 171px;
+    background: linear-gradient(180deg,#0d233d 17%, rgba(11,34,58,0.00));
+    z-index: 99;
+    top: 0;
+    position: fixed;
+    display: flex;
+    justify-content: space-between;
+}
+.header-wrap .top_decoration10{
+    position: relative;
+    width: 33.3%;
+}
+.header-wrap .top_decoration10_reverse{
+    transform: rotateY(180deg);
+}
+
+.header-wrap .title-box{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+}
+.header-wrap .title-box .title{
+    font-size: 24px;
+    font-family: PingFang SC, PingFang SC-Regular;
+    font-weight: 400;
+    text-align: center;
+    color: #ffffff;
+    margin-top: 20px;
+}
+
+.left-container{
+    width: 500px;
+    height: calc(100% - 100px);
+    position: fixed;
+    top: 100px;
+}
+
+.left-container .guage{
+    height: 30%;
+}
+
+.left-container .guage .item-left{
+    width: 60%;
+    height: 100%;
+    float: left;
+}
+.left-container .guage .item-middle{
+    width: 20%;
+    height: 100%;
+    float: left;
+    left: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+.left-container .guage .item-middle .item{
+    width: 100%;
+    color: #fff;
+    font-size: 16px;
+}
+.left-container .guage .item-right{
+    width: 20%;
+    height: 100%;
+    float: right;
+}
+.left-container .guage .item-right .item{
+    width: 100%;
+    height: 33%;
+}
+
+.left-container .realtime{
+    height: 70%;
+}
+
+.left-container .realtime .top{
+    height: 30%;
+}
+.left-container .realtime .middle{
+    height: 40%;
+}
+.left-container .realtime .bottom{
+    height: 40%;
+}
+
+.right-container{
+    width: 500px;
+    height: calc(100% - 100px);
+    position: fixed;
+    top: 100px;
+    right: 0;
+}
+
+.right-container .bar{
+    height: 60%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.right-container .bar >div{
+    height: 50%;
+    width: 40%;
+}
+.right-container .alert{
+    height: 50%;
+}
+.right-container .alert .header{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    color: #d1c150;
+}
+.right-container .alert .list{
+    list-style: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 80%;
+}
+.right-container .alert .list .item{
+    margin-bottom: 8px;
+}
+.right-container .alert .list .item .top{
+    color: #ccc;
+}
+.right-container .alert .list .item .bottom{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: #194ba7;
+}
+.right-container .alert .list .item .bottom .info{
+    color: #fff;
+}
+.right-container .alert .list .item .bottom .status.success{
+    color: #12bf12;
+}
+.middle-container{
+    width: calc(100% - 1000px);
+    height: 100%;
+    right: 500px;
+    position: fixed;
+    background-image: url('./img/1.gif');
+    background-repeat: no-repeat;
+    background-position: 50% ;
+}
+
+.item-header .su{
+
+}
+
+.item-header .su{
+
+}

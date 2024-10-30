@@ -1,0 +1,123 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>
+    </title>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.22/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.22/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+
+      #rendererDiv {
+        padding: 10px;
+        width: 240px;
+      }
+
+      .slider {
+        height: 40px;
+        width: 100%;
+        background-color: transparent;
+      }
+    </style>
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/GroupLayer",
+        "esri/layers/ImageryTileLayer",
+        "esri/layers/TileLayer",
+        "esri/renderers/RasterStretchRenderer",
+        "esri/widgets/Slider",
+        "esri/widgets/BasemapToggle",
+        "esri/widgets/LayerList"
+      ], (
+        Map,
+        MapView,
+        GroupLayer,
+        ImageryTileLayer,
+        TileLayer,
+        RasterStretchRenderer,
+        Slider,
+        BasemapToggle,
+        LayerList
+      ) =>
+        (async () => {
+          // initial stretch type for the rasterStretchRenderer
+          let stretchType = "min-max";
+
+          const url =
+            "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer";
+
+          // create a ImageryTileLayer from tiled elevation service
+          const layer = new ImageryTileLayer({
+            url: url,
+            title: "World Elevation ImageryTileLayer",
+            blendMode: "destination-in"
+          });
+
+          await layer.load();
+
+          layer.renderer = {
+            type: "raster-stretch",
+            stretchType: "min-max",
+            statistics: [layer.rasterInfo.statistics[0]],
+            numberOfStandardDeviations: 1,
+            colorRamp: {
+              type: "algorithmic",
+              fromColor: [0, 0, 0, 0],
+              toColor: [0, 0, 0, 1]
+            }
+          };
+
+          // rest of the map.
+          const groupLayer = new GroupLayer({
+            title: "Group Layer",
+            layers: [
+              new TileLayer({
+                // url: "https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer",
+                // url: "http://118.31.43.251:6080/arcgis/rest/services/GHT2015/MapServer",
+                url:'/other/arcgis/rest/services/quanguo/MapServer',
+                listMode: "hide-children"
+              }),
+              layer
+            ]
+          });
+
+          const map = new Map({
+            basemap: "gray-vector",
+            layers: [groupLayer]
+          });
+
+          const view = new MapView({
+            container: "viewDiv",
+            map: map,
+            zoom: 10,
+            center: [119, 30],
+            constraints: {
+              snapToZoom: false
+            }
+          });
+        })());
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>

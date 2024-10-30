@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset='UTF-8'>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Ecahrt</title>
+  <!--D3.js-->
+  <script charset='utf-8' src='https://d3js.org/d3.v7.min.js'></script>
+
+  <!--ECharts-->
+  <script src='https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js'></script>
+
+  <style>
+    #container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    #main {
+      width: 1000px;
+      height: 800px;
+      margin: auto;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id='container'>
+    <div id='main'></div>
+  </div>
+</body>
+<script>
+  var myChartEchart = echarts.init(document.getElementById('main'), {
+    width: 1000,
+    height: 650
+  }); 
+
+  // Line Chart
+  var option = {
+    title: {
+      text: 'NO2',
+      textStyle: {
+        color: 'black',
+        fontSize: 22,
+        fontWeight: 'bold'
+      }
+    },
+
+    tooltip: {
+      trigger: 'axis'
+    },
+
+    legend: {
+      data: ['Bronx', 'Brooklyn', 'Manhattan', 'Queens', 'Staten Island']
+    },
+
+    toolbox: {
+      show: true,
+      feature: {
+        magicType: { show: true, type: ['stack', 'tiled'] },
+        saveAsImage: { show: true }
+      }
+    },
+
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      name: 'Year',
+      nameLocation: 'middle',
+      data: ['2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021']
+    },
+
+    yAxis: {
+      type: 'value',
+      name: 'ppb'
+    },
+
+    series: [
+      {
+        name: 'Bronx',
+        type: 'line',
+        smooth: true,
+        data: [19.9,19.8,20,18.4,19.4,17.7,16,17.1,16.5],
+      },
+
+      {
+        name: 'Brooklyn',
+        type: 'line',
+        smooth: true,
+        data: [19.9,19.9,19.3,18.5,18.5,17.8,16.5,16,16.7],
+      },
+
+      {
+        name: 'Manhattan',
+        type: 'line',
+        smooth: true,
+        data: [28,26.7,25.2,24.4,24.6,23.4,21.7,20.5,20],
+      },
+
+      {
+        name: 'Queens',
+        type: 'line',
+        smooth: true,
+        data: [18.7,18.9,18.5,17.6,17.8,17.2,15.7,14.8,15.5],
+      },
+
+      {
+        name: 'Staten Island',
+        type: 'line',
+        smooth: true,
+        data: [13.8,14.2,13.7,13.5,13.4,12.9,11.9,11.6,12.8],
+      }
+    ]
+  };
+
+  myChartEchart.setOption(option);
+
+</script>
+
+</html>

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>Visualize points with a heatmap - 4.15</title>
+    <!-- <link
+      rel="stylesheet"
+      href="http://localhost:3333/4.15/esri/css/main.css"
+    /> -->
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+    <!-- <script src="http://localhost:3333/4.15/init.js"></script> -->
+    <link rel="stylesheet" href="https://js.arcgis.com/4.13/esri/css/main.css">
+    <script src="https://js.arcgis.com/4.13/"></script>
+    <script>
+      require([
+        "esri/Map",
+        "esri/PopupTemplate",
+        "esri/layers/CSVLayer",
+        "esri/views/MapView",
+        "esri/widgets/Legend",
+        "esri/widgets/LayerList",
+        "esri/renderers/HeatmapRenderer",
+        "esri/layers/FeatureLayer",
+        "esri/layers/GeoJSONLayer",
+        "esri/widgets/BasemapGallery"
+      ], function(Map,PopupTemplate, CSVLayer, MapView, Legend,LayerList,HeatmapRenderer,FeatureLayer,GeoJSONLayer,BasemapGallery) {
+        
+        // var layer2015 = new FeatureLayer({
+        //   url:"http://118.31.43.251:6080/arcgis/rest/services/lish/ad/MapServer/5",
+        //   popupTemplate:new PopupTemplate({
+        //     title: "2015年份数据",
+        //     content: "经度： {lng} ， 维度： {lat} ，气量：{count}."
+        //   }),
+        //   visible:true,
+        // });
+        // var layer2016 = new FeatureLayer({
+        //   url:"http://118.31.43.251:6080/arcgis/rest/services/lish/ad/MapServer/3",
+        //   popupTemplate:new PopupTemplate({
+        //     title: "2016年份数据",
+        //     content: "经度： {lng} ， 维度： {lat} ，气量：{count}."
+        //   }),
+        //   visible:false,
+        // });
+        // var layer2017 = new FeatureLayer({
+        //   url:"http://118.31.43.251:6080/arcgis/rest/services/lish/ad/MapServer/1",
+        //   popupTemplate:new PopupTemplate({
+        //     title: "2017年份数据",
+        //     content: "经度： {lng} ， 维度： {lat} ，气量：{count}."
+        //   }),
+        //   visible:false,
+        // });
+
+
+          // Symbol for freeways
+          const color1 = {
+            type: "simple-fill",  // autocasts as new SimpleFillSymbol()
+            color: [ 51,51, 204, 0.9 ],
+            style: "solid",
+            outline: {  // autocasts as new SimpleLineSymbol()
+              color: "white",
+              width: 1
+            }
+          };
+
+          // Symbol for U.S. Highways
+          const color2 = {
+            type: "simple-fill", // autocasts as new SimpleLineSymbol()
+            color: "#ff6207",
+            style: "solid",
+            outline: {  // autocasts as new SimpleLineSymbol()
+              color: "white",
+              width: 1
+            }
+          };
+
+          // Symbol for other major highways
+          const color3 = {
+            type: "simple-fill", // autocasts as new SimpleLineSymbol()
+            color: "#ef37ac",
+            style: "solid",
+            outline: {  // autocasts as new SimpleLineSymbol()
+              color: "white",
+              width: 1
+            }
+          };
+          // Symbol for other major highways
+          const color4 = {
+            type: "simple-fill", // autocasts as new SimpleLineSymbol()
+            color: "#ccc",
+            style: "solid",
+            outline: {  // autocasts as new SimpleLineSymbol()
+              color: "white",
+              width: 1
+            }
+          };
+        
+          const hwyRenderer = {
+          type: "unique-value", // autocasts as new UniqueValueRenderer()
+          field: "district",
+          defaultSymbol: color4, // used to visualize all features not matching specified types
+          defaultLabel: "其他区域", //  used in the legend for all other types not specified
+          // used for specifying unique values
+          uniqueValueInfos: [
+            {
+              value: "虹口区", // code for interstates/freeways
+              symbol: color3,
+              label: "虹口区" // used in the legend to describe features with this symbol
+            },
+            {
+              value: "宝山区", // code for U.S. highways
+              symbol: color2,
+              label: "宝山区" // used in the legend to describe features with this symbol
+            },
+            {
+              value: "普陀区", // code for U.S. highways
+              symbol: color3,
+              label: "普陀区" // used in the legend to describe features with this symbol
+            },
+            {
+              value: "静安区", // code for U.S. highways
+              symbol: color1,
+              label: "静安区" // used in the legend to describe features with this symbol
+            },
+            {
+              value: "杨浦区", // code for U.S. highways
+              symbol: color1,
+              label: "杨浦区" // used in the legend to describe features with this symbol
+            },
+            {
+              value: "浦东新区", // code for U.S. highways
+              symbol: color2,
+              label: "浦东新区" // used in the legend to describe features with this symbol
+            }
+          ]
+        };
+        // var xzq = new FeatureLayer({
+        //   title: "上海市行政区",
+        //   url:"http://118.31.43.251:6080/arcgis/rest/services/lish/ad/MapServer/6",
+        //   popupTemplate:new PopupTemplate({
+        //     title: "2017年份数据",
+        //     content: "行政区： {district} ， 经纬度点个数总和： {frequency} ，气量总和：{sum_count}."
+        //   }),
+        //   visible:false,
+        //   renderer:hwyRenderer,
+        // });
+        // var heatmapRenderer = new HeatmapRenderer();
+        // heatmapFeatureLayer.setRenderer(heatmapRenderer);
+
+        const geojsonLayer_Aquaculture = new GeoJSONLayer({
+          title: "Aquaculture",
+          url: './data/Aquaculture.geojson',
+          popupTemplate: {
+            title: "Aquaculture",
+            content: "BioType:{BioType} , stateName:{stateName} , siteName :{siteName} , species : {species}",
+          }
+        });
+
+        const geojsonLayer_USMaritimeLimitsAndBoundaries = new GeoJSONLayer({
+          title: "USMaritimeLimitsAndBoundaries",
+          url: './data/USMaritimeLimitsNBoundaries.geojson',
+          popupTemplate: {
+            title: "USMaritimeLimitsAndBoundaries",
+            content: "REGION:{REGION} , BOUND_ID:{BOUND_ID} , FEAT_TYPE :{FEAT_TYPE} , APPRV_DATE : {APPRV_DATE}, PUB_DATE : {PUB_DATE}",
+          },
+          visible:false,
+        });
+
+        const map = new Map({
+          basemap: "topo-vector",
+          layers: [geojsonLayer_Aquaculture, geojsonLayer_USMaritimeLimitsAndBoundaries]
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          center: [35.72889, -73],
+          zoom: 12,
+          map: map
+        });
+        
+        view.ui.add(
+          new Legend({
+            view: view
+          }),
+          "bottom-left"
+        );
+
+        const basemapGallery = new BasemapGallery({
+          view: view
+        });
+
+        view.when(function() {
+          var layerList = new LayerList({
+            view: view
+          });
+
+          // Add widget to the top right corner of the view
+          view.ui.add(layerList, "top-right");
+
+          // view.ui.add("location","top-left");
+          // 底图切换控件
+          view.ui.add(basemapGallery, {
+            position: "bottom-right"
+          });
+        });
+
+
+
+        // document.getElementById("location").onclick = function(){
+        //   window.open("./echarts.html")
+        // }
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+    <!-- <div id="location" class="esri-widget&#45;&#45;button esri-widget esri-interactive" role="button">
+      <i class="icon-map-marker">打开图表</i>
+  </div> -->
+  </body>
+</html>

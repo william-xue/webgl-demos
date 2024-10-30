@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>leaflet-geoserver-wfs</title>
+    <!-- <link href="../libs/leaflet.css"/> -->
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #map-container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .panel {
+            position: fixed;
+            width: 100px;
+            height: 430px;
+            box-shadow: 10px 10px 0 0 #86c2c0;
+            top: 100px;
+            left: 20px;
+            background: #528abb;
+            z-index: 10000;
+        }
+    </style>
+    <script src="./data.js"></script>
+    <link rel="stylesheet" href="./lib/leaflet.css" crossorigin="" />
+    <script src="./lib/leaflet.js" crossorigin=""></script>
+    <script src="./lib/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <div id="map-container"></div>
+
+    <div id="panel" class="panel" style="color:#fff">
+        <h4>请选择行政区</h4>
+        <div><input type="checkbox" value="青浦区" checked />青浦区</div>
+        <div><input type="checkbox" value="杨浦区" checked />杨浦区</div>
+        <div><input type="checkbox" value="闵行区" />闵行区</div>
+        <div><input type="checkbox" value="宝山区" />宝山区</div>
+        <div><input type="checkbox" value="嘉定区" />嘉定区</div>
+        <div><input type="checkbox" value="浦东新区" />浦东新区</div>
+        <div><input type="checkbox" value="金山区" />金山区</div>
+        <div><input type="checkbox" value="奉贤区" />奉贤区</div>
+        <div><input type="checkbox" value="普陀区" />普陀区</div>
+        <div><input type="checkbox" value="静安区" />静安区</div>
+        <div><input type="checkbox" value="长宁区" />长宁区</div>
+        <div><input type="checkbox" value="徐汇区" />徐汇区</div>
+        <div><input type="checkbox" value="黄浦区" />黄浦区</div>
+        <div><input type="checkbox" value="松江区" />松江区</div>
+        <div><input type="checkbox" value="崇明区" />崇明区</div>
+        <div><input type="checkbox" value="虹口区" />虹口区</div>
+        <button id="doSure" style="">确定</button>
+    </div>
+</body>
+<script>
+    // geoserver上的地址
+    const url = '/djapi/kecheng/pois_getAll'
+    const map = L.map('map-container').setView([31.16, 121.42], 12)
+    function getColor(arg) {
+        return arg > 150 ? '#800026' :
+            arg > 100 ? '#F80826' :
+                arg > 50 ? '#E3FA1C' :
+                    arg > 20 ? '#00DF03' :
+                        arg > 10 ? '#1F33EF' :
+                            '#4BD3Ef';
+    }
+    let poiGeojson = null;
+    function load(url, callback, crs = 'EPSG:4326') {
+        $.ajax({
+            type: 'get',
+            url: url,
+            dataType: 'json',
+            success: loadWFSHandler,
+            error: function (rst) {
+                console.log('request error.')
+
+                layer = L.geoJson(data, {
+                    onEachFeature: onEachFeature,
+                    style: {
+                        // fillColor: getColor(feat.properties.Z120607), //其中一个属性值
+                        // weight: 2,
+                        // opacity: 0.8,
+                        // color: 'white',
+                        // dashArray: '3',
+                        // fillOpacity: 0.8,
+                        color: 'red',
+                        fillColor: '#f03',
+                        fillOpacity: 0.50,
+                        radius: 2
+                    },
+                    // coordsToLatLng: toLatLng
+                })
+                console.log(data)
+                poiGeojson = data
+                loadPois(['青浦区', '杨浦区'])
+                loadArea(['青浦区', '杨浦区'])
+                // callback(layer)
+            }
+        })
+        function loadWFSHandler(json) {
+            console.log(json);
+            // 构造geojson 格式如下：
+            // { 
+            //     "type": "FeatureCollection",
+            //     "features": [
+            //         { 
+            //             "type": "Feature",
+            //             "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
+            //             "properties": {"prop0": "value0"}
+            //         }
+            //     ]
+            // }
+            if (!json.success) return;
+            let data = json.data
+            let features = []
+            for (let i = 0; i < data.length; i++) {
+                let item = data[i]
+                for (let j = 0; j < item.length; j++) {
+                    features.push({
+                        "type": "Feature",
+                        "geometry": { "type": "Point", "coordinates": [parseFloat(item[j]["a"]["lng"]), parseFloat(item[j]["a"]["lat"])] },
+                        "properties": { "name": item[j]['a']['name'], "address": item[j]['a']['address'], "area": item[j]['area'] }
+                    })
+                }
+            }
+            let geojson = {
+                "type": "FeatureCollection",
+                "features": features
+            }
+            // layer = L.geoJson(geojson, options)
+            poiGeojson = geojson
+            // console.log(geojson)
+            loadPois(['青浦区', '杨浦区'])
+            loadArea(['青浦区', '杨浦区'])
+            // callback(layer)
+        }
+
+    }
+    function toLatLng(coords) {
+        return L.CRS.EPSG3857.unproject(L.point(coords))
+    }
+    var lyr = ''
+
+    function highlightFeature(e) {
+        const layer = e.target
+        layer.setStyle({
+            weight: 5,
+            color: '#666',
+            // dashArray:'',
+            fillOpacity: 0.7
+        });
+        // bring this layer in front of ohter popups
+        if (!L.Browser.ie && !L.Browser.opera && L.Browser.edge) {
+            layer.bringToFront()
+        }
+    }
+    function resetHighlight(e) {
+        lyr.resetStyle(e.target)
+    }
+    //窗口绽放
+    function zoomToFeature(e) {
+        console.log(e)
+        // alert(e.target.getBounds())
+        // map.fitBounds(e.target.getBounds())
+        // map.flyTo(e.target.feature.geometry.coordinates,{animate:true})
+        // map.closePopup()
+        let html = ``
+        const props = e.target.feature.properties;
+        Object.keys(props).forEach((item) => {
+            html += `<div>${item}:${props[item]}</div>`
+        })
+        map.openPopup(html, e.latlng, {})
+    }
+    //add listeners
+    function onEachFeature(feature, layer) {
+        layer.on({
+            // mouseover: highlightFeature,
+            // mouseout: resetHighlight,
+            click: zoomToFeature
+        })
+    }
+
+    load(url, callback = (layer) => {
+        // layer.onEachFeature=onEachFeature
+        lyr = layer
+        layer.addTo(map)
+        // 加载行政区
+        loadArea()
+    }, 'epsg:4326')
+
+    function loadArea(params) {
+        let data;
+        if (params) {
+            data = {
+                "type": "FeatureCollection",
+                "name": "shanghai",
+                "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+                "features": shanghaiqu.features.filter(f => params.indexOf(f.properties.district) != -1)
+            }
+        } else {
+            data = shanghaiqu;
+        }
+        L.geoJSON(data, {
+            style: function (feature) {
+                return { color: randomColor() };
+            }
+        })
+            // .bindPopup(function (layer) {
+            //     return layer.feature.properties.district;
+            // })
+            .addTo(map);
+    }
+    function loadPois(params) {
+        let data;
+        if (params) {
+            data = {
+                "type": "FeatureCollection",
+                "name": "shanghai",
+                "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+                "features": poiGeojson.features.filter(f => params.indexOf(f.properties.area) != -1)
+            }
+        } else {
+            data = poiGeojson;
+        }
+        L.geoJSON(data, {
+            // style: function (feature) {
+            //     return { color: randomColor() };
+            // }
+        })
+            .bindPopup(function (layer) {
+                let html = ``
+                const props = layer.feature.properties;
+                Object.keys(props).forEach((item) => {
+                    html += `<div>${item}:${props[item]}</div>`
+                })
+                return html
+            })
+            .addTo(map);
+    }
+
+    // 随机取色函数
+    function randomColor() {
+        var col = "#";
+        for (var i = 0; i < 6; i++) col += parseInt(Math.random() * 16).toString(16);
+        return col;
+    }
+
+    $("#doSure").click((e) => {
+        let checkeds = $(".panel").find('input')
+        let names = []
+        for (let i = 0; i < checkeds.length; i++) {
+            if ($(checkeds[i])[0].checked) {
+                names.push($(checkeds[i]).val())
+            }
+        }
+        console.log(names)
+        removeAll()
+        loadArea(names)
+        loadPois(names)
+    })
+
+    // 删除所有图层
+    function removeAll() {
+        map.eachLayer(function (layer) {
+            if (!layer._container || ('' + jQuery(layer._container).attr('class')).replace(/\s/g, '') != 'leaflet-layer') {
+                layer.remove();
+            }
+        });
+    }
+</script>
+
+</html>

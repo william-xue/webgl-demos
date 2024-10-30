@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新工艺知识图谱</title>
+    <style type="text/css">
+        .img {
+            width: 20px;
+            height: 20px;
+            opacity: 1;
+            position: absolute;
+            z-index: 100000;
+            transition: 2s;
+        }
+
+        .left,
+        .right {
+            width: 10px;
+            height: 10px;
+            border-radius: 100%;
+            position: absolute;
+        }
+
+        .right {
+            right: 0;
+        }
+
+        .under {
+            width: 10px;
+            height: 10px;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            transform: rotate(45deg)
+        }
+
+        .text {
+            width: 50px;
+            font-size: 10px;
+            line-height: 1;
+            position: absolute;
+            top: -1em;
+            left: -15px;
+            text-align: center;
+        }
+
+        #viz {
+            width: 90%;
+            height: calc(100% - 50px);
+            /* height: 1200px; */
+            border: 1px solid lightgray;
+            font: 22pt arial;
+            margin: 0 auto;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        html,
+        body,
+        div {
+            margin: 0;
+            padding: 0;
+        }
+
+        .title {
+            height: 120px;
+            font-size: 25px;
+
+        }
+
+        .title>:nth-child(1) {
+            height: 70px;
+            line-height: 110px;
+            padding-left: 150px;
+        }
+
+        .title>:nth-child(1)>span:nth-child(1) {
+            font-weight: bold;
+            color: #2b9beb;
+        }
+
+        .title>:nth-child(2) {
+            height: 10px;
+            padding-left: 200px;
+            font-size: 15px;
+            font-style: italic
+        }
+
+        .container {
+            height: calc(100% - 120px);
+        }
+
+        .container .search {
+            /* width: 600px;
+            height: 50px;
+            background: aliceblue;
+            position: fixed;
+            right: 5%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 3px 3px 5px 5px #ccc;
+            top: 40px; */
+            width: 600px;
+            height: 50px;
+            background: aliceblue;
+            right: 5%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 3px 3px 5px 5px #ccc;
+            float: right;
+            margin: 0 100px 0 0;
+        }
+
+        .container .search input {
+            width: 500px;
+        }
+
+        .neo-container {
+            justify-content: center;
+        }
+
+        .tuili-container {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: baseline;
+            flex-direction: row;
+            height: 400px;
+        }
+
+        .img_result{
+            text-align: center;
+        }
+        .hideControl {
+            opacity: 0;
+        }
+
+    </style>
+    <script src="./js/jquery-3.6.0.min.js"></script>
+    <script src="./lib/neovis.js"></script>
+</head>
+
+<body>
+    <div class="title">
+        <div><span>NEO4J</span>&nbsp;&nbsp;<span>新工艺</span></div>
+        <div> a litte subtitle a litte title</div>
+    </div>
+    <div class="container">
+        <div class="search">
+            <input type="text" placeholder="请输入cypher语句进行查询，例如：MATCH p = (n)-[r:R]->(m) RETURN p limit 10">&nbsp;&nbsp;
+            <button id="btn_submit">搜索</button>
+        </div>
+        <div id="viz">
+
+        </div>
+    </div>
+    <div style="text-align: center;"><h2>推理</h2></div>
+    <hr />
+    <div class="tuili-container">
+        <div class="first">
+            <select>
+                <option value="车轴">车轴</option>
+                <option value="车轮">车轮</option>
+                <option value="轴箱">轴箱</option>
+            </select>
+        </div>
+        <div class="second hideControl">
+            <h3>车轴分类</h3>
+            <select>
+                <option >动车车轴</option>
+                <option >高速客车车轴</option>
+                <option value="电力机车车轴">电力机车车轴</option>
+                <option disabled>地铁车轴</option>
+            </select>
+        </div>
+        <div class="third hideControl">
+            <h3>加工机床选择</h3>
+            <select multiple style="height: 200px">
+                <option selected>F45数控机床</option>
+                <option>卧室多头钻</option>
+                <option selected>ST130C数控机床</option>
+                <option>2500全机能数控机床</option>
+                <option>CW6163型机床</option>
+                <option selected>Z3063摇臂钻床</option>
+                <option selected>车轴成型磨床</option>
+                <option>双面xi床</option>
+                <option>双面xi床</option>
+            </select>
+        </div>
+        <div class="fourth hideControl">
+            <button id="sure">确定</button>
+            <button id="reset">复位</button>
+        </div>
+    </div>
+    <div class="img_result hideControl">
+        <img src="./img/result.png" />
+    </div>
+</body>
+<script>
+    $(function () {
+        var viz;
+        var config = {
+            container_id: "viz",
+            server_url: "bolt://localhost:7687",
+            server_user: "neo4j",
+            server_password: "123",
+            arrows: false,
+            labels: {
+                "GY1": {
+                    "caption": "name",
+                    "size": 20,
+                    // "community": "type",
+                    // "image": 'https://visjs.org/images/visjs_logo.png',
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                },
+                "GY2": {
+                    "caption": "name",
+                    "size": 20,
+                    // "community": "",
+                    // "image": 'https://visjs.org/images/visjs_logo.png',
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                },
+                "GY3": {
+                    "caption": "name",
+                    "size": 20,
+                    // "community": "name",
+                    // "image": 'https://visjs.org/images/visjs_logo.png',
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                },
+                "GY4": {
+                    "caption": "name",
+                    "size": 20,
+                    // "community": "type",
+                    // "image": 'https://visjs.org/images/visjs_logo.png',
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                },
+                "GY5": {
+                    "caption": "name",
+                    "size": 20,
+                    // "community": "type",
+                    // "image": 'https://visjs.org/images/visjs_logo.png',
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                },
+                "GY6": {
+                    "caption": "name",
+                    "size": 20,
+                    // "community": "type",
+                    // "image": 'https://visjs.org/images/visjs_logo.png',
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                },
+                "GY7": {
+                    "caption": "name",
+                    "size": 20,
+                    // "community": "type",
+                    // "image": 'https://visjs.org/images/visjs_logo.png',
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                },
+                "GY8": {
+                    "caption": "name",
+                    "size": 20,
+                    // "community": "type",
+                    // "image": 'https://visjs.org/images/visjs_logo.png',
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                },
+                "GY9": {
+                    "caption": "name",
+                    "size": 20,
+                    // "community": "type",
+                    // "image": 'https://visjs.org/images/visjs_logo.png',
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                },
+                "GY10": {
+                    "caption": "name",
+                    "size": 20,
+                    // "community": "type",
+                    // "image": 'https://visjs.org/images/visjs_logo.png',
+                    "font": {
+                        "size": 26,
+                        "color": "#000000"
+                    },
+                },
+            },
+            relationships: {
+                "R": {
+                    "thickness": "weight",
+                    "caption": 'name',
+                    // "caption": true,
+                },
+                // "关系":{},
+
+            },
+            initial_cypher: "MATCH p = ()-[:R]->() RETURN p limit 100"
+        };
+
+        viz = new NeoVis.default(config);
+        viz.render();
+        $("#btn_submit").click(function (e) {
+            e.preventDefault();
+            const cql = $('.query_by_cql').val();
+            console.log(cql)
+            config['initial_cypher'] = ($.trim(cql) === '') ? "MATCH p = (n)-[]->(m) RETURN p limit 50" : cql;
+            try {
+                viz.clearNetwork()
+                viz.reinit(config)
+                viz.render()
+            } catch (err) {
+                alert('cypher语句有误，请检查')
+            }
+        });
+        $(".btn_submit_byname1").click(function (e) {
+            e.preventDefault();
+            const name = $('.query_by_name1').val();
+            console.log(name)
+            config['initial_cypher'] = ($.trim(name) === '') ? "MATCH (n)-[r:R]->(m) RETURN * limit 50" : "match p = (n)-[*1..3]->(m) where m.name =~ '.*" + name + ".*' return p";
+            try {
+                viz.clearNetwork()
+                viz.reinit(config)
+                viz.render()
+            } catch (err) {
+                alert('cypher语句有误，请检查')
+            }
+        });
+        $(".btn_submit_byname2").click(function (e) {
+            e.preventDefault();
+            const name = $('.query_by_name2').val();
+            console.log(name)
+            config['initial_cypher'] = ($.trim(name) === '') ? "MATCH (n)-[r:R]->(m) RETURN * limit 50" : "match p = (n)-[*1..3]->(m) where n.name =~ '.*" + name + ".*' return p";
+            try {
+                viz.clearNetwork()
+                viz.reinit(config)
+                viz.render()
+            } catch (err) {
+                alert('cypher语句有误，请检查')
+            }
+        });
+        $(".btn_close").click(function (e) {
+            e.preventDefault();
+            viz.clearNetwork()
+        });
+
+    })
+</script>
+<script src="../texiao/xingxing.js"></script>
+<script>
+    // 模拟推理
+    $(".first select").change(function(){
+        if($(this).val() == '车轴'){
+            $('.second').removeClass('hideControl')
+        }
+    })
+    $(".second select").change(function(){
+        if($(this).val() == '电力机车车轴'){
+            $('.third').removeClass('hideControl')
+            $('.fourth').removeClass('hideControl')
+        }
+    })
+    $("#sure").click(()=>{
+        $(".img_result").removeClass('hideControl')
+    })
+    $("#reset").click(()=>{
+        $(".img_result").addClass('hideControl')
+        $(".second").addClass('hideControl')
+        $(".third").addClass('hideControl')
+        $(".fourth").addClass('hideControl')
+    })
+</script>
+
+</html>

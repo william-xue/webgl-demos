@@ -1,0 +1,374 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Display a dynamic map layer</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
+    <!-- Load Esri Leaflet from CDN -->
+    <script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
+    <!-- Load Esri Leaflet Vector from CDN -->
+    <script src="https://unpkg.com/esri-leaflet-vector@4.0.0/dist/esri-leaflet-vector.js" crossorigin=""></script>
+    <script src="https://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js"></script>
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+
+    <style>
+    body{
+        background-color: rgb(28, 25, 42);
+    }
+      html,
+      body,
+      #map {
+        padding: 0;
+        margin: 0;
+        height: 540px;
+        /* height: 100%; */
+        width: 1920px;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 14px;
+        color: #323232;
+      }
+      .leaflet-control-attribution{
+        display: none !important;
+      }
+      .my-div-icon{
+        /* width: unset !important; */
+        /* height: unset !important; */
+      }
+      .my-factory .label span{
+        font-size: 24px;
+        font-weight: 600;
+        font-family:"Lucida Calligraphy", cursive, serif, sans-serif;
+        /* font-family:  "Arial","Microsoft YaHei","黑体","宋体",sans-serif; */
+        width: 200px;
+        margin-left: -15px;
+      }
+      .my-div-icon .label {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+
+        width: 170px;
+        margin: -20px 0 0 -75px;
+        text-align: center;
+        /* /* padding: 2px; */
+      }
+      .my-div-icon .label span{
+        
+        /* color: aliceblue; */
+
+        font-family: MicrosoftYaHei-Bold;
+        font-size: 30px;
+        font-weight: 600;
+        color: #FFFFFF;
+        letter-spacing: 0.69px;
+        text-shadow: 0 3px 6px #000000;
+      }
+      .my-div-icon .label img{
+        width:46px;
+      }
+      #open{
+        position: fixed;
+        bottom: 10px;
+        display: block;
+        left: 10px;
+        z-index: 11111;
+      }
+      #xian{
+        position: fixed;
+        bottom: 30px;
+        display: block;
+        left: 10px;
+        z-index: 11111;
+      }
+      #location{
+        position: fixed;
+        bottom: 50px;
+        display: block;
+        left: 10px;
+        z-index: 11111;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <button id="open">育肥场开关</button>
+    <!-- <button id="xian">边界线开关</button> -->
+    <div id="location"><input /></div>
+    <script>
+      const apiKey = "YOUR_API_KEY";
+
+      const map = L.map("map",{
+        zoomControl: false,
+
+      }).setView([40.306759936589664, 111.95480346679688], 10);
+
+      L.esri
+        .tiledMapLayer({
+          url: "https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer",
+          opacity: 0.7
+        })
+        .addTo(map);
+// 37.406618, 97.172903], [53.337314, 126.068464
+    // var imageBounds = [[35.7, 95.83], [53.6, 127.365]];//图片的经纬度范围，西南角点,东北角点(纬度、经度)
+    var imageBounds = [[37.406618, 97.172903], [53.337314, 126.068464]];//图片的经纬度范围，西南角点,东北角点(纬度、经度)
+    // var imageUrl='./img/faguang.png';//图片的地址   //faguang  neimeng3    yinying
+    var imageUrl='./img/faguang222.png';//图片的地址   //faguang  neimeng3    yinying
+    // var imageUrl='./img/faguang111.svg';//图片的地址   //faguang  neimeng3    yinying
+    var imageLayer =L.imageOverlay(imageUrl, imageBounds,{opacity:0.8});//opacity是透明度
+    map.addLayer(imageLayer);
+ 
+    //如果imageLayer已经创建，后续只需要切换url即可
+    if(imageLayer!=null){
+        imageLayer.setUrl(imageUrl);
+    }
+
+        let boundary , showBoundary = true;  
+        $.getJSON('./china.json',data=>{
+            boundary = L.geoJSON(data, {
+                    style: function (feature) {
+                        return {
+                            stroke: true,
+                            lineCap : 'round',
+                            lineJoin: 'round',
+                            weight: 2 ,
+                            fillOpacity: 0
+                        };
+                    }
+                });
+            let neimengdata = data.features.filter(f=>f.properties.name === '内蒙古自治区')
+            let multiPolygon = turf.multiPolygon(neimengdata[0].geometry.coordinates)
+            var bbox = turf.bbox(multiPolygon);
+            console.log(neimengdata, bbox);
+        })
+
+        $('#xian').click(()=>{
+            if (showBoundary) {
+                boundary.addTo(map)
+            }else{
+                boundary.remove()
+            }
+            showBoundary = !showBoundary
+        })
+        
+
+    const factories = [
+        {
+            name:'正盛',
+            lntlng:[40.457960363421755, 111.72748088836671],
+            iconUrl: './img/sheng.png',
+            children:[
+            ]
+        },
+        {
+            name:'正谷',
+            lntlng:[40.404215674050505, 111.50676727294923], 
+            iconUrl: './img/gu.png',
+            children:[
+                {
+                    name:'种猪场',
+                    lntlng:[40.42649949317287, 111.49560928344728]
+                },
+                {
+                    name:'1场',
+                    lntlng:[40.403235277950124, 111.47844314575195]
+                },
+                {
+                    name:'2场',
+                    lntlng:[40.40965661286395,  111.48219823837282]
+                },
+                {
+                    name:'3场',
+                    lntlng:[40.40377449757238,  111.48788452148438]
+                },
+                {
+                    name:'4场',
+                    lntlng:[40.41160086570405,  111.49303436279298]
+                },
+                {
+                    name:'5场',
+                    lntlng:[40.406601244914086, 111.49805545806886]
+                },
+                {
+                    name:'6场',
+                    lntlng:[40.39960768822275, 111.51363372802736]
+                },
+                {
+                    name:'7场',
+                    lntlng:[40.391730897048, 111.51384830474855]
+                },
+                {
+                    name:'8场',
+                    lntlng:[40.39222118065106, 111.5215301513672]
+                }
+            ]
+        },
+        {
+            name:'正缘',
+            lntlng:[40.301981640363806, 111.56384468078615],
+            iconUrl: './img/yuan.png',
+            children:[
+                {
+                    name:'种猪场',
+                    lntlng:[40.27533480732468, 111.55946731567384]
+                },
+                {
+                    name:'1场',
+                    lntlng:[40.320732876750945, 111.56461715698244]
+                },
+                {
+                    name:'2场',
+                    lntlng:[40.317002679155685, 111.55487537384033]
+                },
+                {
+                    name:'3场',
+                    lntlng:[40.31683906928025,  111.58646106719972]
+                },
+                {
+                    name:'4场',
+                    lntlng:[40.306825390355534, 111.54813766479494]
+                },
+                {
+                    name:'5场',
+                    lntlng:[40.306367212662366, 111.57607555389406]
+                },
+                {
+                    name:'6场',
+                    lntlng:[40.29743212645525, 111.551914215087]
+                },
+                {
+                    name:'7场',
+                    lntlng:[ 40.2966138360529, 111.57036781311037]
+                },
+                {
+                    name:'8场',
+                    lntlng:[40.29743212645525, 111.58096790313722]
+                }
+            ]
+        },
+        {
+            name:'正业',
+            lntlng:[40.2225339132457, 111.79550170898439],
+            iconUrl: './img/ye.png',
+            children:[
+                {
+                    name:'种猪场',
+                    lntlng:[40.244419182384945, 111.80794715881349]
+                },
+                {
+                    name:'1场',
+                    lntlng:[40.23074171800235, 111.7835497856140]
+                },
+                {
+                    name:'2场',
+                    lntlng:[40.23871920966205, 111.78648948669435]
+                },
+                {
+                    name:'3场',
+                    lntlng:[40.230135586794084, 111.79442882537843]
+                },
+                {
+                    name:'4场',
+                    lntlng:[40.23183929314176,  111.80479288101198]
+                },
+                {
+                    name:'5场',
+                    lntlng:[40.21797905361923,  111.79829120635988]
+                },
+                {
+                    name:'6场',
+                    lntlng:[40.21096593730243, 111.79339885711671]
+                },
+                {
+                    name:'7场',
+                    lntlng:[40.2107037506566, 111.80352687835695]
+                },
+                {
+                    name:'8场',
+                    lntlng:[40.20488622354674, 111.7957377433777]
+                }
+            ]
+        }
+    ]
+    
+    let layers = []
+    factories.forEach(f=>{
+        const { name, lntlng, children , iconUrl} = f;
+        L.marker(lntlng, {
+            icon : L.icon({
+                iconUrl: iconUrl,
+                iconSize: [222, 84], // [148, 56],  // 222, 84
+                iconAnchor: [0, 0],
+                popupAnchor: [0, 0],
+                // shadowUrl: 'my-icon-shadow.png',
+                // shadowSize: [68, 95],
+                // shadowAnchor: [22, 94]
+            })
+        }).addTo(map);  // 
+        // L.marker(lntlng, { icon: L.divIcon({className: 'my-factory', html:`<div class='label'>${name}</div>`}) }).addTo(map);  // .bindPopup(name)
+        children.forEach(function(c){
+            const {name, lntlng} = c
+            var myIcon = L.divIcon({className: 'my-div-icon', html:`<div class='label'><span>${name}</span><img src=${Math.random()>0.5 ? './img/green.png':'./img/red.png'} /></div>`});
+            layers.push(L.marker(lntlng, {icon: myIcon}).addTo(map));
+        })
+    })
+    
+        // L.marker([40.323921, 111.544471], {  }).bindPopup("内蒙正盛").addTo(map);
+        // L.marker([40.48507, 111.751688], {  }).bindPopup("内蒙正盛").addTo(map);
+        // L.marker([40.24418, 111.813465], {  }).bindPopup("内蒙正业").addTo(map);
+        // L.marker([40.426312, 111.504268], {  }).bindPopup("内蒙正谷").addTo(map);
+        // L.marker([40.37892, 111.82205], {  }).bindPopup("内蒙古正大鸿业食品有限公司").addTo(map);
+    
+    layers.forEach(f=>{
+                f.remove();
+            })
+
+    let show2 = true;
+    map.on('zoom',function(evt){
+        if (!show) return;
+        console.log(evt)
+        if(evt.target._zoom > 13){
+            if (show2){
+                layers.forEach(f=>{
+                    f.addTo(map)
+                })
+                show2 = false
+            }else{
+
+            }
+            
+        }else{
+            if (!show2){
+                layers.forEach(f=>{
+                    f.remove()
+                })
+                show2 = true
+            }else{
+                
+            }
+        }
+    })
+
+    map.on('click',function(evt){
+        console.log(evt)
+    })
+    
+    let show = true;
+    $("#open").click(()=>{
+      show = !show
+    })
+
+    let marL = null;
+    $("#location input").change((e)=>{
+       const val = e.target.value
+       console.log(val)
+       let ma = val.split(',').map(Number)
+        // [40.323921, 111.544471]
+        marL && marL.remove()
+        marL = L.marker(ma, {  }).addTo(map)
+        map.flyTo(ma)
+    })
+    </script>
+  </body>
+</html>

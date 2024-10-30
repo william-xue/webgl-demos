@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>leaflet-geoserver-wfs</title>
+    <!-- <link href="../libs/leaflet.css"/> -->
+    <style>
+        html,body{
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #map-container{
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <!-- <script src="../libs/leaflet.js"></script> -->
+    <!-- <link rel="stylesheet" href="../libs/leaflet.css"/>
+    <script src="../libs/leaflet.js"></script>
+    <script src="../libs/esri-leaflet.js"></script> -->
+    <script src="../libs/jquery-2.1.4.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
+    <!-- Load Esri Leaflet from CDN -->
+    <script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
+    <!-- Load Esri Leaflet Vector from CDN -->
+    <script src="https://unpkg.com/esri-leaflet-vector@4.0.0/dist/esri-leaflet-vector.js" crossorigin=""></script>
+</head>
+
+<body>
+    <div id="map-container"></div>
+</body>
+<script>
+    // geoserver上的地址
+    const map = L.map('map-container').setView([37, 104], 3)
+    // var grayscaleLayer= L.tileLayer('http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineCommunity/MapServer/tile/{z}/{y}/{x}', {
+    //     id: 'map11',
+    //     maxZoom: 16,
+    //     minZoom: 4
+    // });
+    // map.addLayer(grayscaleLayer);
+
+    // L.esri.basemapLayer('Topographic').addTo(map);
+
+    L.esri.DynamicMapLayer({
+        url:'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/',
+        // url:'https://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Petroleum/KGS_OilGasFields_Kansas/MapServer'
+    }).addTo(map)
+ 
+    
+</script>
+
+</html>

@@ -1,0 +1,52 @@
+{
+  "homeInfo": {
+    "title": "编辑",
+    "href": "page/vis/edit.html"
+  },
+  "logoInfo": {
+    "title": "xxxxxxxx",
+    "image": "images/logo.png",
+    "href": "",
+    "loginOutHref": "page/login-2.html"
+  },
+  "menuInfo": [
+    {
+      "title": "",
+      "icon": "fa fa-address-book",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "编辑",
+          "href": "page/vis/edit.html",
+          "icon": "fa fa-edit",
+          "target": "_self"
+        },
+        {
+          "title": "查询",
+          "href": "page/neovis/search.html",
+          "icon": "fa fa-window-maximize",
+          "target": "_self"
+        },
+        {
+          "title": "问答",
+          "href": "page/vis/question.html",
+          "icon": "fa fa-window-maximize",
+          "target": "_self"
+        },
+        {
+          "title": "关键词匹配",
+          "href": "page/other/upload.html",
+          "icon": "fa fa-file-text",
+          "target": "_self"
+        },
+        {
+          "title": "用户管理",
+          "href": "page/user/add.html",
+          "icon": "fa fa-file-text",
+          "target": "_self"
+        }
+      ]
+    }
+  ]
+}

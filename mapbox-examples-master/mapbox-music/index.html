@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Animate a point along a route</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+    <script src="./jquery-2.1.4.min.js"></script>
+</head>
+
+<body>
+    <style>
+        .overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        #fun,
+        #fun option {
+            padding: 10px 20px;
+        }
+
+        .overlay button {
+            font: 600 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            background-color: #3386c0;
+            color: #fff;
+            display: inline-block;
+            margin: 0;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .overlay button:hover {
+            background-color: #4ea0da;
+        }
+    </style>
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+    <script src="./Blob.js"></script>
+
+    <div id="map"></div>
+    <div class="overlay">
+        <select id="fun">
+            <option value="y=x">Y=X</option>
+            <option selected value="y=sinx">y=Sin(x)</option>
+        </select>
+        <button id="replay">Replay</button>
+        <button id="pause">Pause</button>
+    </div>
+
+    <script>
+        let center = [114.27913087188796, 30.63046854654364]
+        mapboxgl.accessToken = 'pk.eyJ1Ijoiemhlbmd5dWFuMDEiLCJhIjoiY2tweHJuaWMyMDd4aDJ2cGR4azJpMHA3ZyJ9.2uE3aEVVqriGOKNU11xEnw';
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/examples/cj68bstx01a3r2rndlud0pwpv',
+            center,
+            zoom: 10,
+            pitch: 45,
+            bearing: 20
+        });
+
+        map.on('load', function () {
+            let geojson1 = hexgrid();
+            let huan = createYh();
+            // 生成的数据直接下载下来
+            // downGeojson(geojson);
+
+            let geojson = {
+                features: [],
+                type: "FeatureCollection"
+            }
+            $.get('./data/武汉市.json').then(data => {
+                let wuhanF = data.features[0];
+                geojson1.features.map((feature, index) => {
+                    if (!turf.booleanDisjoint(feature, wuhanF)) {
+                        huan.features.map((circleFeat, featureIndex) => {
+                            if (!turf.booleanDisjoint(feature, circleFeat) && !feature.properties.type) {
+                                if (!turf.booleanDisjoint(turf.point(center), feature)) {
+                                    feature.properties.type = featureIndex + 4
+                                } else {
+                                    feature.properties.type = featureIndex + 5
+                                }
+                                geojson.features.push(feature)
+                            }
+                        });
+                    }
+                });
+
+                // geojson.features.map((feature,index)=>{
+                //     let features = huan.features
+                //     turf.featureEach(features, function (currentFeature, featureIndex) {
+                //     //=currentFeature
+                //     //=featureIndex
+                //     });
+                //     feature.properties.type = index
+                // })
+                console.log(geojson);
+                // geojson.features.map(fe=>{
+                //     if(turf.booleanDisjoint(feature, wuhanF))
+                // })
+                // 显示六边形
+                map.addLayer({
+                    'id': 'extrusion',
+                    'type': 'fill-extrusion',
+                    'source': {
+                        // GeoJSON Data source used in vector tiles, documented at
+                        // https://gist.github.com/ryanbaumann/a7d970386ce59d11c16278b90dde094d
+                        'type': 'geojson',
+                        'data': geojson
+                    },
+                    'paint': {
+                        // See the Mapbox Style Specification for details on data expressions.
+                        // https://docs.mapbox.com/mapbox-gl-js/style-spec/#expressions
+
+                        // Get the fill-extrusion-color from the source 'color' property.
+                        // 'fill-extrusion-color': ['get', 'color'],
+                        // 渐变色
+                        // 'fill-extrusion-color': [
+                        //     'interpolate',
+                        //     ['linear'],
+                        //     // ['heatmap-density'],
+                        //     ['get', 'type'],
+                        //     9,
+                        //     'rgb(33,102,172)',
+                        //     15,
+                        //     'rgb(103,169,207)',
+                        //     20,
+                        //     'rgb(209,229,240)',
+                        //     30,
+                        //     'rgb(253,219,199)',
+                        //     50,
+                        //     'rgb(239,138,98)',
+                        //     100,
+                        //     'rgb(178,24,43)'
+                        // ],
+                        
+                        'fill-extrusion-color': [
+                            'step',
+                            ['get', 'type'],
+                            'red',
+                            4,
+                            '#f8aba6',
+                            5,
+                            '#cccccc',
+                            8,
+                            '#09f467',
+                            13,
+                            '#faa755',
+                            16,
+                            '#fab27b',
+                            20,
+                            '#843900',
+                            24,
+                            '#7fb80e',
+                            28,
+                            '#6a6da9',
+                            32,
+                            '#694d9f',
+                            36,
+                            '#472d56',
+                            50,
+                            'blue',
+                            100,
+                            '#7fb80e'
+                        ],
+
+                        // Get fill-extrusion-height from the source 'height' property.
+                        'fill-extrusion-height': ['get', 'height'],
+
+                        // Get fill-extrusion-base from the source 'base_height' property.
+                        'fill-extrusion-base': ['get', 'base_height'],
+
+                        // Make extrusions slightly opaque for see through indoor walls.
+                        'fill-extrusion-opacity': 0.5
+                    }
+                });
+
+                map.on('click', 'extrusion', (e) => {
+                    console.log(JSON.stringify(e.features[0].properties))
+                })
+                // 显示圆
+                // map.addLayer({
+                //     'id': 'circle',
+                //     'type': 'fill',
+                //     'source': {
+                //         // GeoJSON Data source used in vector tiles, documented at
+                //         // https://gist.github.com/ryanbaumann/a7d970386ce59d11c16278b90dde094d
+                //         'type': 'geojson',
+                //         'data': huan
+                //     },
+                //     'paint': {
+                //         'fill-color':'skyblue',
+                //         'fill-opacity':0.5
+                //     }
+                // });
+            })
+
+            // map.on('click',(e)=>{
+
+            // })
+        });
+
+        let handler = null;
+        $("#replay").click(function () {
+            let count = 0;
+            map.setPaintProperty('extrusion', 'fill-extrusion-height', 1);
+            handler = setInterval(() => {
+                count += 0.03; // 值为增长幅度
+                // let base = 500 * Math.abs(Math.sin(count * Math.PI / 180))
+                // let base = 100 + 30 * count;
+                let val = $("#fun").val()
+                if (val === 'y=x') {
+                    map.setPaintProperty('extrusion', 'fill-extrusion-height', ['*', count * 5, ['get', 'type']]);
+                } else if (val === 'y=sinx') {
+                    map.setPaintProperty('extrusion', 'fill-extrusion-height', ['*', 5000, ['abs', ['sin', ['*', Math.PI / 180 * count, ['get', 'type']]]]]);
+                }
+            }, 30) // 值为速度
+        })
+
+        $("#pause").click(function () {
+            handler && window.clearInterval(handler)
+        })
+
+        // 生成六边形网格
+        function hexgrid() {
+            var bbox = [113.615, 29.926, 115.125, 31.386];
+            var cellSide = 0.4; // 六边形网格边宽，值越大，单个网格越大
+            var options = { units: 'miles', properties: { height: 10, 'base_height': 0, type: 0 } };
+
+            var hexgrid = turf.hexGrid(bbox, cellSide, options);
+            // console.log(hexgrid)
+
+            return hexgrid;
+        }
+        // 创建圆环
+        function createYh() {
+            let union = {
+                "type": "FeatureCollection",
+                "features": []
+            }
+            for (let i = 1; i < 88; i++) {
+                var point = turf.point(center);
+                let radius = Math.sqrt(3) * 0.4; // 数值越大，外环越大
+                var buffered = turf.buffer(point, radius * i, { units: 'miles' });
+                buffered.properties['num'] = i;
+                union.features.push(buffered);
+            }
+            return union;
+        }
+
+        function downGeojson(result) {
+            var blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json,charset=utf-8;' });
+            let fileName = new Date().getTime() + ".json";
+            //IE浏览器使用msSaveBlob
+            if (window.navigator.msSaveBlob) {
+                window.navigator.msSaveBlob(blob, fileName);
+            } else {
+                var aLink = document.createElement('a');
+                aLink.download = fileName;
+                aLink.href = URL.createObjectURL(blob);
+                aLink.click();
+            }
+        }
+    </script>
+
+</body>
+
+</html>

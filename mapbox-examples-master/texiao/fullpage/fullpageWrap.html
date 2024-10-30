@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/4.0.17/fullpage.min.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="./examples.css" /> -->
+    <script src="https://lib.sinaapp.com/js/jquery/2.0.2/jquery-2.0.2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullPage.js/4.0.17/fullpage.min.js" integrity="sha512-zAHJKGyoPf2Y20Wi4uo32sa/vSvwKfY4tYUt6gJfmkA79X0wt5ZfaxL5GqJ5cMnmvGslWi5PKTo51rHRZqYbJg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    
+    <style>
+
+        /* Style for our header texts
+        * --------------------------------------- */
+        h1{
+            font-size: 5em;
+            font-family: arial,helvetica;
+            color: #fff;
+            margin:0;
+        }
+        .intro p{
+            color: #fff;
+        }
+    
+        /* Centered texts in each section
+        * --------------------------------------- */
+        .section{
+            text-align:center;
+        }
+        
+        .fp-overflow , .fp-overflow .intro {
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fp-watermark{
+            display: none !important;
+        }
+        
+        /* Bottom menu
+        * --------------------------------------- */
+        #infoMenu li a {
+            color: #fff;
+        }
+        </style>
+</head>
+<body>
+    <div id="fullpage">
+        <div class="section" id="section1">
+            <div class="slide" id="slide1">
+                <div class="intro">
+                    <h1>Free scroll</h1>
+                </div>
+            </div>
+            <div class="slide" id="slide2">
+                <!-- <img src="https://dss2.bdstatic.com/lfoZeXSm1A5BphGlnYG/skin/269.jpg?2" width="100%" height="1000"/> -->
+                    <iframe src="./fullpage1.html" frameborder="0" width="100%" height="100%"></iframe>
+            </div>
+
+            <div class="slide" id="slide3">
+
+                    <iframe src="./fullpage2.html" frameborder="0" width="100%" height="100%"></iframe>
+            </div>
+    
+        </div>
+        <div class="section" id="section2">
+            <div class="intro">
+                
+                <h1>Great User Experience!</h1>
+            </div>
+        </div>
+
+        <div class="section" id="section3">
+            <div class="intro">
+                <h1>end !</h1>
+            </div>
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+        var myFullpage = new fullpage('#fullpage', {
+            anchors: ['firstPage', 'secondPage', '3rdPage', '4thPage'],
+            sectionsColor: ['#C63D0F', '#1BBC9B', '#7E8F7C', 'skyblue'],
+            scrollBar: true
+        });
+    </script>    
+</body>
+</html>

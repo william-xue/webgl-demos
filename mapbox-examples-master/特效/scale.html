@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <style type="text/css">
+        #testDiv {
+            width: 200px;
+            height: 200px;
+            border: 1px solid red;
+        }
+        #statusShow {
+            width: 200px;
+            height: 200px;
+            border: 1px solid red;
+        }
+    </style>
+    <script type="text/javascript">
+  var testDiv;
+  var divwidth;
+  var divheight;
+  function changeRect() {
+      testDiv = document.getElementById("testDiv");
+      divwidth = testDiv.clientWidth;
+      divheight = testDiv.clientHeight;
+      if (divwidth < 500) {
+          var myVar = setInterval(add, 1)
+          function add() {
+              if (divwidth < 500){
+              divwidth += 1;
+              divheight += 1;
+              testDiv.style.width = divwidth + "px";
+              testDiv.style.height = divheight + "px";
+              } else {
+                  clearInterval(myVar);
+              }
+          }
+      } else {
+          var myVar2 = setInterval(reduce, 1);
+          function reduce() {
+              if (divwidth > 200) {
+                  divwidth -= 1;
+                  divheight -= 1;
+                  testDiv.style.width = divwidth + "px";
+                  testDiv.style.height = divheight + "px";
+              } else {
+                  clearInterval(myVar2);
+              }
+          }
+      }
+    }
+    </script>
+</head>
+<body>
+    <div id="testDiv">
+    </div>
+    <button onclick="changeRect()">改变大小</button>
+</body>
+</html>

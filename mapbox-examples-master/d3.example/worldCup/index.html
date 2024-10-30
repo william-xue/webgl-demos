@@ -1,0 +1,151 @@
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>World Cup Story</title>
+	<link rel="stylesheet" href="./css/bootstrap.min.css">
+	<link rel="stylesheet" href="./css/open-iconic-bootstrap.min.css">
+	<link rel="stylesheet" href="./css/billboard.min.css">
+	<link rel="stylesheet" href="./css/open-iconic.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="./css/d3scription.css" />
+	<link rel="stylesheet" href="./css/mycss.css" />
+	<script type="text/javascript" src="./js/jquery.slim.min.js"></script>
+	<script type="text/javascript" src="./js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="./js/d3.v4.min.js"></script>
+	<script type="text/javascript" src="./js/topojson.v3.js"></script>
+	<script type="text/javascript" src="./js/billboard.min.js"></script>
+	<script type="text/javascript" src="./js/d3scription.js"></script>
+
+</head>
+
+<body>
+	<div class="title">
+		<div class="btn-toolbar mx-auto" style="width: 400px; margin: 15 0 15 0;">
+			<h1>World Cup Story</h1>
+		</div>
+		<div class="btn-toolbar mx-auto" style="width: 100%;" role="toolbar">
+			<div class="col-1" style="margin-right: 75"></div>
+			<div class="btn-group mr-2" role="group" id="play-group"></div>
+			<div class="btn-group mr-2" role="group" id="button-group"></div>
+		</div>
+	</div>
+	<div class="row mx-auto" style="width: 100%; margin-top:130px;">
+		<div class="row" style="width: 100%;">
+			<div class="col-2" style="margin-top: 15;"></div>
+			<span class="oi" data-glyph="badge" style="font-size: 15; margin-top: 15; margin-bottom: -20; color: gold;"> Winner</span>
+			<pre style="margin-top: 15; margin-bottom: -20;">   </pre>
+			<span class="oi" data-glyph="badge" style="font-size: 15; margin-top: 15; margin-bottom: -20; color: #E6E8FA;"> RunnerUp</span>
+			<pre style="margin-top: 15; margin-bottom: -20;">   </pre>
+			<span class="oi" data-glyph="badge" style="font-size: 15; margin-top: 15; margin-bottom: -20; color: #8C7853;"> Third</span>
+			<pre style="margin-top: 15; margin-bottom: -20;">   </pre>
+			<span class="oi" data-glyph="home" style="font-size: 15; margin-top: 15; margin-bottom: -20; color: red;"> HomeCountry</span>
+			<pre style="margin-top: 15; margin-bottom: -20;">   </pre>
+			<span class="oi" data-glyph="map" style="font-size: 15; margin-top: 15; margin-bottom: -20; color: orange;"> Selected(6 at most)</span>
+	
+		</div>
+		<div class="col-1"></div>
+		<div class="col-5.5" id="map" style="margin-top: 25;"></div>
+		<div class="col- btn-group-vertical" role="group" id="float-button-group">
+			<button type="button" class="btn btn-default" id="zoom-in">
+				<span class="oi oi-zoom-in"></span>
+			</button>
+			<button type="button" class="btn btn-default" id="zoom-out">
+				<span class="oi oi-zoom-out"></span>
+			</button>
+			<button type="button" class="btn btn-default" id="reset">
+				<span class="oi oi-reload"></span>
+			</button>
+			<input class="mx-auto" type="range" value="1" min="1" max="8" orient="vertical" id="map-zoomer" />
+		</div>
+		<div class="col-" id="PieChart"></div>
+		<div class="col-1"></div>
+	</div>
+	<!-- 饼图面积图下面的文字 -->
+	<!-- <div class="row mx-auto" style="width: 100%;">
+		<div class="col-1"></div>
+		<div class="col mx-auto" style="font-size: 20; margin:15 15 15 0;">
+			In the beginning, the countries participating in the World Cup only came from North America, South America and Europe. With
+			the progress of globalization, more countries from different continents have also joined the participating countries in
+			the World Cup.
+			<br>Before 1982 Spain World Cup, there were no more than 16 participating countries. After that, the number increased to 24
+			until 1998 France World Cup when it became 32. Furthermore, FIFA officials announced that the 2026 World Cup will be expanded to
+			48 teams.
+		</div>
+		<div class="col-2"></div>
+	</div> -->
+	<!-- 面积图 -->
+	<!-- <div class="row mx-auto" style="width: 100%;">
+		<div class="col-6" id="AreaChart" style="margin:15 30 15 125"></div>
+		<div class="col-3" style="width:500px; margin-top: 15;font-size: 20; display:flex; align-items:center; ">
+			Attandance:
+			<br> At the same time, more and more people came to watch the World Cup. In the early years, due to the inconvenience of transportation,
+			most of the audiences were fans near the host country. With the development of industrialization, international traffic
+			is more developed. The World Cup has gradually become a feast for fans around the world.
+			<br>It is worth noting that the 1942 and 1946 World Cups were cancelled due to the Second World War.
+		</div>
+	</div> -->
+
+	<!-- 散点图 -->
+	<!-- <div class="row mx-auto" style="width: 100%;">
+		<div class="col-3" style=" margin: 15 50 15 175;font-size: 20; display:flex; align-items:center; ">
+			Matches:
+			<br> From the bubble chart on the right we can see the number of matches, the number of wins, and the number of goals scored
+			by the size of the bubble for all countries in the year. In general, the closer a country get to the upper right corner,
+			the better the rankings the country achieved this year.
+		</div>
+		<div class="col-6" id="BubbleChart" sytle="margin:15 15 15 15"></div>
+	</div> -->
+
+	<div class="row mx-auto" style="width: 100%;">
+		<div class="col-1"></div>
+		<div class="col-5" id="RadarChart"></div>
+		<div class="col-5" id="HeatMap"></div>
+		<div class="col-1"></div>
+		<!-- <div class="col-4" style=" margin: 15 15 15 100;font-size: 20; display:flex; align-items:center; ">
+			Historical Data:
+			<br> From the radar chart on the left we can see the shape of the historical data of the selected country. In general, the
+			upper part of the stars of a strong country has a large area, while the lower part has a small area.
+		</div> -->
+	</div>
+
+	<!-- <div class="row mx-auto" style="width: 100%;">
+		<div class="col-4" style="width: 700px; margin: 0 50 15 175;font-size: 20; display:flex; align-items:center; ">
+			Historical VS:
+			<br> From the heatmap on the right we can see the historical matchups of the selected countries. Block[A][B] indicates how
+			many times Country A has defeated Country B. The more times the country wins, the hotter the block colors are. Strong
+			countries see more hot blocks from the row, and fewer hot blocks from the colum.
+		</div>
+		<div class="col-4" id="HeatMap" sytle="margin:0 15 15 15"></div>
+	</div> -->
+
+	<!-- <div class="row mx-auto" style="width: 100%;">
+		<br>
+	</div> -->
+
+	<div class="row mx-auto" style="width: 100%;">
+		<div class="col-1"></div>
+		<div class="col-5" id="BarChart"></div>
+		<div class="col-5" id="LineChart"></div>
+		<div class="col-1"></div>
+	</div>
+	<!-- Exploring Match Statistic for  -->
+	<div class="row mx-auto" style="width: 100%; height: 100%;">
+		<div class="col-12">
+			<iframe id="frame1" src="../worldcup2018-master/index.html" width="100%" height="1000" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling="no" allowtransparency="yes"></iframe>
+			<iframe id="frame2" src="../worldcup-gh-pages-1/index.html" width="100%" height="550" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling="no" allowtransparency="yes"></iframe>
+		</div>
+	</div>
+
+	<!-- <div class="row mx-auto" style="width: 100%;">
+		<div class="col-12">
+		</div>
+	</div> -->
+	<!-- end -->
+	
+
+	<button onclick="topFunction()" id="myBtn" title="Go to top">Top</button>
+
+	<script src="./js/index.js"></script>
+</body>
+
+</html>

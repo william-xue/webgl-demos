@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <!-- <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen"> -->
+  <link href="../css/bootstrap-datepicker3.min.css" rel="stylesheet" media="screen">
+  <link href="../css/jquery.timepicker.min.css" rel="stylesheet" media="screen">
+  <link rel="stylesheet" href="../css/ocean.css" type="text/css">
+  <link rel="stylesheet" href="../css/ol.css" type="text/css">
+  <style>
+    body {
+      background-color: #fff !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="maptitle1">标题</div>
+  <div id="mapPanel1">
+    <div class="titlelng"
+      style="text-align: center;font-size: 16px;font-weight: bold;writing-mode: tb;transform: rotate(180deg);">
+      Latitude(°)</div>
+    <div class="left"></div>
+    <div id="map1"></div>
+    <div class="right">
+      <img id="legend1" src="" style="height: 100%;" />
+    </div>
+  </div>
+  <div class="top1"></div>
+  <div class="titlelng" style="text-align: center;font-size: 16px;font-weight: bold;">Longitude(°)</div>
+  <div id="mapfooter1">
+    <div class="scale"></div>
+    <div class="mapval">无</div>
+    <div class="lnglat" id="lnglat1"></div>
+  </div>
+</body>
+<script type="text/javascript" src="../jquery/jquery-1.8.3.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="../bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../js/bootstrap-datepicker.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="../js/bootstrap-datepicker.zh-CN.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="../js/jquery.timepicker.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="../js/ol.js" charset="UTF-8"></script>
+<script type="text/javascript">
+  var speciald = ["2022-3-17", "2022-3-18"]
+  $('#form_datetime').datepicker({
+    language: 'zh-CN',  //用自己设置的时间文字
+    format: "yyyy-mm-dd",
+    autoclose: 1,
+    beforeShowDay: function (date) {
+      var d = date;
+      var curr_date = d.getDate();
+      var curr_month = d.getMonth() + 1;
+      var curr_year = d.getFullYear();
+      var formatDate = curr_year + "-" + curr_month + "-" + curr_date;
+
+      //特殊日期的匹配
+      if ($.inArray(formatDate, speciald) != -1) {
+        return { classes: 'specialdays' };
+      }
+      return;
+    }
+
+  });
+  $('#form_hour').timepicker({
+    timeFormat: 'G:i',
+    step: 60,
+    show2400: true,
+    maxTime: '23：00',
+    disableTextInput: true,
+  })
+  $('#add_hour').on('click', function () {
+    // console.log("hello");
+    $('#form_hour').timepicker('show');
+  });
+
+  function getLocalTime(nS) {
+    return new Date(parseInt(nS) * 1000).toLocaleString().replace(/:\d{1,2}$/, ' ');
+  }
+
+  let mylayers = [], addedLayer;  // 存影像服务, 加载的影像名称
+  function init(titleName, mylayer) {
+    addedLayer = mylayer;
+    // 清空layers
+    for (let i = 0; i < mylayers.length; i++) {
+      map && map.removeLayer(mylayers[i])
+    }
+    mylayers = [];
+    let wmsSource = new ol.source.ImageWMS({
+      url: '/mygeoserver/geoserver/tif2022/wms',
+      // projection: 'EPSG:4326',
+      params: { 'LAYERS': mylayer },
+      // params: { 'LAYERS': 'ol_base:heliu' },
+      ratio: 1,
+      serverType: 'geoserver',
+      crossOrigin: 'anonymous',
+    });
+    let layer = new ol.layer.Image({
+      source: wmsSource
+    })
+    mylayers.push(layer)
+    map.addLayer(layer)
+    // 图例
+    const graphicUrl = wmsSource.getLegendUrl(map.getView().getResolution());
+    const img = document.getElementById('legend1');
+    console.log(graphicUrl)
+    img.src = graphicUrl;
+
+    // 专题图整饬
+    $("#maptitle1").html(titleName)
+    $("#mapfooter1 .scale").html("Scale 1 : " + $(".ol-scale-line1-inner").html())
+  }
+
+  var tdtLayer = new ol.layer.Tile({
+    title: "谷歌矢量地图服务",
+    source: new ol.source.XYZ({
+      // url: "http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}",
+      // 天地图路网
+      // url: "https://t0.tianditu.gov.cn/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=acd0145627cbd82850e902ec254b593d"
+      // arcgis server
+      url: 'http://map.geoq.cn/arcgis/rest/services/ChinaOnlineStreetWarm/MapServer/tile/{z}/{y}/{x}'
+      // 高德路网
+      // url: 'https://wprd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&style=7&x={x}&y={y}&z={z}'
+    })
+  });
+  map = new ol.Map({
+    target: 'map1',                          // 关联到对应的div容器
+    layers: [
+      // new ol.layer.Tile({                 // 瓦片图层
+      //     source: new ol.source.OSM()     // OpenStreetMap数据源
+      // })
+      tdtLayer
+    ],
+    view: new ol.View({                     // 地图视图
+      projection: 'EPSG:4326',
+      center: [113, 12],
+      zoom: 4
+    }),
+    controls: ol.control.defaults().extend([
+      new ol.control.ScaleLine({
+        //设置度量单位为米
+        units: 'metric',
+        target: 'scalebar',
+        className: 'ol-scale-line1'
+      }), new ol.control.MousePosition({
+        coordinateFormat: function (coordinate) {
+          return ol.coordinate.format(coordinate, '经度:{x} 纬度:{y}', 2);
+        },
+        projection: 'EPSG:4326',
+        className: 'custom-mouse-position',
+        target: document.getElementById('lnglat1'),
+        undefinedHTML: '&nbsp;'
+      })
+    ])
+  })
+  map.on("moveend", function (e) {
+    // console.log(e)
+    $("#mapfooter1 .scale").html("Scale 1 : " + $(".ol-scale-line1-inner").html())
+    let extent = map.getView().calculateExtent()
+    let geLng = (extent[2] - extent[0]) / 5
+    let geLat = (extent[3] - extent[1]) / 5
+    let su = ``, heng = ``;
+    for (let i = 0; i < 5; i++) {
+      su += `<div class="kedu1"><span>${(geLat * i + extent[1]).toFixed(1)}</span></div>`
+      heng += `<div class="kedu2"><span>${(geLng * i + extent[0]).toFixed(1)}</span></div>`
+    }
+    $("#mapPanel1 .left").html(su)
+    $(".top1").html(heng)
+  })
+  map.on('singleclick', function (evt) {
+    if (addedLayer === '') {
+      alert('请先加载影像！')
+      return;
+    }
+    let coor = evt.coordinate;
+    let bbox = (coor[0] - 2) + "," + (coor[1] - 2) + "," + (coor[0] + 2) + "," + (coor[1] + 2)
+    $.get(`/mygeoserver/geoserver/tif2022/wms?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetFeatureInfo&FORMAT=image%2Fjpeg
+            &TRANSPARENT=true&QUERY_LAYERS=${addedLayer}&LAYERS=${addedLayer}&exceptions=application%2Fvnd.ogc.se_inimage&INFO_FORMAT=application%2Fjson
+            &FEATURE_COUNT=50&X=50&Y=50&SRS=EPSG%3A404000&STYLES=&WIDTH=101&HEIGHT=101&BBOX=${bbox}`, (e) => {
+      // console.log(e)
+      let result = "无"
+      if (e.features.length !== 0) {
+        result = e.features[0].properties.GRAY_INDEX.toFixed(4)
+      }
+      $("#mapfooter1 .mapval").html(result)
+    })
+  });
+
+</script>
+
+</html>

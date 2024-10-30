@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>鼠标点击时出现小心心</title>
+<style>
+ .mydiv{
+ width:1000px;
+ height:500px;
+ background-color:'#fff';
+ border:12px solid green;
+ }
+  body{
+  position:relative;
+  }
+  .img {width: 20px;height: 20px;opacity: 1;position: absolute;z-index: 100000;transition: 2s;}
+  .left,.right {width: 10px;height: 10px;border-radius: 100%;position: absolute;}
+  .right {right: 0;}
+  .under {width: 10px;height: 10px;position: absolute;top: 5px;left: 5px;transform: rotate(45deg)}
+  .text {width: 50px;font-size: 10px;line-height: 1;position: absolute;top: -1em;left: -15px;text-align: center;}
+ 
+ </style>
+ 
+ </head>
+<body>
+<div class="mydiv"></div>
+</body>
+<script>
+     // 点击出的文字数组，可自行添加，不要太多哦
+      text = ["你好呀~", "点我呀~", "啦啦啦~", "哎呀呀~", "开心~", "帅哥美女~", "哦~", "咦~"];
+      // 计数
+      var count = 0;
+      // 鼠标按下事件
+      document.body.onmousedown = function (e) {
+          // 获取鼠标点击位置
+          var x = event.pageX - 18;
+         var y = event.pageY - 30;
+        // 分别创建所需要的元素节点
+        var img = document.createElement("div");
+         var left = document.createElement("div");
+         var right = document.createElement("div");
+         var under = document.createElement("div");
+         var txt = document.createElement("div");
+         // 通过随机数从文字数组中获取随机下标的文字
+        var textNode = document.createTextNode(text[parseInt(Math.random() * text.length)]);
+         // 文字添加到txt节点中
+        txt.appendChild(textNode);
+ 
+         img.className = "img" + " " + "img" + count;
+         left.className = "left";
+         right.className = "right";
+         under.className = "under";
+        txt.className = "text";
+         img.style.top = y + "px";
+        img.style.left = x + "px";
+         // 将创建的元素添加到容器中
+        img.appendChild(left);
+         img.appendChild(right);
+        img.appendChild(under);
+       img.appendChild(txt);
+         document.body.appendChild(img);
+         // 获取随机颜色
+         var color = "rgb(" + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," +
+             parseInt(Math.random() * 255) + ")";
+         txt.style.color=color;
+         for (var i = 0; i < 3; i++) {
+             img.children[i].style.background = color;
+        }
+     }
+     // 鼠标抬起事件
+     document.body.onmouseup = function () {
+         document.getElementsByClassName("img" + count)[0].style.transform = "scale(0.5)";
+         document.getElementsByClassName("img" + count)[0].style.transform = "translateY(-40px)";
+         document.getElementsByClassName("img" + count)[0].style.opacity = "0";
+         count++;
+    }
+ </script>
+</html>

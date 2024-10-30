@@ -1,0 +1,219 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <script src="./d3.v5.min.js"></script>
+    <style>
+        .tooltip {
+            font-size: 15px;
+            width: auto;
+            padding: 10px;
+            height: auto;
+            position: absolute;
+            background-color: #108f7e;
+            opacity: .6;
+            border-radius: 5px;
+            color: #ffffff;
+            display: none;
+        }
+
+        #container {
+            background-color: #ffffff;
+            /* width: 1250px; */
+            /* height: 650px; */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+
+    <script type="text/javascript">
+        let colors = ['pink', 'green', 'skyblue', 'aquamarine', 'yellow', '#108f7e']
+
+        d3.csv('all_data_lines.csv').then(rows => {
+            let person = {} // 存放每个人的得分统计
+
+            rows.forEach(({ SE, Name, Stars }) => {
+
+                if (!person[Name]) {
+                    person[Name] = {}
+                }
+
+                if (!person[Name][SE.slice(0,3)]) {
+                    person[Name][SE.slice(0,3)] = 1
+                } else {
+                    person[Name][SE.slice(0,3)] += 1
+                }
+            })
+
+            console.log(person)
+            let dataset = {}
+            for (let name in person) {
+                let datas = []
+                Object.keys(person[name]).forEach(se => {
+                    let num = person[name][se]
+                    datas.push(num)
+                })
+                dataset[name] = datas
+            }
+
+            // 绘制折线图
+            const padding = {
+                top: 10,
+                left: 10,
+                right: 10,
+                bottom: 10
+            };
+            const height = 400;
+            const width = 600;
+            const xAxisWidth = width - padding.left - padding.right;
+            const yAxisWidth = height - padding.top - padding.bottom;
+
+            // 创建svg画布
+            const svg = d3.select("#container")
+                .append("svg")
+                .attr("width", width + 40)
+                .attr("height", height + 40)
+
+            // 打开要用相对路径，否则很容易发生跨域错误，然后凉凉
+            // dataset = {
+            //     "BFS": [130, 624, 753, 600, 532, 1038, 772],
+            //     "BFS1": [230, 624, 753, 600, 532, 1038, 772],
+            //     "BFS2": [330, 624, 753, 600, 532, 1038, 772],
+            //     "BFS3": [430, 624, 753, 600, 532, 1038, 772],
+            //     "BFS4": [530, 624, 753, 600, 532, 1038, 772],
+            //     "BFS5": [630, 624, 753, 600, 532, 1038, 772],
+            //     "BFS6": [630, 624, 753, 600, 532, 1038, 72],
+            //     "BFS7": [930, 624, 753, 600, 532, 1038, 772]
+            // }
+
+            console.log(dataset);
+            data_key = []
+            year = []
+            data_sum = []
+
+            for (var i in dataset) {
+                data_change = []
+                data_key.push(i);
+                for (var num in dataset[i]) {
+                    data_change.push(parseInt(dataset[i][num]))
+                }
+                data_sum.push(data_change)
+            }
+
+            console.log(data_key)
+            console.log(data_sum)
+            // console.log(dataset[data_key[0]]);
+            // console.log(dataset[data_key[0]].map((o, i) => i + 1970));
+            // console.log(Object.keys(person['chandler']))
+            // console.log(Object.keys(person['chandler']).map((o,i) => i).slice(0,224))
+            const xScale = d3.scaleBand()
+                .domain(dataset[data_key[0]].map((o, i) => i))
+                // .domain([10,50])
+                // .domain(Object.keys(person['chandler']).map((o,i) => i))
+                .range([0, xAxisWidth]);
+
+            const yScale = d3.scaleLinear()
+                .domain([0, 1500])
+                .rangeRound([yAxisWidth, 0])
+
+            const xAxis = d3.axisBottom(xScale).ticks(1)
+            .tickFormat(function(i){
+                return Object.keys(person['chandler'])[i]
+            })
+            const yAxis = d3.axisLeft(yScale);
+
+            const gx = svg.append("g")
+                .attr("transform", `translate(${(padding.left) * 3}, ${height - padding.bottom})`);
+            const gy = svg.append('g')
+                .attr("transform", "translate(" + ((padding.left) * 3 + 12) + "," + (height - padding.bottom - yAxisWidth) + ")");
+
+            // 绘制x轴
+            gx.call(xAxis)
+                .append("text")
+                .attr("text-anchor", "start")
+                .attr("stroke", "#ddd")
+                .style("font-size", "17px")
+                .style("font-style", "宋体")
+                .attr("x", width - padding.right * 5)
+                .attr("y", padding.bottom * 2)
+                .text(d => "SE");
+
+            // 绘制y轴
+            gy.call(yAxis).append("text")
+                .attr("text-anchor", "start")
+                .attr("stroke", "#ddd")
+                .style("font-size", "17px")
+                .style("font-style", "宋体")
+                .attr("x", (padding.left - 10))
+                .attr("y", 40)
+                .text(d => "number of lines");
+
+            // 可以自动生成颜色
+            var color = [];
+            for (i = 0; i < 80; i++) {
+                var letters = '0123456789ABCDEF'.split('');
+                var rand_color = '#';
+                for (var j = 0; j < 6; j++) {
+                    rand_color += letters[Math.round(Math.random() * 15)];
+                }
+                color[i] = rand_color;
+            }
+
+            // 创建线生成器
+            const pathLine = d3.line()
+                .curve(d3.curveBasis) // 如果没有这一行则是折线，有则为曲线
+                .x((d, i) => xScale(i) + padding.left + xScale.bandwidth() / 2)
+                .y(d => height - padding.bottom - (yScale(0) - yScale(d)));
+
+                // var tip = d3.tip()
+                //     .attr('class', 'd3-tip')
+                //     .offset([-10, 0])
+                //     .html(function (d) {
+                //         return "Hello Tip";
+                //     })
+            // 绘制曲线
+            for (var i = 0; i < data_sum.length; ++i) {
+                svg.append("path")
+                    .attr("d", pathLine(data_sum[i]))
+                    .attr("stroke", color[i])
+                    .attr("stroke-width", "2px")
+                    .attr("fill", "none")
+                    .attr("transform", `translate(${(padding.left) * 2},0)`)
+                    // .on('mouseover', tip.show)
+                    // .on('mouseout', tip.hide);
+                        // .on("mouseover",function(d,i){
+                        //     console.log(d,i)
+                        //     d3.select(this)
+                        //     .transition()
+                        //     .duration(1000)
+                        //     .attr("stroke","yellow");
+                        // })
+                        // .on("mouseout",function(d,i){
+                        //     d3.select(this)
+                        //         .transition()
+                        //         .duration(1000)
+                        //         // .attr("stroke","steelblue");
+                        // });
+                        
+            }
+
+            // 添加表头
+            const header = ["xxxx统计图"];
+            const headers = svg.append("g");
+            headers.selectAll("text")
+                .data(header)
+                .enter()
+                .append("text")
+                .attr("stroke", "black")
+                .attr("transform", `translate(${width / 3 + padding.left * 4},${30})`)
+                .style("font-size", "25px")
+                .text(d => d);
+
+        })
+
+    </script>
+</body>
+
+</html>

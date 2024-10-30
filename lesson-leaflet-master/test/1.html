@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Leaflet LayerGroup with TileLayer Demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/leaflet.css" integrity="sha512-l/zxioAftzYsr5PnbcGeUPOW/XNCaMBSQn/RR71it4YJHJU24TLYxQZ7fVdjHcoYjdyzXNfDoID3V6eXSEz8aQ==" crossorigin=""/>
+    <style>
+      #map-container {
+        height: 500px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map-container"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.6.0/leaflet.js" integrity="sha512-vYRgf0D2vWNDWKOBghKOewHm9YLPxfvBo5+n2Hdq7PDMg50/j6fm0/hoCoiT8BvS9M8oYw+DK9QG0o37L2VT0g==" crossorigin=""></script>
+    <script>
+      // 创建地图对象
+      var myMap = L.map('map-container').setView([39.9029, 116.3975], 13);
+
+      // 创建 TileLayer 对象
+      var tileLayer1 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+        maxZoom: 18
+      });
+
+      var tileLayer2 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri'
+      });
+
+      // 创建 LayerGroup 对象，并将 TileLayer 对象加入其中
+      var tileLayers = L.layerGroup([tileLayer1, tileLayer2]);
+
+      // 将 LayerGroup 对象添加到地图上
+      tileLayers.addTo(myMap);
+
+      // 创建控制面板
+      var overlayMaps = {
+        'Tile Layers': tileLayers
+      };
+      L.control.layers({}, overlayMaps).addTo(myMap);
+    </script>
+  </body>
+</html>

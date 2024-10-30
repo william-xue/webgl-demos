@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset='utf-8' />
+  <title>NYC Air Pollution</title>
+  <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.12.0/mapbox-gl.js'></script>
+  <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.js"
+    type="application/javascript"></script>
+  <!-- <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery-csv/1.0.21/jquery.csv.js" type="application/javascript"></script> -->
+  <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/d3/7.3.0/d3.js" type="application/javascript"></script>
+
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    .map-overlay {
+      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+      position: absolute;
+      width: 330px;
+      top: 0;
+      left: 0;
+      padding: 10px;
+    }
+
+    .map-overlay .map-overlay-inner {
+      background-color: #fff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      border-radius: 3px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    .map-overlay table {
+      border: none;
+      width: 100%;
+    }
+
+    .map-overlay h2 {
+      line-height: 24px;
+      display: block;
+      margin: 0 0 10px;
+    }
+
+    .map-overlay label {
+      font: 16px/18px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+      vertical-align: bottom;
+      margin: 0;
+      padding: 0;
+    }
+
+    .map-overlay .legend .bar {
+      height: 10px;
+      width: 100%;
+      background: linear-gradient(to right, #fca107, #7f3121);
+    }
+
+    .map-overlay input {
+      display: inline;
+      vertical-align: middle;
+      margin: 5px;
+      padding: 0;
+    }
+
+    .map-overlay input[type='range'] {
+      width: 250px;
+    }
+
+    .map-overlay p.credit {
+      margin: 5px 0 0 0;
+      padding: 0;
+    }
+
+    .map-legend {
+      position: absolute;
+      width: 100px;
+      height: 200px;
+      bottom: 40px;
+      right: 40px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id='map'></div>
+
+  <div class='map-overlay'>
+    <div class='map-overlay-inner'>
+      <h2>&nbsp;&nbsp;&nbsp;New York City Air Pollution</h2>
+      <table>
+        <tr>
+          <td>
+            <input id='slider' type='range' min='0' max='8' step='1' value='0' list='tickmarks' />
+            <datalist id='tickmarks'>
+              <option value='0' label='2013'></option>
+              <option value='1'></option>
+              <option value='2'></option>
+              <option value='3'></option>
+              <option value='4'></option>
+              <option value='5'></option>
+              <option value='6'></option>
+              <option value='7'></option>
+              <option value='8' label='2021'></option>
+            </datalist>
+          </td>
+          <td>
+            <label id='year'>2013</label>
+          </td>
+        </tr>
+
+        <tr>
+          <td class='radios'>
+            <input type='radio' name='layers' value='PM2_5' checked /><label>PM2.5 &nbsp;</label>
+            <input type='radio' name='layers' value='O3' /><label>O3 &nbsp;</label>
+            <input type='radio' name='layers' value='NO2' /><label>NO2 &nbsp;</label>
+            <input type='radio' name='layers' value='NOx' /><label>NOx</label>
+          </td>
+        </tr>
+      </table>
+
+      <p class='credit'>
+        &nbsp;&nbsp;&nbsp;NYC Community Districts:
+        <a href='https://data.cityofnewyork.us/City-Government/Community-Districts/yfnk-k7r4'>NYC OpenData</a>
+        <br>
+        &nbsp;&nbsp;&nbsp;Air Pollutants:
+        <a href='https://a816-dohbesp.nyc.gov/IndicatorPublic/beta/key-topics/airquality/'>NYCCAS Air Quality Data
+          Hub</a>
+      </p>
+    </div>
+  </div>
+
+  <div class='map-legend'>
+    <canvas id='legend' width='100' height='200'> </canvas>
+  </div>
+
+
+  <script>
+    // Mapbox token
+    mapboxgl.accessToken =
+      'pk.eyJ1IjoidWNmbmhlZCIsImEiOiJjbGNybjR2YmcwMmY2M29teHo4Nnhtcm1xIn0.iEYPs84JN_4b1XioklgvXA';
+
+    // Load a new map in the 'map' HTML div
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/ucfnhed/clh5jmrg300q001pn6e8763qv',
+      center: [-73.95, 40.7],
+      zoom: 10,
+    });
+
+    map.addControl(new mapboxgl.NavigationControl());
+    // Create an array of the available data years
+    const years = [
+      '2013',
+      '2014',
+      '2015',
+      '2016',
+      '2017',
+      '2018',
+      '2019',
+      '2020',
+      '2021'
+    ];
+
+    const elRadios = document.getElementsByClassName('radios');
+
+
+    // Color bar
+    const canvas = document.getElementById('legend');
+
+    const ctx = canvas.getContext('2d');
+
+    const lingrad = ctx.createLinearGradient(0, 0, 0, 200);
+    lingrad.addColorStop(0, 'rgb(190,92,55)');
+    lingrad.addColorStop(0.25, 'rgb(215,136,81)');
+    lingrad.addColorStop(0.5, 'rgb(219,191,146)');
+    lingrad.addColorStop(0.75, 'rgb(243,225,175)');
+    lingrad.addColorStop(1, 'rgb(247,247,233)');
+    ctx.fillStyle = lingrad;
+    ctx.fillRect(10, 10, 10 + 3, 200 - 20);
+    ctx.font = "16px 'Helvetica Neue'";
+    ctx.textBaseline = 'top';
+    ctx.fillText('High', 40, 10);
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('Low', 40, 200 - 10);
+
+
+    // read in air pollutant data
+    // const data_PM2_5 = ['https://github.com/CathyChen532/DV/blob/main/PM2.5.json'];
+    //const data_O3 = ['https://github.com/CathyChen532/DV/blob/main/O3.json'];      
+    //const data_NO2 = ['https://github.com/CathyChen532/DV/blob/main/NO2.json'];
+    //const data_NOx = ['https://github.com/CathyChen532/DV/blob/main/NOx.json'];
+
+    // 声明的全局变量
+    let districts = {}, data_PM2_5 = [], data_O3 = [], data_NO2 = [], data_NOx = [];
+    let yearcol = 'mean_2013', chosenLayer = 'PM2_5';
+
+    const parseNumber = function (data) {
+      return {
+        mean_2013: Number(data['mean_2013']),
+        mean_2014: Number(data['mean_2014']),
+        mean_2015: Number(data['mean_2015']),
+        mean_2016: Number(data['mean_2016']),
+        mean_2017: Number(data['mean_2017']),
+        mean_2018: Number(data['mean_2018']),
+        mean_2019: Number(data['mean_2019']),
+        mean_2020: Number(data['mean_2020']),
+        mean_2021: Number(data['mean_2021']),
+      }
+    }
+
+    const getPaint = function (layer, field) {
+      let res = {}
+      switch (layer) {
+        case "PM2_5":
+          res = {
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              ['get', field],
+              0,
+              '#F2F12D',
+              2,
+              '#EED322',
+              5,
+              '#E6B71E',
+              8,
+              '#DA9C20',
+              9,
+              '#CA8323',
+              10,
+              '#B86B25',
+              20,
+              '#A25626',
+              30,
+              '#723122'
+            ],
+            'fill-opacity': 0.75
+          }
+          break;
+        case "O3":
+          res = {
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              ['get', field],
+              0,
+              '#F2F12D',
+              2,
+              '#EED322',
+              5,
+              '#E6B71E',
+              8,
+              '#DA9C20',
+              9,
+              '#CA8323',
+              10,
+              '#B86B25',
+              20,
+              '#A25626',
+              30,
+              '#723122'
+            ],
+            'fill-opacity': 0.75
+          }
+          break;
+        case "NO2":
+          res = {
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              ['get', field],
+              0,
+              '#F2F12D',
+              2,
+              '#EED322',
+              5,
+              '#E6B71E',
+              8,
+              '#DA9C20',
+              9,
+              '#CA8323',
+              10,
+              '#B86B25',
+              20,
+              '#A25626',
+              30,
+              '#723122'
+            ],
+            'fill-opacity': 0.75
+          }
+          break;
+        case "NOx":
+          res = {
+            'fill-color': [
+              'interpolate',
+              ['linear'],
+              ['get', field],
+              0,
+              '#F2F12D',
+              2,
+              '#EED322',
+              5,
+              '#E6B71E',
+              8,
+              '#DA9C20',
+              9,
+              '#CA8323',
+              10,
+              '#B86B25',
+              20,
+              '#A25626',
+              30,
+              '#723122'
+            ],
+            'fill-opacity': 0.75
+          }
+          break;
+        default:
+          break;
+      }
+      return res
+    }
+
+    map.on('load', async function () {
+
+      // $.get('./data/PM2.5_NYC_CD.csv',(res)=>{
+      //   console.log(res)
+      //   data_PM2_5 = $.csv.fromArrays(res)
+      //   console.log(data_PM2_5);
+      // })
+
+      districts = await $.get('./data/Community Districts.json')
+
+      console.log(districts)
+
+      let _data_PM2_5 = await d3.csv('./data/PM2.5_NYC_CD.csv')
+      let _data_O3 = await d3.csv('./data/O3_NYC_CD.csv')
+      let _data_NO2 = await d3.csv('./data/NO2_NYC_CD.csv')
+      let _data_NOx = await d3.csv('./data/NOx_NYC_CD.csv')
+
+      districts.features.forEach(element => {
+        const { type, geometry, properties } = element
+        let item1 = _data_PM2_5.find(it => it.boro_cd === properties.boro_cd)
+        let item2 = _data_O3.find(it => it.boro_cd === properties.boro_cd)
+        let item3 = _data_NO2.find(it => it.boro_cd === properties.boro_cd)
+        let item4 = _data_NOx.find(it => it.boro_cd === properties.boro_cd)
+        item1 && data_PM2_5.push({
+          type,
+          geometry,
+          properties: {
+            ...properties,
+            ...parseNumber(item1)
+          }
+        })
+
+        item2 && data_O3.push({
+          type,
+          geometry,
+          properties: {
+            ...properties,
+            ...parseNumber(item2),
+          }
+        })
+
+        item3 && data_NO2.push({
+          type,
+          geometry,
+          properties: {
+            ...properties,
+            ...parseNumber(item3),
+          }
+        })
+
+        item4 && data_NOx.push({
+          type,
+          geometry,
+          properties: {
+            ...properties,
+            ...parseNumber(item4),
+          }
+        })
+
+      });
+
+      // console.log(data_PM2_5)
+
+      map.addSource('data_PM2_5', {
+        'type': 'geojson',
+        'data': {
+          type: "FeatureCollection",
+          features: data_PM2_5
+        }
+      })
+
+      map.addSource('data_O3', {
+        'type': 'geojson',
+        'data': {
+          type: "FeatureCollection",
+          features: data_O3
+        }
+      })
+
+      map.addSource('data_NO2', {
+        'type': 'geojson',
+        'data': {
+          type: "FeatureCollection",
+          features: data_NO2
+        }
+      })
+
+      map.addSource('data_NOx', {
+        'type': 'geojson',
+        'data': {
+          type: "FeatureCollection",
+          features: data_NOx
+        }
+      })
+
+
+      map.addLayer({
+        id: 'data_PM2_5',
+        type: 'fill',
+        source: 'data_PM2_5',
+        paint: getPaint('PM2_5', 'mean_2013'),
+      });
+
+      map.addLayer({
+        id: 'data_O3',
+        type: 'fill',
+        source: 'data_O3',
+        layout: {
+          visibility: 'none'
+        },
+        paint: getPaint('O3', 'mean_2013'),
+      });
+
+      map.addLayer({
+        id: 'data_NO2',
+        type: 'fill',
+        source: 'data_NO2',
+        layout: {
+          visibility: 'none'
+        },
+        paint: getPaint('NO2', 'mean_2013'),
+      });
+
+      map.addLayer({
+        id: 'data_NOx',
+        type: 'fill',
+        source: 'data_NOx',
+        layout: {
+          visibility: 'none'
+        },
+        paint: getPaint('O3', 'mean_2013'),
+      });
+
+      // function that runs when the user changes the data year
+      function setYear(year) {
+        // Set the slider to the correct year
+        document.getElementById('year').textContent = years[year];
+
+        yearcol = 'mean_' + years[year];
+
+        map.setLayoutProperty('data_PM2_5', 'visibility', 'none');
+        map.setLayoutProperty('data_O3', 'visibility', 'none');
+        map.setLayoutProperty('data_NO2', 'visibility', 'none');
+        map.setLayoutProperty('data_NOx', 'visibility', 'none');
+
+        let layerName = null, paintFlag = null;
+        if (chosenLayer === 'PM2_5') {
+          layerName = 'data_PM2_5'
+        } else if (chosenLayer === 'O3') {
+          layerName = 'data_O3'
+        } else if (chosenLayer === 'NO2') {
+          layerName = 'data_NO2'
+        } else if (chosenLayer === 'NOx') {
+          layerName = 'data_NOx'
+        }
+        layerName && map.setLayoutProperty(layerName, 'visibility', 'visible');
+        layerName && map.setPaintProperty(layerName, 'fill-color', getPaint(chosenLayer, yearcol)['fill-color']);
+
+      }
+
+      // Assign an event listner to the slider so that the setYear function runs      when     the user changes the slider
+      document
+        .getElementById('slider')
+        .addEventListener('input', function (e) {
+          var year = parseInt(e.target.value);
+          setYear(year);
+        });
+
+      // Event listener for layer switch
+      for (let elRadio of elRadios) {
+        elRadio.addEventListener('change', function (e) {
+          chosenLayer = e.target.value;
+          console.log(chosenLayer);
+
+          map.setLayoutProperty('data_PM2_5', 'visibility', 'none');
+          map.setLayoutProperty('data_O3', 'visibility', 'none');
+          map.setLayoutProperty('data_NO2', 'visibility', 'none');
+          map.setLayoutProperty('data_NOx', 'visibility', 'none');
+          switch (chosenLayer) {
+            case 'PM2_5':
+              map.setLayoutProperty('data_PM2_5', 'visibility', 'visible');
+              map.setPaintProperty('data_PM2_5', 'fill-color', getPaint('PM2_5', yearcol)['fill-color']);
+              break;
+            case 'O3':
+              map.setLayoutProperty('data_O3', 'visibility', 'visible');
+              map.setPaintProperty('data_O3', 'fill-color', getPaint('O3', yearcol)['fill-color']);
+              break;
+            case 'NO2':
+              map.setLayoutProperty('data_NO2', 'visibility', 'visible');
+              map.setPaintProperty('data_NO2', 'fill-color', getPaint('NO2', yearcol)['fill-color']);
+              break;
+            case 'NOx':
+              map.setLayoutProperty('data_NOx', 'visibility', 'visible');
+              map.setPaintProperty('data_NOx', 'fill-color', getPaint('NOx', yearcol)['fill-color']);
+              break;
+            default:
+              break;
+          }
+        });
+      }
+
+
+      // add the line highlight layer
+      map.addLayer({
+        'id': 'line_highlight',
+        'type': 'line',
+        'source': {
+          'type': 'geojson',
+          'data': districts,
+        },
+        'layout': {
+          'visibility': 'visible'
+        },
+        paint: {
+          'line-color': '#adf',
+          'line-width': 4
+        },
+        filter: ['==', 'boro_cd', '99999999']
+      });
+
+
+      // popup of community district
+      var mypopup = new mapboxgl.Popup({ offset: [0, 0], closeButton: false });
+      let layers = ['data_PM2_5', 'data_O3', 'data_NO2', 'data_NOx'];
+      // map.on('click', function (e) {
+      //   // 以此点*px范围内的正方形算为点击反应区
+      //   var bbox = [
+      //     [e.point.x - 1, e.point.y - 1],
+      //     [e.point.x + 1, e.point.y + 1]
+      //   ];
+      //   // mapbox 返回查询要素的图层属性
+      //   var features = map.queryRenderedFeatures(bbox, {
+      //     layers: layers
+      //   });
+
+      //   console.log(features);
+      //   if(!features || !features[0]) return;
+      //   let bro_cd = features[0]?.properties?.boro_cd;
+      //   map.setFilter('line_highlight', ['==', 'boro_cd', bro_cd])
+      // })
+
+      // 四个图层事件      
+      layers.forEach(layer => {
+        if (!layer) return;
+
+        map.on('mouseover', layer, function (e) {
+          
+          let bro_cd = e.features[0]?.properties?.boro_cd;
+          bro_cd && map.setFilter('line_highlight', ['==', 'boro_cd', bro_cd])
+  
+          mypopup
+            .setLngLat(e.lngLat)
+            .setHTML(
+              '<strong>Community Districts: ' + e.features[0].properties.Community_District +
+              '</strong>'+
+              '<br />2013: ' + e.features[0].properties.mean_2013 +
+              '<br />2014: ' + e.features[0].properties.mean_2014 +
+              '<br />2015: ' + e.features[0].properties.mean_2015 +
+              '<br />2016: ' + e.features[0].properties.mean_2016 +
+              '<br />2017: ' + e.features[0].properties.mean_2017 +
+              '<br />2018: ' + e.features[0].properties.mean_2018 +
+              '<br />2019: ' + e.features[0].properties.mean_2019 +
+              '<br />2020: ' + e.features[0].properties.mean_2020 +
+              '<br />2021: ' + e.features[0].properties.mean_2021)
+            .addTo(map);
+        });
+
+        // change cursor to pointer when mouse over community district
+        map.on('mouseenter', layer, function () {
+          map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // remove pop up when leave community district
+        map.on('mouseleave', layer, function () {
+          map.getCanvas().style.cursor = '';
+          mypopup.remove();
+        });
+      })
+
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,58 @@
+path {
+    stroke: white;
+    stroke-width: 0.5px;
+    fill: lightgray;
+}
+
+path.selected {
+    stroke: darkorange;
+    stroke-width: 1px;
+}
+
+#float-button-group {
+    position: relative;
+    top: 0;
+    left: 5;
+    opacity: 0.5;
+}
+
+#float-button-group:hover {
+    opacity: 1;
+}
+
+#map {
+    width: 900px;
+    height: 505px;
+    border: 1px solid lightgray;
+}
+
+#map-zoomer {
+    position: relative;
+    writing-mode: bt-lr;
+    -webkit-appearance: slider-vertical;
+    width: 8px;
+    margin-left: 15;
+    height: 100px;
+}
+
+#myBtn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    right: 15%;
+    z-index: 99;
+    border: none;
+    outline: none;
+    background-color: steelblue;
+    color: white;
+    cursor: pointer;
+    padding: 15px;
+    border-radius: 10px;
+    font-size: 18px;
+    opacity: 0.7;
+}
+
+#myBtn:hover {
+    background-color: #555;
+    /* Add a dark-grey background on hover */
+}

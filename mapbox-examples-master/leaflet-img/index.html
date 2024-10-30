@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>leaflet-geoserver-wfs</title>
+    <!-- <link href="../libs/leaflet.css"/> -->
+    <style>
+        html,body{
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #map-container{
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <!-- <script src="../libs/leaflet.js"></script> -->
+    <link rel="stylesheet" href="../libs/leaflet.css"/>
+    <script src="../libs/leaflet.js"></script>
+    <script src="../libs/jquery-2.1.4.min.js"></script>
+</head>
+
+<body>
+    <div id="map-container"></div>
+</body>
+<script>
+    // geoserver上的地址
+    const map = L.map('map-container').setView([37, 104], 3)
+    var grayscaleLayer= L.tileLayer('http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineCommunity/MapServer/tile/{z}/{y}/{x}', {id: 'map11',maxZoom: 16,minZoom: 4});
+    map.addLayer(grayscaleLayer);
+ 
+ 
+    var imageBounds = [[0, 50], [61.148, 180]];//图片的经纬度范围，西南角点,东北角点(纬度、经度)
+    var imageUrl='../public/model.png';//图片的地址
+    var imageLayer =L.imageOverlay(imageUrl, imageBounds,{opacity:0.8});//opacity是透明度
+    map.addLayer(imageLayer);
+ 
+    //如果imageLayer已经创建，后续只需要切换url即可
+    if(imageLayer!=null){
+        imageLayer.setUrl(imageUrl);
+    }
+
+    // 水印
+    L.Control.Watermark = L.Control.extend({
+        onAdd: function(map) {
+            var img = L.DomUtil.create('img');
+
+            img.src = './img/gu.png';
+            img.style.width = '200px';
+
+            return img;
+        },
+
+        onRemove: function(map) {
+            // Nothing to do here
+        }
+        });
+
+        L.control.watermark = function(opts) {
+        return new L.Control.Watermark(opts);
+        }
+
+        L.control.watermark({ position: 'bottomleft' }).addTo(map);
+</script>
+
+</html>
